@@ -1,0 +1,62 @@
+<view class="changeInfo_content">
+  <!-- 昵称 -->
+  <mp-cells footer="">
+    <mp-cell prop="昵称" title="昵称" ext-class="">
+      <view class="right">
+        <view class="weui-input">
+          <input bindinput="formInputChange" data-field="nickName" model:value="{{nickName}}" />
+        </view>
+        <image class="youjiantouImage" src="/images/mine/enter_light@2x.png"></image>
+      </view>
+
+    </mp-cell>
+    <!-- 性别 -->
+    <view class="chooseSex">
+      <text>性别</text>
+      <picker bindchange="bindPickerChange" value="{{gender}}" range="{{array}}">
+        <view class="picker">
+          <view>{{array[gender]}}</view>
+          <image class="youjiantouImage" src="/images/mine/enter_light@2x.png"></image>
+        </view>
+      </picker>
+
+    </view>
+    <!-- 生日 -->
+    <mp-cell prop="date" title="生日" ext-class="">
+      <picker data-field="birthdate" mode="date" value="{{birthdate}}" bindchange="bindDateChange">
+        <view class="weui-input">
+          <view>{{birthdate}}</view>
+          <image class="youjiantouImage" src="/images/mine/enter_light@2x.png"></image>
+        </view>
+      </picker>
+    </mp-cell>
+    <!-- 电话 -->
+    <mp-cell prop="phone" title="电话" ext-class="">
+      <view class="right">
+        <view class="weui-input">
+          <input bindinput="formInputChange" model:value="{{phone}}" data-field="phone" />
+        </view>
+        <image class="youjiantouImage" src="/images/mine/enter_light@2x.png"></image>
+      </view>
+
+    </mp-cell>
+    <!-- 邮件 -->
+    <mp-cell prop="email" title="邮件" ext-class="">
+      <view class="emailRight">
+        <view class="weui-input">
+          <input bindinput="formInputChange" data-field="email" model:value="{{email}}" />
+        </view>
+        <image class="youjiantouImage" src="/images/mine/enter_light@2x.png"></image>
+      </view>
+    </mp-cell>
+  </mp-cells>
+
+  <view class="bottom">
+    <view class="btn" bindtap="submit">
+      提交修改
+    </view>
+    <view class="btn" bindtap="logout">
+      退出登录
+    </view>
+  </view>
+</view>

@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.servicewechat.mapper.NotesMapper">
+
+    <select id="getNoteList" parameterType="com.cloud.servicewechat.common.PageVo"
+            resultType="com.cloud.commonsmng.entity.appletEntity.Notes">
+       SELECT
+         c.notesId,
+              c.title,
+              c.content,
+              Date_FORMAT(c.createTime,'%Y-%c-%d')as time,
+              c.taskType,
+              c.id,
+              c.userId,
+              c.detailStatus,
+              c.read_status
+        FROM
+         (
+         SELECT
+        n.id AS notesId,
+        n.title,
+        n.content,
+        nd.createTime,
+        n.taskType,
+        n.modifyTime,
+        n.delFlag,
+        n.`status`,
+        nd.id,
+        nd.userId,
+        nd.`status` AS detailStatus,
+         CASE
+           nd.`status`
+           WHEN 1 THEN
+           '已读' ELSE '未读'
+          END AS read_status
+         FROM
+          notes n
+          LEFT JOIN notes_detail nd ON n.id = nd.notesId
+         WHERE
+          n.taskType = 'all'
+         OR ( n.taskType != 'all' AND nd.userId = #{pageVo.userId} )
+         OR( n.taskType = #{pageVo.uRole})
+         ORDER BY nd.createTime desc
+         ) c
+        WHERE
+        c.delFlag = 1 and
+        c.status = 1 and c.userId = #{pageVo.userId}
+        limit ${pageVo.page.beginIndex-1}, ${pageVo.page.pageSize}
+    </select>
+
+    <select id="countNoteList"  resultType="java.lang.Integer">
+    SELECT count(1)  as tolNum
+    FROM
+        (
+            SELECT
+                n.id AS notesId,
+                n.title,
+                n.content,
+                nd.createTime,
+                n.taskType,
+                n.modifyTime,
+                n.delFlag,
+                n.`status`,
+                nd.id,
+                nd.userId,
+                nd.`status` AS detailStatus,
+                CASE
+                    nd.`status`
+                    WHEN 1 THEN
+                        '已读' ELSE '未读'
+                    END AS read_status
+            FROM
+                notes n
+                    LEFT JOIN notes_detail nd ON n.id = nd.notesId
+            WHERE
+                n.taskType = 'all'
+               OR ( n.taskType = 'user' AND nd.userId = #{pageVo.userId} )
+              ORDER BY nd.createTime desc
+              ) c
+    WHERE
+        c.delFlag = 1 and
+        c.status = 1 and c.userId = #{pageVo.userId}
+        limit ${pageVo.page.beginIndex-1}, ${pageVo.page.pageSize}
+    </select>
+
+    <update id="updateStatus" parameterType="java.lang.String">
+        update notes_detail
+        set status = 1
+        where id=#{notesId}
+    </update>
+
+
+    <select id="getUserEmails" resultType="java.lang.String">
+        select u.email from `user` u
+        WHERE u.delFlag = 1 AND (u.email is not NULL AND u.email != '') AND u.id IN
+        <foreach collection="userlist" item="item" index="index" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </select>
+    <select id="getNoteById" resultType="com.cloud.commonsmng.entity.appletEntity.Notes">
+        SELECT * FROM notes WHERE id = #{id}
+    </select>
+    <insert id="insertNote" parameterType="com.cloud.commonsmng.entity.appletEntity.Notes">
+        INSERT INTO  notes (id, title, content, creatorId, createTime, modifierId, modifyTime, taskType,
+        isFeedBack,delFlag,status,flag)
+        VALUES (#{notes.id},#{notes.title},#{notes.content},
+        #{notes.creatorId},NOW(),#{notes.modifierId},NOW(),#{notes.taskType},#{notes.isFeedBack},1,#{notes.status},#{notes.flag});
+    </insert>
+
+    <select id="getUserUnionId" resultType="com.cloud.commonsmng.entity.appletEntity.User">
+        select u.id,u.unionid,w.openId from user u LEFT JOIN weixin_info w ON u.unionid = w.unionid
+        WHERE u.id IN
+        <foreach collection="userIds" item="item" index="index" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </select>
+    <select id="getNewOpenId" resultType="java.lang.String">
+        select openId from weixin_info order by modifyTime DESC limit 0,1;
+    </select>
+
+    <select id="getUnionidempty" resultType="com.cloud.commonsmng.entity.appletEntity.WeixinInfo">
+        SELECT openId from weixin_info WHERE unionid is NULL OR unionid =''
+    </select>
+
+    <select id="getRealName" resultType="java.lang.String">
+        SELECT realName FROM user where id=#{userId}
+    </select>
+</mapper>

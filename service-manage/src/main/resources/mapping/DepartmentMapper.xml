@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.servicemanage.mapper.DepartmentMapper">
+
+    <resultMap id="department" type="com.cloud.servicemanage.entity.Department">
+        <id property="id" column="id"/>
+        <result property="code" column="code"/>
+        <result property="name" column="name"/>
+        <result property="address" column="address"/>
+        <result property="parentid" column="parentid"/>
+        <result property="parentname" column="parentname"/>
+        <result property="creatorid" column="creatorid"/>
+        <result property="createtime" column="createtime"/>
+        <result property="modifierid" column="modifierid"/>
+        <result property="modifytime" column="modifytime"/>
+        <result property="isused" column="isused"/>
+        <result property="treeabout" column="treeabout"/>
+        <result property="level" column="level"/>
+        <result property="creatorname" column="creatorname"/>
+        <result property="modifiername" column="modifiername"/>
+
+    </resultMap>
+
+    <resultMap id="deptTreeMap" type="com.cloud.servicemanage.entity.Department">
+        <id property="id" column="id"/>
+        <result property="code" column="code"/>
+        <result property="name" column="name"/>
+        <result property="address" column="address"/>
+        <result property="parentid" column="parentid"/>
+        <result property="parentname" column="parentname"/>
+        <result property="creatorid" column="creatorid"/>
+        <result property="createtime" column="createtime"/>
+        <result property="modifierid" column="modifierid"/>
+        <result property="modifytime" column="modifytime"/>
+        <result property="isused" column="isused"/>
+        <result property="treeabout" column="treeabout"/>
+        <collection column="{id=id}" property="children"
+                    ofType="deptTreeMap" javaType="java.util.ArrayList" select="getDeptTreeByParentId"/>
+    </resultMap>
+
+    <sql id="isusedSql">
+        <if test="isused != null">
+            <![CDATA[ AND a.isused = #{isused} ]]>
+        </if>
+    </sql>
+
+    <!--获取一级机构集合-->
+    <select id="getDeptInfoList" resultMap="department">
+        SELECT a.id,
+               a.`code`,
+               a.`name`,
+               a.address,
+               a.parentid,
+               a.creatorid,
+               d.userName AS creatorname,
+               a.createtime,
+               a.modifierid,
+               e.userName AS modifiername,
+               a.modifytime,
+               a.isused,
+               a.treeabout,
+               c.`name`   AS `level`
+        FROM department a
+                 LEFT JOIN `user` d ON d.id = a.creatorid
+                 LEFT JOIN `user` e ON e.id = a.modifierid
+                 LEFT JOIN dictionary c ON (a.LEVEL = c.CODE AND c.kind = 'DepartmentClassification')
+        WHERE a.isused = 1
+          AND a.parentid = 0
+    </select>
+
+    <select id="getDeptInfoByDeptId" resultMap="department">
+        SELECT a.id,
+               a.code,
+               a.name,
+               a.address,
+               a.parentid,
+               b.name     AS parentname,
+               a.creatorid,
+               d.userName as creatorname,
+               a.createtime,
+               a.modifierid,
+               e.userName as modifiername,
+               a.modifytime,
+               a.isused,
+               a.treeabout,
+               c.name     AS level
+        FROM department a
+                 LEFT JOIN department b ON a.parentid = b.id
+                 LEFT JOIN `user` d ON d.id = a.creatorid
+                 LEFT JOIN `user` e ON e.id = a.modifierid
+                 LEFT JOIN dictionary c ON (a.level = c.code AND c.kind = 'DepartmentClassification')
+        WHERE a.id = #{id}
+    </select>
+
+    <select id="getSubDeptsByDeptId" resultMap="department">
+        SELECT
+        a.id, a.code, a.name, a.address, a.parentid, b.name AS parentname,
+        a.creatorid, a.createtime, a.modifierid, a.modifytime, a.isused, a.treeabout
+        FROM
+        department a LEFT JOIN department b ON a.parentid = b.id
+        WHERE
+        a.parentid = #{parentid}
+        <include refid="isusedSql"/>
+    </select>
+
+    <select id="isDeptCodeExisted" resultType="boolean">
+        <![CDATA[
+        SELECT COUNT(1)
+        FROM department
+        WHERE id != #{id}
+          AND code = #{code}
+        ]]>
+    </select>
+
+    <insert id="addDeptInfo" parameterType="com.cloud.servicemanage.entity.Department">
+        INSERT
+        INTO department(id, `code`, `name`, address, parentid, creatorid, createtime, modifierid, modifytime, isused)
+        VALUES (#{id}, #{code}, #{name}, #{address}, #{parentid}, #{creatorid}, NOW(), #{modifierid}, NOW(), #{isused});
+
+        UPDATE department
+        SET treeabout = CONCAT(IFNULL((
+                                          SELECT c.treeabout
+                                          FROM (
+                                                   SELECT treeabout
+                                                   FROM department
+                                                   WHERE id = (SELECT parentid
+                                                               FROM department
+                                                               WHERE id = #{id})) c
+                                      ), ''), '/', #{id}
+            )
+        WHERE id = #{id};
+    </insert>
+
+    <update id="updateDeptInfo" parameterType="com.cloud.servicemanage.entity.Department">
+        UPDATE department
+        SET code       = #{code},
+            `name`     = #{name},
+            address    = #{address},
+            parentid   = #{parentid},
+            modifierid = #{modifierid},
+            modifytime = NOW(),
+            isused     = #{isused},
+            treeabout  = CONCAT(IFNULL((
+                                           SELECT c.treeabout
+                                           FROM (
+                                                    SELECT treeabout
+                                                    FROM department
+                                                    WHERE id = #{parentid}) c
+                                       ), ''), '/', #{id}
+                )
+        WHERE id = #{id};
+    </update>
+
+    <!-- 设置下拉框类型的机构树 -->
+    <select id="getDeptTreeByParentId" resultMap="deptTreeMap">
+        SELECT a.id,
+               a.code,
+               a.name,
+               a.address,
+               a.parentid,
+               b.name AS parentname,
+               a.creatorid,
+               a.createtime,
+               a.modifierid,
+               a.modifytime,
+               a.isused,
+               a.treeabout
+        FROM department a
+                 LEFT JOIN department b ON a.parentid = b.id
+        WHERE a.parentid = #{id}
+          AND a.isused = 1
+    </select>
+</mapper>

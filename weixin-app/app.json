@@ -1,0 +1,106 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/live/live",
+    "pages/mine/mine",
+    "pages/product/product",
+    "pages/mine/authentification/authentification",
+    "pages/mine/authentification/agreement/agreement",
+    "pages/mine/authentification/subSuccess/subSuccess",
+    "pages/index/advices/adviceDetail/adviceDetail",
+    "pages/index/voiceBroadcast/voiceBroadcast",
+    "pages/index/advices/advices",
+    "pages/index/weblink/weblink",
+    "pages/index/infoReport/infoReport",
+    "pages/logs/logs",
+    "pages/mine/message/message",
+    "pages/mine/history/history",
+    "pages/mine/approve/approve",
+    "pages/mine/customize/customize",
+    "pages/mine/feedback/feedback",
+    "pages/mine/feedbackItems/feedbackItems",
+    "pages/mine/Answerdetail/Answerdetail",
+    "pages/mine/AnswerdetailQuestion/AnswerdetailQuestion",
+    "pages/mine/collect/collect",
+    "pages/mine/enterpriseLogin/enterpriseLogin",
+    "pages/product/entfirm/entfirm",
+    "pages/product/entfirm/loans/loans",
+    "pages/product/entfirm/loans/question/question",
+    "pages/product/entfirm/loans/nextpage/nextpage",
+    "pages/product/entfirm/loans/detail/detail",
+    "pages/product/entfirm/loans/question/submitdetail/submitdetail",
+    "pages/product/gp/gp",
+    "pages/customerservice/index",
+    "pages/mine/customize/detail/detail",
+    "pages/mine/collect/search/search",
+    "pages/information/information",
+    "pages/information/detail/detail",
+    "pages/mine/questionnaire/questionnaire",
+    "pages/mine/questionnaireres/questionnaireres",
+    "pages/mine/myMessage/myMessage",
+    "pages/mine/myMessage/myMessageItems/myMessageItems",
+    "pages/mine/member/member",
+    "pages/mine/Answer/Answer",
+    "pages/mine/memberDetail/memberDetail"
+  ],
+  "requiredBackgroundModes": ["audio"],
+  "window": {
+    "backgroundTextStyle": "dark",
+    "navigationBarBackgroundColor": "#fff",
+    "navigationBarTitleText": "微信小程序",
+    "navigationBarTextStyle": "black",
+    "onReachBottomDistance": 50,
+    "enablePullDownRefresh": true,
+    "resizable": true
+  },
+  "tabBar": {
+    "list": [{
+      "pagePath": "pages/index/index",
+      "text": "首页",
+      "iconPath": "./images/tabBar/homePage_nor@2x.png",
+      "selectedIconPath": "./images/tabBar/homePage_sel@2x.png"
+    }, {
+      "pagePath": "pages/product/product",
+      "text": "服务",
+      "iconPath": "./images/tabBar/information_nor@2x.png",
+      "selectedIconPath": "./images/tabBar/information_sel@2x.png"
+    }, {
+      "pagePath": "pages/mine/mine",
+      "text": "我的",
+      "iconPath": "./images/tabBar/my_nor@2x.png",
+      "selectedIconPath": "./images/tabBar/my_sel@2x.png"
+    }],
+    "selectedColor": "#165689"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "usingComponents": {
+    "mp-dialog": "/miniprogram_npm/weui-miniprogram/dialog/dialog",
+    "mp-half-screen-dialog": "weui-miniprogram/half-screen-dialog/half-screen-dialog",
+    "mp-searchbar": "weui-miniprogram/searchbar/searchbar",
+    "mp-form": "weui-miniprogram/form/form",
+    "mp-cells": "weui-miniprogram/cells/cells",
+    "mp-cell": "weui-miniprogram/cell/cell",
+    "mp-checkbox-group": "weui-miniprogram/checkbox-group/checkbox-group",
+    "mp-checkbox": "weui-miniprogram/checkbox/checkbox",
+    "mp-badge": "weui-miniprogram/badge/badge"
+  },
+  "useExtendedLib": {
+    "weui": true
+  },
+  "plugins": {
+    "WechatSI": {
+      "version": "0.3.5",
+      "provider": "wx069ba97219f66d99"
+    },
+    "tencentvideo": {
+      "version": "1.5.1",
+      "provider": "wxa75efa648b60994b"
+    }
+  },
+  "permission": {
+    "scope.userLocation": {
+      "desc": "你的位置信息将用于小程序位置服务"
+    }
+  }
+}

@@ -1,0 +1,35 @@
+<view class="pageTotal"
+      style="background-image: url({{myBackground}});background-position:bottom;background-size: 100%;background-repeat:no-repeat;"
+>
+    <view class="content">
+        <view class="box" wx:for="{{noReadNumber1}}" wx:key="index" wx:for-index="index" wx:for-item="item"  bindtap="goSearch" data-theme="loans" data-theme2='{{item}}'>
+            <view class="pic">
+                <!-- <image src="../../../images/product/loans.png"></image> -->
+                <image src="{{item.pic}}"></image>
+            </view>
+            <view catchtap="socrt_change" data-ccc="{{item}}" class="text">{{item.name}}</view>
+        </view>
+        <!-- <view class="box"  bindtap="goSearch" data-theme="cash">
+            <view class="pic">
+                <image src="../../../images/product/cash.png"></image>
+            </view>
+            <view class="text">现金管理</view>
+        </view> -->
+        <!-- <view class="box"  bindtap="goSearch" data-theme="rent">
+            <view class="pic">
+                <image src="../../../images/product/rent.png"></image>
+            </view>
+            <view class="text">租赁</view>
+        </view>
+        <view class="box"  bindtap="goSearch" data-theme="insurance">
+            <view class="pic">
+                <image src="../../../images/product/insurance.png"></image>
+            </view>
+            <view class="text">保险</view>
+        </view> -->
+        
+    </view>
+    <view class="footer">
+            <button bindtap="gohomepage">返回主页</button>
+        </view>
+</view>

@@ -1,0 +1,77 @@
+/* pages/mine/approve/approve1.wxss */
+page {
+  background-color: rgba(238, 238, 238, 0.3);
+}
+.head{
+  height: 178rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.head_top {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.yuan {
+  width: 40rpx;
+  height: 40rpx;
+  line-height: 40rpx;
+  border-radius: 50%;
+  background-color: #1C98FF;
+  text-align: center;
+  color: #fff;
+}
+.right{
+  background-color: #BFBFBF;
+}
+.center {
+  width: 430rpx;
+  height: 4rpx;
+  background: #BFBFBF;
+}
+.head_text{padding: 0 85rpx; display: flex; justify-content: space-between; width: 100%;box-sizing: border-box; margin-top: 15rpx; color: #1C98FF; font-size: 24rpx;}
+.enterprise{color: #BFBFBF;}
+.content {
+  padding: 0 35rpx;
+  background-color: #fff;
+}
+
+.box {
+  padding: 35rpx 0;
+  border-bottom: 1px solid #ddd;
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #333333;
+  display: flex;
+  align-items: center;
+}
+
+.mail {
+  border: none;
+}
+.content_left{width: 180rpx;}
+.sign {
+  margin: 0 40rpx 0 10rpx;
+}
+
+.content_right {
+  color: #999;
+  font-size: 24rpx;
+}
+.foot {
+  width: 360rpx;
+  height: 64rpx;
+  background: #1C98FF;
+  border-radius: 32rpx;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 68rpx;
+}

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.servicemanage.mapper.CustomizeQuestionMapper">
+
+<!--获取所有问题-->
+    <select id="getCustomizeQuestionList" resultType="com.cloud.commonsmng.entity.appletEntity.CustomizeQuestion">
+        SELECT
+            id,
+            questionDescription,
+            creatorId,
+            createTime,
+            modifierId,
+            modifyTime,
+            delFlag,
+            sequen,
+            releaseFlag
+        FROM
+            customize_question
+        WHERE
+            delFlag = 1
+        ORDER BY
+            sequen;
+    </select>
+
+<!--根据id获取id-->
+    <select id="getCustomizeQuestionById" resultType="com.cloud.commonsmng.entity.appletEntity.CustomizeQuestion">
+        SELECT
+            id,
+            questionDescription,
+            sequen
+        FROM
+            customize_question
+        WHERE
+            delFlag = 1 AND id = #{id};
+    </select>
+
+<!--根据id获取问题详细信息-->
+    <select id="getCustomizeQuestionDetailById" resultType="com.cloud.commonsmng.entity.appletEntity.CustomizeQuestion">
+        SELECT
+            a.id,
+            a.questionDescription,
+            a.sequen,
+            a.createTime,
+            b.realName AS creatorName,
+            a.modifyTime,
+            c.realName AS modifierName
+        FROM
+            customize_question a
+        LEFT JOIN
+            `user` b ON a.creatorId = b.id AND b.delFlag = 1
+        LEFT JOIN
+            `user` c ON a.modifierId = c.id AND c.delFlag = 1
+        WHERE
+            a.delFlag = 1 AND
+            a.id = #{id};
+    </select>
+
+    <!--  修改问题内容  -->
+    <update id="updateCustomizeQuestion" parameterType="com.cloud.commonsmng.entity.appletEntity.CustomizeQuestion">
+        UPDATE customize_question
+        SET questionDescription = #{customizeQuestion.questionDescription},
+            sequen = #{customizeQuestion.sequen},
+            modifyTime = NOW(),
+            modifierId = #{customizeQuestion.modifierId}
+        WHERE id = #{customizeQuestion.id}
+    </update>
+
+<!--    删除问题-->
+    <update id="deleteCustomizeQuestion" parameterType="com.cloud.commonsmng.entity.appletEntity.CustomizeQuestion">
+        UPDATE customize_question
+        SET delFlag = 0
+        WHERE id = #{customizeQuestion.id}
+    </update>
+
+<!--    发布问题-->
+    <update id="releaseCustomizeQuestion" parameterType="com.cloud.commonsmng.entity.appletEntity.CustomizeQuestion">
+        UPDATE customize_question
+        SET releaseFlag = 1
+        WHERE id = #{customizeQuestion.id}
+    </update>
+
+<!--    添加问题-->
+    <insert id="insertCustomizeQuestion" parameterType="com.cloud.commonsmng.entity.appletEntity.CustomizeQuestion">
+        INSERT INTO customize_question (id, questionDescription, sequen, createTime, creatorId)
+        VALUES (#{customizeQuestion.id}, #{customizeQuestion.questionDescription},
+                #{customizeQuestion.sequen}, NOW(), #{customizeQuestion.creatorId});
+    </insert>
+</mapper>

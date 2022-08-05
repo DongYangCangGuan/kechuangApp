@@ -1,0 +1,10 @@
+{
+  "usingComponents": {
+    "txv-video": "plugin://tencentvideo/video"
+  },
+
+  "navigationBarBackgroundColor": "#ffffff",
+  "backgroundTextStyle":"light",
+  "navigationBarTitleText": "e视",
+  "navigationBarTextStyle":"black"
+}

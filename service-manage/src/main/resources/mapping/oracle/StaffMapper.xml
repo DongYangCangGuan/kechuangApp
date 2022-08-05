@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.servicemanage.mapper">
+
+    <resultMap id="staffinfo" type="com.cloud.servicemanage.entity.StaffInfo">
+        <id      property="id"             column="ID"/>
+        <result  property="name"           column="NAME"/>
+        <result  property="empid"          column="EMPID"/>
+        <result  property="pic"            column="PIC"/>
+        <result  property="mobile"         column="MOBILE"/>
+        <result  property="loginname"      column="LOGINNAME"/>
+        <result  property="birthday"       column="BIRTHDAY"/>
+        <result  property="sex"            column="SEX"/>
+        <result  property="job"            column="JOB"/>
+        <result  property="departmentid"   column="DEPARTMENTID"/>
+        <result  property="email"          column="EMAIL"/>
+        <result  property="isused"         column="ISUSED"/>
+    </resultMap>
+
+    <select id="getStaffById" resultMap="staffinfo" parameterType="HashMap">
+        SELECT * FROM
+                    (SELECT
+                            t.*,
+                            rownum rn
+                      FROM (SELECT
+                                    a.id as id,
+                                    a.birthday as birthday,
+                                    a.sex as sex,
+                                    a.job as job,
+                                    a.empid as empid,
+                                    a.pic as pic,
+                                    a.loginname as loginname,
+                                    a.mobile as mobile,
+                                    a.name as name,
+                                    b.name as departmentname,
+                                    a.departmentid as departmentid,
+                                    a.email as email,
+                                    a.isused as isused
+                              FROM
+                                    USER_INFO a,department b
+                             WHERE 1=1
+        <choose>
+            <when test="switch1">
+                AND a.departmentid=b.id AND a.departmentid = #{departmentid,jdbcType=VARCHAR}
+            </when>
+            <otherwise>
+                AND a.departmentid=b.id AND a.departmentid IN(SELECT id FROM department where id = #{departmentid,jdbcType=VARCHAR} OR
+                treeabout LIKE concat(concat('%',#{departmentid,jdbcType=VARCHAR}),'%'))
+            </otherwise>
+        </choose>
+        <if test="orderName != null and orderName != ''">
+            ORDER BY ${orderName} ${orderKind}
+        </if>
+                          ) t
+                      WHERE rownum &lt; (${CurrentPage1}+${PageSize1}+1)
+                    )
+               WHERE rn &gt; ${CurrentPage1}
+    </select>
+
+    <select id="getStaffSum" resultType="Integer">
+        SELECT
+              COUNT(id) as SUM
+          FROM
+              USER_INFO
+          WHERE 1=1
+        <choose>
+            <when test="switch1">
+                AND departmentid=#{departmentid,jdbcType=VARCHAR}
+            </when>
+            <otherwise>
+                AND departmentid IN(SELECT id FROM department where id = #{departmentid,jdbcType=VARCHAR} OR treeabout LIKE concat(concat('%',#{departmentid,jdbcType=VARCHAR}),'%'))
+            </otherwise>
+        </choose>
+
+        <if test="isused != '' and isused != null">
+            AND isused = #{isused}
+        </if>
+    </select>
+
+    <select id="selectByName" resultMap="staffinfo" parameterType="HashMap">
+      SELECT * FROM (
+                      SELECT
+                              use.id as id,
+                              use.birthday as birthday,
+                              use.sex as sex,
+                              use.job as job,
+                              use.empid as empid,
+                              use.pic as pic,
+                              use.loginname as loginname,
+                              use.mobile as mobile,
+                              use.name as name,
+                              department.name as departmentname,
+                              use.departmentid as departmentid,
+                              use.email as email,
+                              use.isused as isused,
+                              use.eduid as eduid
+                        FROM
+                              USER_INFO use,department
+                        WHERE
+                              use.departmentid=department.id
+                          AND use.departmentid IN (SELECT id FROM department where id = #{departmentid,jdbcType=VARCHAR} OR treeabout LIKE concat(concat('%',#{departmentid,jdbcType=VARCHAR}),'%'))
+                      )
+                  WHERE name LIKE concat(concat('%',#{name,jdbcType=VARCHAR} ),'%')
+    </select>
+
+    <insert id="insertStaff" parameterType="com.cloud.servicemanage.entity.StaffInfo">
+begin
+        INSERT INTO USER_INFO (
+        id,
+        name,
+        birthday,
+        departmentid,
+        modifierid,
+        creatorid,
+        createtime,
+        modifytime,
+        sex,
+        job,
+        isused,
+        empid,
+        loginname,
+        mobile,
+        email,
+        pic,
+        password
+        )
+        values(#{StaffInfo.id},#{StaffInfo.name},#{StaffInfo.birthday},#{StaffInfo.departmentid},#{StaffInfo.userId},#{StaffInfo.userId},SYSDATE,SYSDATE,#{StaffInfo.sex},#{StaffInfo.job},'1',
+        #{StaffInfo.empid},#{StaffInfo.loginname},#{StaffInfo.mobile},#{StaffInfo.email},#{StaffInfo.pic},'123456');
+
+        <foreach collection="StaffInfo.role" item="item" separator=";">
+            INSERT INTO userrolerelation (id,userid,roleid,createtime,modifytime)
+            VALUES (
+            (select rawtohex(sys_guid()) from dual),
+            #{StaffInfo.id ,jdbcType=VARCHAR},
+            #{item,jdbcType=VARCHAR},
+            SYSDATE,
+            SYSDATE
+            )
+        </foreach>;
+
+        <foreach collection="StaffInfo.experienceList" item="item" separator=";">
+            INSERT INTO user_dpt ( id, departmentid, entrytime,userstatus , userid )
+            VALUES (
+            (select rawtohex(sys_guid()) from dual),
+            #{item.departmentid ,jdbcType=VARCHAR},
+            to_date(#{item.entrytime},'yyyy-MM-dd'),
+            #{item.userstatus ,jdbcType=VARCHAR},
+            #{StaffInfo.id ,jdbcType=VARCHAR}
+            )
+        </foreach>;
+
+        <foreach collection="StaffInfo.educationList" item="item" separator=";">
+            INSERT INTO user_edu ( id, education, major, starttime, endtime, userid, status )
+            VALUES (
+            (select rawtohex(sys_guid()) from dual),
+            #{item.education,jdbcType=VARCHAR},
+            #{item.major,jdbcType=VARCHAR},
+            to_date(#{item.starttime},'yyyy-MM-dd'),
+            to_date(#{item.endtime},'yyyy-MM-dd'),
+            #{StaffInfo.id,jdbcType=VARCHAR},
+            '1'
+            )
+        </foreach>;
+
+        end ;
+    </insert>
+
+    <update id="deleteStaff">
+        UPDATE USER_INFO set isused=#{isused,jdbcType=VARCHAR} where id=#{id,jdbcType=VARCHAR}
+    </update>
+
+    <select id="selectRole" resultType="com.cloud.servicemanage.entity.Role">
+        SELECT ROL_ID AS id,ROL_NAME AS name FROM ROLE
+    </select>
+    <select id="selectEducationOrType" resultType="com.cloud.servicemanage.entity.Dictionary">
+        SELECT id,code,name FROM dictionary where kind=#{kind,jdbcType=VARCHAR} ORDER BY id asc
+    </select>
+    <select id="isStaffIdExisted" resultType="boolean">
+        <![CDATA[
+          SELECT
+              COUNT(1)
+          FROM
+              USER_INFO
+          WHERE
+              id != #{id,jdbcType=VARCHAR}
+              AND empid = #{empid,jdbcType=VARCHAR}
+        ]]>
+    </select>
+
+    <select id="isStaffLoginNameExisted" resultType="boolean">
+        <![CDATA[
+          SELECT
+              COUNT(1)
+          FROM
+              USER_INFO
+          WHERE
+              id != #{id,jdbcType=VARCHAR}
+              AND loginname = #{loginname,jdbcType=VARCHAR}
+        ]]>
+    </select>
+
+    <select id="selectUserRoleId" resultType="java.lang.String">
+        SELECT
+			  a.roleid as id
+		FROM userrolerelation a,ROLE ROL
+		WHERE ROL.ROL_ID =a.roleid AND a.userid=#{id,jdbcType=VARCHAR}
+    </select>
+
+    <select id="selectUserRoleName" resultType="java.lang.String">
+        SELECT
+			  ROL.ROL_NAME as name
+		FROM
+			  userrolerelation a, ROLE ROL
+		WHERE
+			  ROL.ROL_ID =a.roleid AND a.userid=#{id,jdbcType=VARCHAR}
+    </select>
+    <select id="selectUserEdu" resultType="com.cloud.servicemanage.entity.UserEducation">
+        SELECT
+                a.id        as id,
+                a.education as education,
+                b.name      as name,
+                a.major     as major,
+                TO_CHAR(a.starttime,'yyyy-MM-dd') as starttime,
+                TO_CHAR(a.endtime,'yyyy-MM-dd') as endtime,
+                a.userid    as userid
+         FROM user_edu a,dictionary b
+         WHERE b.id=a.education AND a.userid=#{id,jdbcType=VARCHAR}
+    </select>
+    <select id="selectUserDepart" resultType="com.cloud.servicemanage.entity.UserDepart">
+        SELECT
+                a.id as id,
+                a.departmentid as departmentid,
+                b.name as departmentname,
+                TO_CHAR(a.entrytime,'yyyy-MM-dd') as entrytime,
+                a.userstatus as userstatus,
+                c.name as name,
+                a.userid as userid
+        FROM   user_dpt a ,department b ,dictionary c
+        WHERE a.userid = #{id,jdbcType=VARCHAR} AND b.id=a.departmentid  AND c.id=a.userstatus
+    </select>
+
+
+
+    <update id="updateStaff" parameterType="com.cloud.servicemanage.entity.StaffInfo">
+begin
+        UPDATE USER_INFO SET
+                            name =  #{StaffInfo.name,jdbcType=VARCHAR},
+                            birthday = #{StaffInfo.birthday,jdbcType=VARCHAR},
+                            departmentid = #{StaffInfo.departmentid,jdbcType=VARCHAR},
+                            createtime = SYSDATE,
+                            modifytime = SYSDATE,
+                            modifierid = #{StaffInfo.userId,jdbcType=VARCHAR},
+                            sex = #{StaffInfo.sex,jdbcType=VARCHAR},
+	        job = #{StaffInfo.job,jdbcType=VARCHAR},
+	        empid = #{StaffInfo.empid,jdbcType=VARCHAR},
+	        loginname = #{StaffInfo.loginname,jdbcType=VARCHAR},
+	        mobile = #{StaffInfo.mobile,jdbcType=VARCHAR},
+	        email = #{StaffInfo.email,jdbcType=VARCHAR},
+	        pic = #{StaffInfo.pic,jdbcType=VARCHAR}
+        WHERE id = #{StaffInfo.id,jdbcType=VARCHAR};
+
+        DELETE FROM userrolerelation where userid=#{StaffInfo.id,jdbcType=VARCHAR};
+
+        DELETE FROM user_dpt where userid=#{StaffInfo.id,jdbcType=VARCHAR};
+
+        DELETE FROM user_edu where userid=#{StaffInfo.id,jdbcType=VARCHAR};
+
+        <if test="StaffInfo.role != null and StaffInfo.role.size() > 0">
+            <foreach collection="StaffInfo.role" item="item" separator=";">
+                INSERT INTO userrolerelation (id,userid,roleid,createtime,modifytime)
+                VALUES (
+                (select rawtohex(sys_guid()) from dual),
+                #{StaffInfo.id ,jdbcType=VARCHAR},
+                #{item,jdbcType=VARCHAR},
+                SYSDATE,
+                SYSDATE
+                )
+            </foreach>;
+        </if>
+
+        <if test="StaffInfo.experienceList != null and StaffInfo.experienceList.size() > 0">
+            <foreach collection="StaffInfo.experienceList" item="item" separator=";">
+                INSERT INTO user_dpt ( id, departmentid, entrytime,userstatus , userid )
+                VALUES (
+                (select rawtohex(sys_guid()) from dual),
+                #{item.departmentid ,jdbcType=VARCHAR},
+                to_date(#{item.entrytime},'yyyy-MM-dd'),
+                #{item.userstatus ,jdbcType=VARCHAR},
+                #{StaffInfo.id ,jdbcType=VARCHAR}
+                )
+            </foreach>;
+        </if>
+
+        <if test="StaffInfo.educationList != null and StaffInfo.educationList.size() > 0">
+            <foreach collection="StaffInfo.educationList" item="item" separator=";">
+                INSERT INTO user_edu ( id, education, major, starttime, endtime, userid, status )
+                VALUES (
+                (select rawtohex(sys_guid()) from dual),
+                #{item.education,jdbcType=VARCHAR},
+                #{item.major,jdbcType=VARCHAR},
+                to_date(#{item.starttime},'yyyy-MM-dd'),
+                to_date(#{item.endtime},'yyyy-MM-dd'),
+                #{StaffInfo.id,jdbcType=VARCHAR},
+                '1'
+                );
+            </foreach>
+        </if>
+   end;
+   </update>
+
+</mapper>

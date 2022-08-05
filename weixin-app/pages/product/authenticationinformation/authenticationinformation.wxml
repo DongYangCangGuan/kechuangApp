@@ -1,0 +1,39 @@
+<!-- <view class="product_container" 
+      style="background-image: url({{myBackground3}});background-size: 100% 100%;background-repeat:no-repeat;">
+    <view class="title">
+        <view class="title_text">请选择身份</view>
+    </view>
+
+    <view class="content">
+        <view bindtap="goDetail" data-theme="entfirm">
+            <image src="../../images/product/entfirm.png"></image>
+        </view>
+        <view bindtap="goDetail" data-theme="gp">
+            <image src="../../images/product/GP.png"></image>
+        </view>
+        <view class="contbox entfirm" bindtap="goDetail" data-theme="entfirm">创业公司</view>
+        <view class="contbox gp" bindtap="goDetail" data-theme="gp">GP</view>
+    </view>
+</view> -->
+
+<view class="product_container">
+    <view class="title">11111111111</view>
+    <view class="content_box">
+        <view class="con_circle" style=" top: 0;left: -1%;z-index: 999;"></view>
+        <view class="con_main">
+            <view class="con_pargraph">
+                上海科创基金是根据上海市委、市政府部署要求，由上海国际集团牵头发起设立的市场化母基金，主要投资人包括国盛集团、上港集团国泰君安、上海信托、张江高科、太保集团、嘉定国资集团等。上海科创基金以服务上海科创中心建设为使命，目标规模300亿元，目前管理规模超过120亿元。
+            </view>
+            <view class="con_pargraph">
+                截至目前，上海科创基金已投资子基金超过50支，子基金签约总规模超过1000亿元，投资组合企业超过1000家。已上市企业达到46家，其中科创板27家。未来一年有申报上市计划的企业超过100家。
+            </view>
+        </view>
+        <view class="con_circle" style="bottom: 0;right: -1%;"></view>
+    </view>
+     <view class="footer">
+        <button bindtap="gohomepage">返回主页</button>
+    </view>
+    <!-- <view class="footer">
+        您的身份证正在认证中，请稍后...
+    </view> -->
+</view>

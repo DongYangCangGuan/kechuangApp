@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.servicemanage.mapper.RoleMapper">
+
+    <sql id="tmpPageQry">
+        <if test="searchdata !=null">
+
+            <if test="searchdata.name !=null and searchdata.name !='' ">
+                AND ROL.ROL_NAME like'%${searchdata.name}%'
+            </if>
+            <if test="searchdata.code !=null and searchdata.code !='' ">
+                AND ROL.ROL_CODE like '%${searchdata.code}%'
+            </if>
+        </if>
+    </sql>
+
+
+    <!--查询页面总条数-->
+    <select id="getPageTotal" parameterType="com.cloud.servicemanage.common.PageVo"
+            resultType="java.lang.Integer">
+        SELECT
+                COUNT(1)
+          FROM
+                ROLE ROL
+        <where>
+            1=1 <include refid="tmpPageQry"></include>
+        </where>
+        ORDER BY CREATETIME DESC
+    </select>
+
+    <!--查询角色基本信息-->
+    <select id="getRole" parameterType="com.cloud.servicemanage.common.PageVo" resultType="com.cloud.servicemanage.entity.Role">
+        SELECT * FROM
+                    (SELECT
+                            t.*,
+                            rownum rn
+                      FROM (select
+                                ROL.AREA           as area,
+                                ROL.ROL_ID         as id,
+                                ROL.ROL_CODE       as code,
+                                ROL.ROL_NAME       as name,
+                                ROL.CREATORID      as creatorid,
+                                ROL.MODIFYTIME     as createtime,
+                                ROL.MODIFIERID     as modifierid,
+                                ROL.MODIFYTIME     as modifytime,
+                                ROL.ISUSED         as isused,
+                                USI.ID             as userid,
+                                USI.NAME           as username
+                          from  ROLE  ROL
+                     left join  USER_INFO  USI  on ROL.MODIFIERID=USI.ID
+                        <where>
+                            1=1  <include refid="tmpPageQry"></include>
+                        </where>
+                        ORDER BY  ROL.MODIFYTIME  DESC
+                              ) t
+                  WHERE rownum &lt;(${page.pageIndex}*${page.pageSize}+1)
+                      )
+        WHERE rn &gt; ((${page.pageIndex}-1)*${page.pageSize})
+    </select>
+
+    <!--增加角色-->
+    <insert id="addRole" parameterType="com.cloud.servicemanage.entity.Role">
+        INSERT into ROLE(
+						 	ROL_ID,
+							ROL_NAME,
+							ROL_CODE,
+							ISUSED,
+							CREATORID,
+							MODIFIERID,
+							CREATETIME,
+							MODIFYTIME,
+							AREA
+						  )
+					VALUES
+						  ( #{id},
+							#{name},
+							#{code},
+							#{isused},
+							#{creatorid},
+							#{modifierid},
+							(SELECT sysdate FROM DUAL),
+							(SELECT sysdate FROM DUAL),
+							#{area}
+						  )
+    </insert>
+    <!--修改角色信息-->
+    <update id="updateRole" parameterType="com.cloud.servicemanage.entity.Role">
+        UPDATE ROLE
+        <set>
+            <if test="name!=null and name !=''">ROL_NAME =#{name},</if>
+            <if test="code!=null and code !=''">ROL_CODE =#{code},</if>
+            <if test="isused==true">
+                ISUSED =1,
+            </if>
+            <if test="isused==false">
+                ISUSED =0,
+            </if>
+            <if test="area!=null and area !=''">
+                AREA =#{area},
+            </if>
+            MODIFIERID=#{modifierid} ,
+            MODIFYTIME=(SELECT sysdate FROM DUAL)
+        </set>
+        WHERE ROL_ID=#{id,jdbcType=VARCHAR}
+    </update>
+
+
+
+
+
+
+    <!--查找角色编号重复-->
+    <select id="checkRoleCode"  resultType="java.lang.Integer">
+      select   COUNT(1)  from ROLE ROL where <![CDATA[ ROL.ROL_ID <> #{id} ]]> and ROL.ROL_CODE=#{code,jdbcType=VARCHAR}
+    </select>
+
+    <!--查找角色名称重复-->
+    <select id="checkRoleName" resultType="java.lang.Integer">
+      select   COUNT(1) from ROLE ROL where <![CDATA[ ROL.ROL_ID <> #{id} ]]> and ROL.ROL_NAME =#{name,jdbcType=VARCHAR}
+    </select>
+
+
+
+    <!--删除角色-->
+    <delete id="deleteRole" parameterType="java.lang.String">
+        delete from  ROLE ROL
+              where  ROL.ROL_ID=#{id}  and   not exists
+                       (select
+								URLT.ROLEID
+						from  USERROLERELATION URLT where URLT.ROLEID  =#{id})
+    </delete>
+</mapper>

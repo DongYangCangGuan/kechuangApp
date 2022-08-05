@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.serviceauthorize.mapper.AppUserMapper">
+
+
+    <resultMap id="userinfo" type="com.cloud.serviceauthorize.entity.BaseUser">
+        <id  property="userid" column="userid"/>
+        <result property="username" column="username"/>
+        <result property="img_URL" column="img_URL"/>
+        <result property="rooturl" column="rooturl"/>
+        <collection property="listrole" select="getRoleByUserid" column="userid">
+        </collection>
+    </resultMap>
+
+    <resultMap id="userdatainfo" type="com.cloud.serviceauthorize.entity.UserData">
+        <id  property="userid" column="userid"/>
+        <result property="device_id" column="device_id"/>
+        <result property="data" column="data"/>
+        <result property="device" column="device"/>
+        <result property="pushid" column="pushid"/>
+        <result property="smpid" column="smpid"/>
+        <result property="version" column="version"/>
+        <result property="deviceversion" column="deviceversion"/>
+        <result property="phonemodel" column="phonemodel"/>
+        <result property="position" column="position"/>
+    </resultMap>
+
+    <resultMap id="getRole" type="com.cloud.commonsmng.entity.BaseRole">
+        <id  property="id" column="id"/>
+        <result  property="code" column="code"/>
+        <result  property="rootUrl" column="rootUrl"/>
+    </resultMap>
+
+    <select id="getUserInfo" resultMap="userinfo">
+         select t.empid as userid,t.name as username ,t.pic as img_URL
+         from user t
+         where t.loginname=#{USERID} AND password=#{PWD}
+    </select>
+    <select id="getUserByUserID" resultMap="userinfo">
+         select t.empid as userid,t.name as username ,t.pic as img_url
+         from user t
+         where t.loginname=#{USERID} OR t.empid=#{USERID}
+    </select>
+
+    <select id="getUserData" resultType="int">
+        select count(1) from user_data where USERID=#{USERID}
+    </select>
+    <select id="getRoleByUserid"  parameterType="String" resultMap="getRole">
+        select A.id,A.name,A.rooturl from role A LEFT JOIN userrolerelation B ON A.id=B.roleid AND B.userid=#{ID}
+    </select>
+
+    <insert id="InsertUserData" parameterType="com.cloud.serviceauthorize.entity.UserData">
+        insert into user_data(userid,device_id,device,version,deviceversion,phonemodel,position)
+        VALUES (#{userid},#{device_id},#{device},#{version},#{deviceversion},#{phonemodel},#{position})
+    </insert>
+    <update id="updateDataUser" parameterType="com.cloud.serviceauthorize.entity.UserData">
+        update user_data
+        set device_id=#{device_id},
+        position=#{position},
+        device=#{device},
+        version=#{version},
+        deviceversion=#{deviceversion}
+        where userid=#{userid}
+    </update>
+</mapper>

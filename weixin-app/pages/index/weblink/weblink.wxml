@@ -1,0 +1,3 @@
+<!-- <web-view src="https://mp.weixin.qq.com/s/mM7Brrzz_42nofyS_B6NLw"></web-view> -->
+
+<web-view src="{{newsLink}}"></web-view>

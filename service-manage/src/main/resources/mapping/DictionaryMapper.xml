@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.servicemanage.mapper.DictionaryMapper">
+
+    <resultMap id="dictionary" type="com.cloud.commonsmng.entity.appletEntity.Dictionary">
+        <id property="id" column="id"/>
+        <result property="code" column="code"/>
+        <result property="name" column="name"/>
+        <result property="kind" column="kind"/>
+        <result property="creatorid" column="creatorid"/>
+        <result property="createtime" column="createtime"/>
+        <result property="modifierid" column="modifierid"/>
+        <result property="modifytime" column="modifytime"/>
+        <result property="pic" column="pic"/>
+        <result property="picurl" column="picurl"/>
+        <result property="modifyname" column="modifyname"/>
+        <result property="isused" column="isused"/>
+        <result property="price" column="price"/>
+        <result property="value" column="value"/>
+        <result property="kindCode" column="kindCode"/>
+    </resultMap>
+
+    <sql id="tmpPageQry">
+        <if test="searchdata !=null">
+
+            <if test="searchdata.name !=null and searchdata.name !='' ">
+                AND a.name like'%${searchdata.name}%'
+            </if>
+            <if test="searchdata.kind !=null and searchdata.kind !='' ">
+                AND a.kind like '%${searchdata.kind}%'
+            </if>
+        </if>
+    </sql>
+
+
+    <!--查询页面总条数-->
+    <select id="getPageTotal" parameterType="com.cloud.servicemanage.common.PageVo"
+            resultType="java.lang.Integer">
+        SELECT
+        COUNT(1)
+        FROM
+        dictionary a
+        <where>
+            1=1 and a.kind not like 'dict'
+            <include refid="tmpPageQry"></include>
+        </where>
+        ORDER BY createtime DESC
+    </select>
+
+    <!--分页-->
+    <sql id="page1">
+        <if test="page!=null">
+            LIMIT ${page.beginIndex-1},${page.pageSize}
+        </if>
+    </sql>
+
+    <!-- 所有信息查询-->
+    <select id="getDictionaryInfo" resultMap="dictionary" parameterType="com.cloud.servicemanage.common.PageVo">
+        SELECT
+        a.id,
+        a.`code`,
+        a.`name`,
+        b.`name` AS kind,
+        b.`code` as kindCode,
+        a.creatorid,
+        a.createtime,
+        a.modifierid,
+        a.modifytime,
+        a.pic,
+        a.picurl,
+        c.`userName` AS modifyname,
+        IFNULL(a.isused,'1') AS isused
+        FROM
+        dictionary a
+        LEFT JOIN dictionary b ON b.`code` = a.kind
+        LEFT JOIN `user` c ON c.id = a.creatorid
+        <where>
+            1 = 1
+            AND b.`name` IS NOT NULL
+            AND b.kind = 'dict'
+            <include refid="tmpPageQry"></include>
+        </where>
+        ORDER BY a.modifytime DESC
+        <include refid="page1"></include>
+    </select>
+
+    <!--下拉框查询-->
+    <select id="getKindnameInfo" resultMap="dictionary">
+        SELECT id, code, name
+        FROM dictionary
+        where kind = "dict"
+    </select>
+
+    <!--增加-->
+    <insert id="addDictionary" parameterType="com.cloud.commonsmng.entity.appletEntity.Dictionary">
+        INSERT INTO dictionary (id, CODE, `name`, kind, parentId, creatorid, createtime, modifierid, modifytime, pic,
+                                picurl, isused, price, `value`)
+        SELECT #{id},
+               #{code},
+               #{name},
+               #{kind},
+               d.id,
+               #{creatorId},
+               now(),
+               #{modifierId},
+               now(),
+               #{pic},
+               #{picurl},
+               1,
+               #{price},
+               #{value}
+        FROM (SELECT -1) a
+                 LEFT JOIN
+             dictionary d ON
+                     d.kind = 'dict' AND d.type = 'reportProperty'
+                     AND d.`code` = #{kind}
+    </insert>
+
+    <!--增加大类-->
+    <insert id="addclassDictionary" parameterType="com.cloud.commonsmng.entity.appletEntity.Dictionary">
+        INSERT into dictionary(id, code, `name`, kind, creatorid, createtime, modifierid, modifytime, isused, type)
+        VALUES (#{id}, #{code}, #{name}, 'dict', #{creatorId}, now(), #{modifierId}, now(), 1, #{type})
+    </insert>
+
+    <update id="updateDictionary" parameterType="com.cloud.commonsmng.entity.appletEntity.Dictionary">
+        UPDATE dictionary
+        <set>
+            <if test="code != null and code != ''">code = #{code},</if>
+            <if test="name != null and name != ''">`name` = #{name},</if>
+            <if test="kind != null and kind != ''">
+                kind = #{kind},
+                parentId = (SELECT d.id
+                FROM
+                ( SELECT id FROM dictionary WHERE kind = 'dict' AND type = 'reportProperty' AND `code` = #{kind})
+                d),
+            </if>
+            <if test="pic != null and pic != ''">pic = #{pic},</if>
+            <if test="isused != null and isused != ''">isused = #{isused},</if>
+            <if test="price != null and price != ''">price = #{price},</if>
+            <if test="value != null and value != ''">`value` = #{value},</if>
+            modifierid = #{modifierid},
+            modifytime = now()
+        </set>
+        WHERE id=#{id}
+    </update>
+
+
+    <!--删除-->
+    <delete id="deleteDictionary" parameterType="java.lang.String">
+
+        delete
+        from dictionary
+        where id = #{id}
+
+    </delete>
+
+    <!--查询大类name存在-->
+    <select id="selectName" resultType="java.lang.Integer">
+        select COUNT(1)
+        from dictionary
+        where kind = 'dict'
+          and name = #{name}
+    </select>
+    <!--查询大类code存在-->
+    <select id="selectCode" resultType="java.lang.Integer">
+        select COUNT(1)
+        from dictionary
+        where kind = 'dict'
+          and code = #{code}
+    </select>
+    <!--查询id存在-->
+    <select id="selectId" resultType="java.lang.Integer">
+        select COUNT(1)
+        from dictionary
+        where id = #{id}
+    </select>
+
+    <!--查询name存在-->
+    <select id="selectName1" resultType="java.lang.Integer">
+        select COUNT(1)
+        from dictionary
+        where name = #{name}
+    </select>
+    <!--查询code存在-->
+    <select id="selectCode1" resultType="java.lang.Integer">
+        select COUNT(1)
+        from dictionary
+        where code = #{code}
+    </select>
+
+    <!--根据kind查询字典表中的数据-->
+    <select id="selectByKind" resultMap="dictionary" parameterType="java.lang.String">
+        select name, code, pic
+        from dictionary
+        where kind = #{kind}
+          and isused = 1
+    </select>
+
+    <!--根据父级编号查询字典表中的数据-->
+    <select id="selectByParent" resultType="com.cloud.commonsmng.entity.appletEntity.Dictionary" parameterType="java.lang.String">
+        SELECT
+        id,
+        `code`,
+        `name`,
+        kind,
+        creatorid,
+        createtime,
+        modifierid,
+        modifytime,
+        pic,
+        picurl,
+        isused,
+        `index`,
+        `parameter`,
+        `type`,
+        `value`,
+        parentId
+        from dictionary where parentId=#{parentId}
+        <if test="kind != null and kind != ''">
+            and kind = #{kind}
+        </if>
+        and isused=1
+    </select>
+
+    <!--根据id查询字典信息-->
+    <select id="getDictionaryById" parameterType="java.lang.String"
+            resultType="com.cloud.commonsmng.entity.appletEntity.Dictionary">
+        SELECT d.id,
+               d.`code`,
+               d.`name`,
+               d.kind,
+               d.parentId,
+               d.pic,
+               d.picurl,
+               d.isused,
+               d.price,
+               d.`value`,
+               d.type
+        FROM dictionary d
+        WHERE d.id = #{id}
+    </select>
+</mapper>

@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.servicewechat.mapper.PushMapper">
+    <insert id="addPush" parameterType="com.cloud.servicewechat.entity.PushEntity">
+        insert into push(push_message_id,template_type,
+                         title, keywords1,
+                         keywords2,keywords3,
+                         keywords4,keywords5,
+                         remark, url,appId,
+                         creatorId,
+                         createTime,
+                         modifierId,
+                         modifyTime,status,delFlag)
+       values(#{id},#{templateType},#{title}
+               ,#{keywords1},#{keywords2},#{keywords3}
+               ,#{keywords4},#{keywords5},#{remark},
+              #{url},#{appId},
+              #{creatorId},
+              now(),
+              #{modifierId},
+              now(),#{status},1)
+    </insert>
+    <update id="modifyPush" parameterType="com.cloud.servicewechat.entity.PushEntity">
+        update push
+        set
+        <if test="templateType!=null and templateType!=''">
+            template_type=#{templateType},
+        </if>
+        <if test="title!=null and title!=''">
+            title=#{title},
+        </if>
+        <if test="url!=null and url!=''">
+            url=#{url},
+        </if>
+        <if test="keywords1!=null and keywords1!=''">
+            keywords1=#{keywords1},
+        </if>
+        <if test="keywords2!=null and keywords2!=''">
+            keywords2=#{keywords2},
+        </if>
+        <if test="keywords3!=null and keywords3!=''">
+            keywords3=#{keywords3},
+        </if>
+        <if test="keywords4!=null and keywords4!=''">
+            keywords4=#{keywords4},
+        </if>
+        <if test="keywords5!=null and keywords5!=''">
+            keywords5=#{keywords5},
+        </if>
+        <if test="remark!=null and remark!=''">
+            remark=#{remark},
+        </if>
+        <if test="delFlag!=null ">
+            delFlag=#{delFlag},
+        </if>
+        <if test="status!=null ">
+            status=#{status},
+        </if>
+        <if test="appId!=null ">
+            appId=#{appId},
+        </if>
+        modifierId =  #{modifierId},
+        modifyTime =  now()
+    where push_message_id=#{pushMessageId}
+    </update>
+    <sql id="tmpPageQry">
+        <trim prefix="where" prefixOverrides="and | or">
+            AND n.delFlag = 1
+            <if test="pageVo.searchdata != null">
+                <if test="pageVo.searchdata.title != null and pageVo.searchdata.title != ''">
+                    and n.title like concat('%',#{pageVo.searchdata.title},'%')
+                </if>
+                <if test="pageVo.searchdata.status != null and pageVo.searchdata.status != ''">
+                    and n.status = #{pageVo.searchdata.status}
+                </if>
+            </if>
+        </trim>
+    </sql>
+    <sql id="pagination">
+        <if test="pageVo.page!=null">
+            LIMIT ${pageVo.page.beginIndex-1}, ${pageVo.page.pageSize}
+        </if>
+    </sql>
+    <select id="getPushList" parameterType="com.cloud.servicewechat.common.PageVo"  resultType="com.cloud.servicewechat.entity.PushEntity">
+        select push_message_id as pushMessageId,template_type templateType,title,
+               keywords1,keywords2,keywords3,
+               keywords4,keywords5,remark, url,appId,
+               creatorId,
+               createTime,
+               modifierId,
+               modifyTime,status
+        from push n
+        <include refid="tmpPageQry"></include>
+        ORDER BY n.createTime DESC
+        <include refid="pagination"></include>
+    </select>
+    <select id="getPushCount" parameterType="com.cloud.servicewechat.common.PageVo" resultType="java.lang.Integer">
+        select count(0) from push n
+        <include refid="tmpPageQry"></include>
+    </select>
+
+    <select id="getPushById" resultType="com.cloud.servicewechat.entity.PushEntity">
+        select  push_message_id as pushMessageId,template_type templateType,title,
+               keywords1,keywords2,keywords3,
+               keywords4,keywords5,remark, url,
+               creatorId,
+               createTime,
+               modifierId,
+               modifyTime,status from push WHERE push_message_id=#{id}
+    </select>
+
+    <insert id="insertweixinIfo" parameterType="java.lang.String">
+        INSERT ignore INTO weixin_info (openId) VALUES
+        <foreach collection="openIds" item="item" index="index" separator=",">
+            (#{item})
+        </foreach>;
+    </insert>
+
+    <select id="insertUnionid" parameterType="com.cloud.commonsmng.entity.appletEntity.WeixinInfo">
+        <foreach collection="list" item="item" index="index" separator=";">
+            UPDATE weixin_info set unionid = #{item.unionid} WHERE openId = #{item.openId}
+        </foreach>;
+
+    </select>
+</mapper>

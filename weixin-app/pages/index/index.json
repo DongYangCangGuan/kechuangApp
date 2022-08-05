@@ -1,0 +1,10 @@
+{
+  "usingComponents": {
+    "mp-searchbar": "weui-miniprogram/searchbar/searchbar",
+    "mp-icon": "weui-miniprogram/icon/icon",
+    "mp-badge": "weui-miniprogram/badge/badge",
+    "mp-loading": "weui-miniprogram/loading/loading"
+  },
+  "navigationBarTitleText": "科创生态圈"
+  
+}

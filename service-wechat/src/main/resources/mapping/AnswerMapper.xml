@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.servicewechat.mapper.AnswerMapper">
+
+
+    <resultMap id="applymap"  type="com.cloud.commonsmng.entity.appletEntity.Answer" >
+        <id column="id" property="id"/>
+        <result column="questionDescription" property="questionDescription"/>
+        <result column="questionType" property="questionType"/>
+        <collection property="questionOptionsList" ofType="com.cloud.commonsmng.entity.appletEntity.QuestionOptionsEntity" javaType="java.util.ArrayList">
+            <id column="questionOptionsId" property="id"/>
+            <result column="content" property="content" />
+            <result column="answer" property="answer"/>
+        </collection>
+    </resultMap>
+
+    <resultMap id="Dictionary"  type="com.cloud.commonsmng.entity.appletEntity.Dictionary" >
+        <id column="id" property="id"/>
+        <result column="index" property="index"/>
+        <result column="createTime" property="createTime"/>
+        <result column="name" property="name"/>
+    </resultMap>
+
+
+
+    <sql id="projectQuery">
+     <trim prefix="WHERE" prefixOverrides="AND | OR">
+        <if test="userId != null and userId != ''">
+            AND a.userId = #{userId}
+        </if>
+        <if test="kindId != null and kindId != ''">
+            AND q.questionBelong = #{kindId}
+        </if>
+         <if test="createTime != null and createTime != ''">
+             AND a.createTime = #{createTime}
+         </if>
+        AND   a.answer LIKE concat('%',mq.answer ,'%')
+     </trim>
+    </sql>
+
+
+    <sql id="page">
+        <if test="pageVo.page!=null">
+            LIMIT ${pageVo.page.beginIndex-1}, ${pageVo.page.pageSize}
+        </if>
+    </sql>
+
+    <select id="countAnswerList" resultType="java.lang.Integer">
+        select count(1) as tolNum
+        from dictionary d
+        where d.kind = 'producttype'
+          and d.code in (
+            select q.questionBelong
+            from question q
+                     left join answer a ON q.id = a.questionId
+            where a.userid = #{pageVo.userId})
+    </select>
+
+    <select id="getAnswerList" resultMap="Dictionary">
+        select
+        DISTINCT
+        d.id,
+        d.`name`,
+        a.ordinal as `index`,
+        a.createTime as createTime
+        from dictionary d
+        left join question q ON q.questionBelong=d.code and d.kind = 'producttype'
+        left join answer a ON q.id =a.questionId
+        where a.userid = #{pageVo.userId} and d.code in (
+        select q.questionBelong from question q
+        left join answer a ON q.id =a.questionId where a.userid = #{pageVo.userId})
+        order by  a.ordinal DESC
+        <include refid="page"></include>
+    </select>
+
+    <select id="getAnswerDetail" resultMap="applymap">
+        SELECT
+        q.id,
+        q.questionDescription,
+        a.answer,
+        mq.content,
+        CASE
+        q.questionType
+        WHEN 1 THEN
+        '单选' ELSE '多选'
+        END AS questionType,
+        q.modifyTime
+        FROM
+        question q
+        LEFT JOIN myquestion mq ON mq.questionId = q.id
+        LEFT JOIN answer a ON a.questionId = q.id
+        <include refid="projectQuery"></include>
+    </select>
+
+    <select id="getAllPush" resultType="com.cloud.commonsmng.entity.appletEntity.AnswerPushEntity">
+        select * from answer_push ap where  createTime &lt;=  date_add(now(), interval -2 day) and isPush = 0
+    </select>
+
+    <select id="getQuestionName" resultType="String">
+        select questionname from question where questionBelong  = #{questionBelong}  order by createTime desc LIMIT 0,1
+    </select>
+
+    <update id="updateIspush" >
+        update answer_push set isPush =  1  where id = #{id }
+    </update>
+
+    <!--问卷列表    a.createTime,-->
+    <select id="selectQuestionnaireList" resultType="com.cloud.commonsmng.entity.appletEntity.QuestionnaireEntity">
+        SELECT DISTINCT
+
+        a.questionBelong
+        FROM
+        question a
+        LEFT JOIN dictionary b ON a.questionnairetypes=b.`code`
+        WHERE
+        delFlag = '1'
+        <if test="questionname != null and questionname != ''">
+            AND a.questionname like concat('%',#{questionname} ,'%')
+        </if>
+        <if test="startTime != null and startTime != '' and endTime != null and endTime != '' ">
+            AND a.createTime between #{startTime,jdbcType=DATE} and #{endTime,jdbcType=DATE}
+        </if>
+
+    </select>
+
+    <!--问卷列表    a.createTime,-->
+    <select id="getQuestionMsg" resultType="com.cloud.commonsmng.entity.appletEntity.QuestionnaireEntity">
+        SELECT
+            questionname,
+            questionBelong,
+            modifyTime as modifytime,
+            createTime ,
+            releaseFlag
+        FROM
+            question
+        WHERE
+            delFlag='1'
+          and
+            questionBelong = #{questionBelong} limit 0,1
+    </select>
+
+    <!--根据问卷名称查询问卷问题 -->
+    <select id="selectQuestionList" resultType="com.cloud.commonsmng.entity.appletEntity.QuestionEntity">
+        SELECT
+            id,
+            questionDescription,
+            sequen,
+            questionType
+        FROM
+            question
+        WHERE
+            1 = 1
+          AND delFlag = '1'
+          AND questionBelong = #{questionname}
+        ORDER BY
+            sequen
+    </select>
+
+    <!--根据问题ID查询问题选项-->
+    <select id="selectMyQuestionList" resultType="com.cloud.commonsmng.entity.appletEntity.QuestionOptionsEntity">
+        SELECT
+            id,
+            questionId,
+            answer,
+            content
+        FROM
+            myquestion
+        WHERE
+            questionId = #{id}
+        ORDER BY
+            answer
+    </select>
+
+    <select id="countQesMemberList"  parameterType="com.cloud.servicewechat.common.PageVo" resultType="java.lang.Integer">
+        select count(ap.id)   from answer_push  ap left join user u on ap.userId = u.id left join member m  on u.memberId = m.id  where u.id is not null and m.id is not null
+        <include refid="tmpPageQry"/>
+    </select>
+
+    <select id="getQesMemberList"  parameterType="com.cloud.servicewechat.common.PageVo" resultType="com.cloud.commonsmng.entity.appletEntity.User">
+        select u.*   from answer_push  ap left join user u on ap.userId = u.id left join member m  on u.memberId = m.id  where u.id is not null and m.id is not null
+        <include refid="tmpPageQry"/>
+        order by ap.createTime desc
+        <include refid="pagination"></include>
+    </select>
+
+    <sql id="tmpPageQry">
+        <if test="pageVo.searchData != null">
+            <if test="pageVo.searchdata.realName != null and pageVo.searchdata.realName != ''  ">
+                AND u.realName LIKE concat('%',#{pageVo.searchdata.realName},'%')
+            </if>
+            <if test="pageVo.searchdata.questionBelong != null and pageVo.searchdata.questionBelong != ''  ">
+                AND ap.questionBelong =#{pageVo.searchdata.questionBelong}
+            </if>
+            <if test="pageVo.searchdata.uRole != null and pageVo.searchdata.uRole != '' and  'pg'.toString == pageVo.searchdata.uRole ">
+                and  date_format(createTime,'%Y-%m-%d') &lt;=  date_add(date_format(now(),'%Y-%m-%d'), interval -2 day)
+            </if>
+        </if>
+    </sql>
+
+    <!--//分页-->
+    <sql id="pagination">
+        <if test="pageVo.page!=null">
+            LIMIT ${pageVo.page.beginIndex-1}, ${pageVo.page.pageSize}
+        </if>
+
+    </sql>
+
+    <select id="getMemberByUserId"  parameterType="String" resultType="com.cloud.commonsmng.entity.appletEntity.Member">
+        select m.* from user u left join member m on u.memberId = m.id where u.id = #{id}
+    </select>
+
+    <select id="getUserAnswerQuestion"  parameterType="String" resultType="com.cloud.commonsmng.entity.appletEntity.QuestionEntity">
+            select q.*,a.answer from answer a left join question q on a.questionId = q.id   where a.userId =  #{userId} and a.questionBelong = #{questionBelong} order by q.sequen
+    </select>
+
+    <select id="getUserAllAnswers"  parameterType="String" resultType="com.cloud.commonsmng.entity.appletEntity.QuestionOptionsEntity">
+        select * from myquestion where questionId= #{questionId} and answer in
+        <foreach collection="answers" item="item" index="index" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+        ORDER BY  answer
+    </select>
+</mapper>

@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.servicemanage.mapper.SliderMapper">
+
+    <!-- sql 条件判断 -->
+    <sql id="tmpPageQry">
+        <trim prefix="where" prefixOverrides="and | or">
+            <if test="pageVo.searchData != null">
+                <if test="pageVo.searchdata.enterpriseCode != null and pageVo.searchdata.enterpriseCode != ''">
+                    AND m.enterpriseCode LIKE concat('%',#{pageVo.searchdata.enterpriseCode},'%')
+                </if>
+                <if test="pageVo.searchdata.enterpriseName != null and pageVo.searchdata.enterpriseName != ''">
+                    AND m.enterpriseName LIKE concat('%',#{pageVo.searchdata.enterpriseName},'%')
+                </if>
+                <if test="pageVo.searchdata.comboId != null and pageVo.searchdata.comboId != ''">
+                    AND m.comboId = #{pageVo.searchdata.comboId}
+                </if>
+                <if test="pageVo.searchdata.accountManager != null and pageVo.searchdata.accountManager != ''">
+                    AND m.accountManager = #{pageVo.searchdata.accountManager}
+                </if>
+                <if test="pageVo.searchdata.startTime != null and pageVo.searchdata.startTime != ''">
+                    <if test="pageVo.searchdata.endTime != null and pageVo.searchdata.endTime != ''">
+                        AND date_format(m.createTime,'%Y-%m-%d') BETWEEN #{pageVo.searchdata.startTime} AND
+                        #{pageVo.searchdata.endTime}
+                    </if>
+                </if>
+            </if>
+        </trim>
+    </sql>
+
+    <!--sql 分页-->
+    <sql id="pagination">
+        <if test="pageVo.page != null">
+            LIMIT ${pageVo.page.beginIndex-1}, ${pageVo.page.pageSize}
+        </if>
+    </sql>
+
+    <!--分页获取轮播图信息-->
+    <select id="getSliderPageVo" parameterType="com.cloud.servicemanage.common.PageVo"
+            resultType="com.cloud.commonsmng.entity.appletEntity.Slider">
+        SELECT
+        s.id,
+        s.pic,
+        s.url,
+        s.title,
+        s.`index`,
+        s.isused,
+        s.modifierId,
+        u.userName as modifyusername,
+        s.modifyTime
+        FROM `slideshow` s
+        LEFT JOIN `user` u on s.modifierId = u.id
+        <include refid="tmpPageQry"></include>
+        ORDER BY s.`index`
+        <include refid="pagination"></include>
+    </select>
+
+    <!--查询轮播图总数-->
+    <select id="getPageTotal" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM `slideshow` s
+        <include refid="tmpPageQry"></include>
+    </select>
+
+    <!--根据编号查询轮播图信息-->
+    <select id="getSliderById" parameterType="java.lang.String"
+            resultType="com.cloud.commonsmng.entity.appletEntity.Slider">
+        SELECT s.id,
+               s.pic,
+               s.url,
+               s.`index`,
+               s.title,
+               s.isused,
+               s.modifierId,
+               s.modifyTime
+        FROM `slideshow` s
+        WHERE s.id = #{id}
+    </select>
+
+    <!--新增轮播图信息-->
+    <insert id="insertSlider" parameterType="com.cloud.commonsmng.entity.appletEntity.Slider">
+        INSERT INTO slideshow (id, pic, url, `index`, creatorId, createTime, modifierId, modifyTime, isused, title)
+        VALUES (#{slider.id},
+        #{slider.pic},
+        #{slider.url},
+        <if test="slider != null and slider.index != null and slider.index != ''">
+            #{slider.index},
+        </if>
+        <if test="slider != null and (slider.index == null or slider.index == '')">
+            (SELECT MAX(s.`index`) + 1 FROM slideshow s where s.isused = 1),
+        </if>
+        #{slider.creatorId},
+        NOW(),
+        #{slider.modifierId},
+        NOW(),
+        1,
+        #{slider.title})
+    </insert>
+
+    <!--修改轮播图信息-->
+    <update id="updateSlider" parameterType="com.cloud.commonsmng.entity.appletEntity.Slider">
+        UPDATE slideshow
+        SET pic = #{slider.pic},
+        url = #{slider.url},
+        title = #{slider.title},
+        <if test="slider != null and slider.index != null and slider.index != ''">
+            `index` = #{slider.index},
+        </if>
+        <if test="slider != null and (slider.index == null or slider.index == '')">
+            `index` = (SELECT c.`index` FROM (SELECT MAX( s.`index` ) + 1 AS `index` FROM slideshow s WHERE s.isused = 1
+            ) c),
+        </if>
+        modifierId = #{slider.modifierId},
+        modifyTime = NOW(),
+        isused = #{slider.isused}
+        WHERE id = #{slider.id}
+    </update>
+
+    <!--删除轮播图信息-->
+    <delete id="deleteSlider" parameterType="java.lang.String">
+        DELETE
+        FROM slideshow
+        WHERE id = #{id}
+    </delete>
+
+    <!--判断优先级是否存在-->
+    <select id="checkSliderByIndex" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+        SELECT count(1)
+        FROM slideshow s
+        WHERE s.`index` = #{index}
+          AND s.isused = 1
+    </select>
+</mapper>

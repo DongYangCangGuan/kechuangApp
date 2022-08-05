@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.servicemanage.mapper.DictionaryMapper">
+
+    <resultMap id="dictionary" type="com.cloud.servicemanage.entity.Dictionary">
+        <result  property="id"          column="id"         jdbcType="VARCHAR"/>
+        <result  property="code"        column="code"       jdbcType="VARCHAR"/>
+        <result  property="name"        column="name"       jdbcType="VARCHAR"/>
+        <result  property="kind"        column="kind"       jdbcType="VARCHAR"/>
+        <result  property="creatorid"   column="creatorid"  jdbcType="VARCHAR"/>
+        <result  property="createtime"  column="createtime" jdbcType="DATE"/>
+        <result  property="modifierid"  column="modifierid" jdbcType="VARCHAR"/>
+        <result  property="modifytime"  column="modifytime" jdbcType="DATE"/>
+        <result  property="pic"         column="PIC"        jdbcType="VARCHAR"/>
+        <result  property="picurl"      column="PICURL"     jdbcType="VARCHAR"/>
+        <result  property="modifyname"  column="modifyname" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="tmpPageQry">
+        <if test="searchdata != null">
+            <if test="searchdata.name != null and searchdata.name != '' ">
+                AND DTO.NAME like '%${searchdata.name}%'
+            </if>
+            <if test="searchdata.kind != null and searchdata.kind != '' ">
+                AND DTO.KIND like '%${searchdata.kind}%'
+            </if>
+        </if>
+    </sql>
+
+
+
+
+    <!--查询页面总条数-->
+    <select id="getPageTotal" parameterType="com.cloud.servicemanage.common.PageVo"
+            resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM DICTIONARY  DTO
+        <where>
+            1=1 and DTO.KIND not like 'dict'<include refid="tmpPageQry"></include>
+        </where>
+        ORDER BY createtime DESC
+    </select>
+
+    <!-- 所有信息查询-->
+    <select id="getDictionaryInfo" resultMap="dictionary" parameterType="com.cloud.servicemanage.common.PageVo">
+        SELECT * FROM
+                    (SELECT
+                            t.*,
+                            rownum rn
+                      FROM (SELECT
+                                    DTO.ID         as id,
+                                    DTO.CODE       as code,
+                                    DTO.NAME       as name,
+                                    b.name         as kind,
+                                    DTO.CREATORID  as creatorid,
+                                    DTO.CREATETIME as createtime,
+                                    DTO.MODIFIERID as modifierid,
+                                    DTO.MODIFYTIME as modifytime,
+                                    DTO.PIC        as pic,
+                                    DTO.PICURL     as picurl,
+                                    USI.NAME       as modifyname
+                              FROM  DICTIONARY  DTO
+                         LEFT JOIN  (select
+                                            id,
+                                            code,
+                                            name,
+                                            kind
+                                       from dictionary
+                                      where kind='dict'
+                                     ) b on b.code=DTO.KIND
+                         LEFT JOIN   USER_INFO USI on USI.ID =DTO.MODIFIERID
+                                <where>
+                                    1=1 and b.name is not null
+                                    <include refid="tmpPageQry"></include>
+                                </where>
+                          ORDER BY    DTO.MODIFYTIME DESC
+                              ) t
+        WHERE rownum &lt;(${page.pageIndex}*${page.pageSize}+1)
+                    )
+        WHERE rn &gt; ((${page.pageIndex}-1)*${page.pageSize})
+    </select>
+
+    <!--下拉框查询-->
+    <select id="getKindnameInfo" resultMap="dictionary">
+        SELECT
+			   DTO.ID   as id,
+			   DTO.CODE as code,
+			   DTO.NAME as name
+        FROM  DICTIONARY  DTO
+        where DTO.KIND ='dict'
+    </select>
+
+    <!--增加-->
+    <insert id="addDictionary" parameterType="com.cloud.servicemanage.entity.Dictionary">
+        INSERT into dictionary(id, code, name, kind, creatorid,createtime,modifierid,modifytime,pic,picurl)
+        VALUES(#{id},#{code},#{name},#{kind},#{creatorid},(SELECT sysdate FROM DUAL),null,(SELECT sysdate FROM DUAL),#{pic},null)
+    </insert>
+
+    <!--增加大类-->
+    <insert id="addclassDictionary" parameterType="com.cloud.servicemanage.entity.Dictionary">
+        INSERT into dictionary(id, code, name, kind, creatorid,createtime,modifierid,modifytime)
+        VALUES(#{id},#{code},#{name},'dict',#{creatorid},(SELECT sysdate FROM DUAL),null,(SELECT sysdate FROM DUAL))
+    </insert>
+
+    <update id="updateDictionary" parameterType="com.cloud.servicemanage.entity.Dictionary">
+        UPDATE dictionary
+        <set>
+            <if test="code!=null and code !=''">code=#{code},</if>
+            <if test="name!=null and name !=''">name=#{name},</if>
+            <if test="kind!=null and kind !=''">kind=#{kind},</if>
+            <if test="pic!=null and pic !=''">pic=#{pic},</if>
+            isused=#{isused},
+            creatorid=#{creatorid},
+            modifierid=#{modifierid},
+            modifytime=(SELECT sysdate FROM DUAL)
+        </set>
+        WHERE id=#{id}
+    </update>
+
+
+    <!--删除-->
+    <delete id="deleteDictionary" parameterType="java.lang.String">
+      delete from dictionary  where  id=#{id}
+    </delete>
+
+    <!--查询大类name存在-->
+    <select id="selectName"  resultType="java.lang.Integer">
+      select   COUNT(1)  from dictionary where kind='dict' and name=#{name}
+    </select>
+    <!--查询大类code存在-->
+    <select id="selectCode"  resultType="java.lang.Integer">
+      select   COUNT(1)  from dictionary where kind='dict' and code=#{code}
+    </select>
+    <!--查询id存在-->
+    <select id="selectId"  resultType="java.lang.Integer">
+      select   COUNT(1)  from dictionary where id=#{id}
+    </select>
+
+    <!--查询name存在-->
+    <select id="selectName1"  resultType="java.lang.Integer">
+      select   COUNT(1)  from dictionary where name=#{name}
+    </select>
+    <!--查询code存在-->
+    <select id="selectCode1"  resultType="java.lang.Integer">
+      select   COUNT(1)  from dictionary where code=#{code}
+    </select>
+</mapper>

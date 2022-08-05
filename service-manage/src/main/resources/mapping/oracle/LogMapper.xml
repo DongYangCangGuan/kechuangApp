@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.servicemanage.mapper.LogMapper">
+    <select id="getLogInfo"  resultType="com.cloud.commonsmng.entity.Loginfo" parameterType="com.cloud.servicemanage.common.PageVo">
+        select * from loginfo where 1=1
+        <if test="actiontype!= null and ''!=actiontype">
+            and actiontype =#{actiontype}
+        </if>
+        <if  test="log_level!= null and ''!=log_level">
+            and log_level=#{log_level}
+        </if>
+        <if  test="module!= null and ''!=module">
+            and module=#{module}
+        </if>
+        <if  test="type!= null and ''!=type">
+            and type=#{type}
+        </if>
+        <if  test="endDate!= null and ''!=endDate">
+            and recivetime &lt;= #{endDate}
+        </if>
+        <if  test="startDate!= null and ''!=startDate">
+            and recivetime &gt;= #{startDate}
+        </if>
+    </select>
+
+    <select id="getLogHour" resultType="com.cloud.servicemanage.entity.LogHourData" parameterType="java.lang.String">
+        SELECT to_char(e.RECIVETIME,'hh24')  as hourDt,count(*) as countNum FROM loginfo e  where 1=1
+        <!-- 引用一个sql片段 -->
+        <include refid="getLogInfoSelect"></include>
+        and to_char(SYSDATE,'YYYY-MM-DD') &lt;= to_char(e.recivetime,'YYYY-MM-DD') GROUP BY to_char(e.RECIVETIME,'hh24') ORDER BY to_char(e.RECIVETIME,'hh24')
+    </select>
+    <select id="getLogHourCount"   resultType="java.lang.Integer" parameterType="java.lang.String">
+        SELECT count(1)  as count FROM loginfo e  where 1=1
+        <!-- 引用一个sql片段 -->
+        <include refid="getLogInfoSelect"></include>
+        and to_char(SYSDATE,'YYYY-MM-DD') &lt;= to_char(e.recivetime,'YYYY-MM-DD')
+    </select>
+    <select id="getLogWeek" resultType="com.cloud.servicemanage.entity.LogHourData" parameterType="java.lang.String">
+        select count(e.id) as countNum,substr(e.recivetime,1,10) as hourDt  from loginfo e  where 1=1
+        <!-- 引用一个sql片段 -->
+        <include refid="getLogInfoSelect"></include>
+        and to_char(SYSDATE+7,'YYYY-MM-DD') &lt;= to_char(e.recivetime,'YYYY-MM-DD') GROUP BY substr(e.recivetime,1,10) ORDER BY substr(e.recivetime,1,10)
+    </select>
+    <select id="getLogWeekCount"   resultType="java.lang.Integer" parameterType="java.lang.String">
+        select count(1) as count  from loginfo e  where 1=1
+        <!-- 引用一个sql片段 -->
+        <include refid="getLogInfoSelect"></include>
+        and to_char(SYSDATE+7,'YYYY-MM-DD')  &lt;= to_char(e.recivetime,'YYYY-MM-DD')
+    </select>
+    <select id="getLogMonth" resultType="com.cloud.servicemanage.entity.LogHourData" parameterType="java.lang.String">
+        select count(e.id) as countNum,substr(e.recivetime,1,10) as hourDt from loginfo e  where 1=1
+        <!-- 引用一个sql片段 -->
+        <include refid="getLogInfoSelect"></include>
+        and to_char(SYSDATE+30,'YYYY-MM-DD') &lt;= to_char(e.recivetime,'YYYY-MM-DD')  GROUP BY substr(e.recivetime,1,10) ORDER BY  substr(e.recivetime,1,10)
+    </select>
+    <select id="getLogMonthCount"   resultType="java.lang.Integer" parameterType="java.lang.String">
+        select count(1) as count from loginfo e  where 1=1
+        <!-- 引用一个sql片段 -->
+        <include refid="getLogInfoSelect"></include>
+        and to_char(SYSDATE+30,'YYYY-MM-DD') &lt;= to_char(e.recivetime,'YYYY-MM-DD')
+    </select>
+    <select id="getLogDateCount"   resultType="java.lang.Integer" parameterType="java.lang.String">
+        select count(1) as count from loginfo e  where 1=1
+        <!-- 引用一个sql片段 -->
+        <include refid="getLogInfoSelect"></include>
+        and  #{startDate}&lt;= to_char(e.recivetime,'YYYY-MM-DD')  and  #{endDate} &gt;=  to_char(e.recivetime,'YYYY-MM-DD')
+    </select>
+    <select id="getLogDate" resultType="com.cloud.servicemanage.entity.LogHourData" parameterType="java.lang.String">
+        select count(e.id) as countNum,substr(e.recivetime,1,10) as hourDt  from loginfo e  where 1=1
+        <!-- 引用一个sql片段 -->
+        <include refid="getLogInfoSelect"></include>
+        and  #{startDate} &lt;= to_char(e.recivetime,'YYYY-MM-DD')  and  #{endDate} &gt;=  to_char(e.recivetime,'YYYY-MM-DD')  GROUP BY substr(e.recivetime,1,10) ORDER BY  substr(e.recivetime,1,10)
+    </select>
+    <sql id="getLogInfoSelect">
+        <if test="actionType==0 or actionType==1">
+            and e.actiontype=#{actionType}
+        </if>
+        <if test="actionType==2">
+            and e.log_level='error'
+        </if>
+        <if test="actionType==3">
+            and e.type=1
+        </if>
+    </sql>
+</mapper>

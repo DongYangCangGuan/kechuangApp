@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.servicemanage.mapper.PushMapper">
+    <insert id="addPush" parameterType="com.cloud.servicemanage.entity.PushEntity">
+        <if test="push.pushDetailList != null and push.pushDetailList.size() > 0">
+            INSERT push_detail(id, openId, pushId, status, createTime)
+            VALUES
+            <foreach collection="push.pushDetailList" item="item" index="index" separator=",">
+                (#{item.id},#{item.openId},#{item.pushId},#{item.status},NOW())
+            </foreach>;
+        </if>
+
+        insert into push(push_message_id,template_type,
+                         title, keywords1,
+                         keywords2,keywords3,
+                         keywords4,keywords5,
+                         remark, url,appId,
+                         creatorId,
+                         createTime,
+                         modifierId,
+                         modifyTime,status,delFlag,sendType)
+       values(#{push.id},#{push.templateType},#{push.title}
+               ,#{push.keywords1},#{push.keywords2},#{push.keywords3}
+               ,#{push.keywords4},#{push.keywords5},#{push.remark},
+              #{push.url},#{push.appId},
+              #{push.creatorId},
+              now(),
+              #{push.modifierId},
+              now(),#{push.status},1,#{push.sendType})
+    </insert>
+    <update id="modifyPush" parameterType="com.cloud.servicemanage.entity.PushEntity">
+        update push
+        set
+        <if test="push.templateType!=null and push.templateType!=''">
+            template_type=#{push.templateType},
+        </if>
+        <if test="push.title!=null and push.title!=''">
+            title=#{push.title},
+        </if>
+        <if test="push.url!=null and push.url!=''">
+            url=#{push.url},
+        </if>
+        <if test="push.keywords1!=null and push.keywords1!=''">
+            keywords1=#{push.keywords1},
+        </if>
+        <if test="push.keywords2!=null and push.keywords2!=''">
+            keywords2=#{push.keywords2},
+        </if>
+        <if test="push.keywords3!=null and push.keywords3!=''">
+            keywords3=#{push.keywords3},
+        </if>
+        <if test="push.keywords4!=null and push.keywords4!=''">
+            keywords4=#{push.keywords4},
+        </if>
+        <if test="push.keywords5!=null and push.keywords5!=''">
+            keywords5=#{push.keywords5},
+        </if>
+        <if test="push.remark!=null and push.remark!=''">
+            remark=#{push.remark},
+        </if>
+        <if test="push.delFlag!=null ">
+            delFlag=#{push.delFlag},
+        </if>
+        <if test="push.status!=null ">
+            status=#{push.status},
+        </if>
+        <if test="push.appId!=null ">
+            appId=#{push.appId},
+        </if>
+        <if test="push.sendType!=null and push.sendType!=''">
+            sendType=#{push.sendType},
+        </if>
+        modifierId =  #{push.modifierId},
+        modifyTime =  now()
+    where push_message_id=#{push.pushMessageId}
+    </update>
+    <sql id="tmpPageQry">
+        <trim prefix="where" prefixOverrides="and | or">
+            AND n.delFlag = 1
+            <if test="pageVo.searchdata != null">
+                <if test="pageVo.searchdata.title != null and pageVo.searchdata.title != ''">
+                    and n.title like concat('%',#{pageVo.searchdata.title},'%')
+                </if>
+                <if test="pageVo.searchdata.status != null and pageVo.searchdata.status != ''">
+                    and n.status = #{pageVo.searchdata.status}
+                </if>
+            </if>
+        </trim>
+    </sql>
+    <sql id="pagination">
+        <if test="pageVo.page!=null">
+            LIMIT ${pageVo.page.beginIndex-1}, ${pageVo.page.pageSize}
+        </if>
+    </sql>
+    <select id="getPushList" parameterType="com.cloud.servicemanage.common.PageVo"  resultType="com.cloud.servicemanage.entity.PushEntity">
+        select push_message_id as pushMessageId,template_type templateType,title,
+               keywords1,keywords2,keywords3,
+               keywords4,keywords5,remark, url,appId,
+               creatorId,
+               createTime,
+               modifierId,
+               modifyTime,status,sendType
+        from push n
+        <include refid="tmpPageQry"></include>
+        ORDER BY n.createTime DESC
+        <include refid="pagination"></include>
+    </select>
+    <select id="getPushCount" parameterType="com.cloud.servicemanage.common.PageVo" resultType="java.lang.Integer">
+        select count(0) from push n
+        <include refid="tmpPageQry"></include>
+    </select>
+
+    <select id="getPushById" resultType="com.cloud.servicemanage.entity.PushEntity">
+        select  push_message_id as pushMessageId,template_type templateType,title,
+               keywords1,keywords2,keywords3,
+               keywords4,keywords5,remark, url,appId,
+               creatorId,
+               createTime,
+               modifierId,
+               modifyTime,status,sendType from push WHERE push_message_id=#{id}
+    </select>
+
+    <insert id="insertweixinIfo" parameterType="java.lang.String">
+        INSERT ignore INTO weixin_info (openId) VALUES
+        <foreach collection="openIds" item="item" index="index" separator=",">
+            (#{item})
+        </foreach>;
+    </insert>
+
+    <select id="insertUnionid" parameterType="com.cloud.commonsmng.entity.appletEntity.WeixinInfo">
+        <foreach collection="list" item="item" index="index" separator=";">
+            UPDATE weixin_info set unionid = #{item.unionid} WHERE openId = #{item.openId}
+        </foreach>;
+
+    </select>
+
+    <select id="getUserIds" resultType="java.lang.String">
+        SELECT id FROM user WHERE delFlag = 1 AND isused = 1
+        <if test="sendtype!=null and sendtype!=''">
+            AND uRole = #{sendtype}
+        </if>
+    </select>
+
+    <select id="getUserInfoList" parameterType="com.cloud.servicemanage.common.PageVo" resultType="com.cloud.commonsmng.entity.appletEntity.User">
+        SELECT u.realName,u.nickName,wi.openId from user u left join weixin_info wi on u.unionid = wi.unionid
+        WHERE u.delFlag = 1 AND u.isused = 1 AND wi.openId is NOT NULL AND wi.openId != ""
+        <include refid="userPageQry"></include>
+        ORDER BY u.createTime DESC
+        <include refid="pagination"></include>
+    </select>
+
+    <select id="getUserInfoCount" parameterType="com.cloud.servicemanage.common.PageVo"  resultType="java.lang.Integer">
+        SELECT COUNT(1) from user u left join weixin_info wi on u.unionid = wi.unionid
+        WHERE u.delFlag = 1 AND u.isused = 1 AND wi.openId is NOT NULL AND wi.openId != ""
+        <include refid="userPageQry"></include>
+
+    </select>
+
+    <sql id="userPageQry">
+        <trim prefix="where" prefixOverrides="and | or">
+
+            <if test="pageVo.searchdata != null">
+                <if test="pageVo.searchdata.realName != null and pageVo.searchdata.realName != ''">
+                    and u.realName like concat('%',#{pageVo.searchdata.realName},'%')
+                </if>
+                <if test="pageVo.searchdata.nickName != null and pageVo.searchdata.nickName != ''">
+                    and u.nickName = #{pageVo.searchdata.nickName}
+                </if>
+            </if>
+        </trim>
+    </sql>
+
+    <select id="getpushDatailopenIds" parameterType="java.lang.String" resultType="java.lang.String">
+        SELECT openId from push_detail WHERE pushId = #{pushId}
+    </select>
+
+    <update id="updatePushDetail">
+        delete from push_detail where pushId = #{pushId};
+
+        <if test="push.pushDetailList != null and push.pushDetailList.size() > 0">
+            INSERT push_detail(id, openId, pushId, status, createTime)
+            VALUES
+            <foreach collection="push.pushDetailList" item="item" index="index" separator=",">
+                (#{item.id},#{item.openId},#{item.pushId},#{item.status},NOW())
+            </foreach>;
+        </if>
+    </update>
+
+    <select id="getPushDetail" resultType="com.cloud.commonsmng.entity.appletEntity.PushDetail">
+        SELECT u.realName,u.nickName,wi.openId from push_detail pd
+        left join weixin_info wi on wi.openId = pd.openId
+        left join user u on u.unionid = wi.unionid
+        WHERE pd.pushId = #{id}
+    </select>
+
+</mapper>

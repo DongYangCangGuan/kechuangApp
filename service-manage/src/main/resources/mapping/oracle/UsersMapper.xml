@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.servicemanage.mapper.UsersMapper">
+
+    <resultMap id="userinfo" type="com.cloud.servicemanage.entity.Users">
+        <id  property="id" column="id"/>
+        <result  property="name" column="name"/>
+        <result  property="loginname" column="loginname"/>
+        <result  property="email" column="email"/>
+        <result  property="mobile" column="mobile"/>
+        <result  property="departmentid" column="departmentid"/>
+        <result  property="pic" column="pic"/>
+        <collection property="listrole" select="selectRoleChildrenById"  ofType="rolesinfo" column="id">
+        </collection>
+    </resultMap>
+    <resultMap id="baseUserinfo" type="com.cloud.servicemanage.entity.Users">
+        <id  property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="loginname" column="loginname"/>
+        <result property="email" column="email"/>
+        <result property="mobile" column="mobile"/>
+        <result property="pic" column="pic"/>
+        <result property="departmentid" column="departmentid"/>
+        <result property="password" column="password"/>
+        <result property="creatorid" column="creatorid"/>
+        <result property="createtime" column="createtime"/>
+        <result property="modifierid" column="modifierid"/>
+        <result property="modifytime" column="modifytime"/>
+        <result property="empid" column="empid"/>
+        <result property="status" column="status"/>
+        <result property="sex" column="sex"/>
+    </resultMap>
+
+
+    <resultMap id="userAndrolesinfo" type="com.cloud.servicemanage.entity.Users" >
+        <id  property="id"               column="id"/>
+        <result  property="name"         column="name"/>
+        <result  property="loginname"    column="loginname"/>
+        <result  property="email"        column="email"/>
+        <result  property="mobile"       column="mobile"/>
+        <result  property="departmentid" column="departmentid"/>
+        <result  property="pic"          column="pic"/>
+        <collection property="listrole"  column="{id=id}"
+                     ofType="rolesinfo" javaType="java.util.ArrayList" select="selectRoleChildrenById"/>
+    </resultMap>
+
+
+    <resultMap id="rolesinfo" type="com.cloud.servicemanage.entity.Role">
+        <id  property="id" column="id"/>
+        <result  property="name" column="name"/>
+        <result  property="code" column="code"/>
+    </resultMap>
+
+
+
+    <select id="getUsersByID" resultType="com.cloud.servicemanage.entity.Users">
+        select * from USER_INFO WHERE loginname=#{id};
+    </select>
+
+    <update id="updateUserPwd" parameterType="com.cloud.servicemanage.entity.Users">
+        update USER_INFO
+        set password=#{newpwd}
+        where id=#{userid}
+    </update>
+
+
+    <select id="getBaseUserInfo" resultMap="baseUserinfo">
+        select * from USER_INFO where id=#{userid} AND password=#{pwd}
+    </select>
+
+    <!-- 查询条件 -->
+    <sql id="tmpPageQry">
+        <if test="searchdata != null">
+            <if test="searchdata.name != null and searchdata.name != ''">
+                AND USI.NAME like'%${searchdata.name}%'
+            </if>
+            AND URRL.ROLEID = #{searchdata.roleid}
+        </if>
+    </sql>
+
+
+    <!--查询页面总条数-->
+    <select id="getPageTotal" resultType="java.lang.Integer" parameterType="com.cloud.servicemanage.common.PageVo">
+        SELECT COUNT(DISTINCT USI.ID)
+          FROM USER_INFO USI
+     LEFT JOIN USERROLERELATION URRL ON USI.ID = URRL.USERID
+     LEFT JOIN ROLE              ROL ON URRL.ROLEID = ROL.ROL_ID
+        <where>
+            1=1 <include refid="tmpPageQry"/>
+        </where>
+    </select>
+
+
+
+    <!--查询特定角色下的用户-->
+    <select id="getUsers" resultMap="userAndrolesinfo" parameterType="com.cloud.servicemanage.common.PageVo">
+        SELECT * FROM
+                    (SELECT
+                    t.*,
+                    rownum rn
+                    FROM (SELECT DISTINCT
+                                        id,
+                                        name,
+                                        departmentid,
+                                        empid,
+                                        departname,
+                                        loginname,
+                                        email,
+                                        pic
+                                   FROM(SELECT
+                                            USI.ID             AS id,
+                                            USI.NAME           AS name,
+                                            USI.DEPARTMENTID   AS departmentid,
+                                            USI.EMPID          AS empid,
+                                            DET.NAME           AS departname,
+                                            USI.LOGINNAME      AS loginname,
+                                            USI.EMAIL          AS email,
+                                            USI.PIC            AS pic
+                                        FROM USER_INFO USI
+                                        LEFT JOIN DEPARTMENT        DET ON USI.DEPARTMENTID	= DET.ID
+                                        LEFT JOIN USERROLERELATION URRL ON USI.ID = URRL.USERID
+                                        LEFT JOIN ROLE              ROL ON URRL.ROLEID = ROL.ROL_ID
+                                            <where>
+                                                1=1 <include refid="tmpPageQry"></include>
+                                            </where>
+                                        ORDER BY USI.MODIFYTIME DESC
+                                          )
+                                 ) t
+                      WHERE rownum &lt;(${page.pageIndex}*${page.pageSize}+1)
+                    )
+            WHERE rn &gt; ((${page.pageIndex}-1)*${page.pageSize})
+    </select>
+
+
+    <!--根据用户id查询角色基本信息-->
+    <select id="selectRoleChildrenById" resultMap="rolesinfo" parameterType="java.util.Map">
+          SELECT
+				 ROL.ROL_ID 		AS id,
+				 ROL.ROL_NAME		AS name,
+				 ROL.ROL_CODE	    AS code
+            FROM USERROLERELATION URRL
+      INNER JOIN ROLE ROL  on URRL.ROLEID = ROL.ROL_ID
+           WHERE URRL.USERID = #{id}
+    </select>
+
+
+    <!--删除角色-->
+    <delete id="delRoleforUser" parameterType="java.util.Map" >
+        DELETE FROM USERROLERELATION URRL WHERE URRL.ROLEID =#{roleid} AND URRL.USERID =#{userid}
+    </delete>
+</mapper>

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.servicewechat.mapper.ActivityMapper">
+
+    <resultMap id="collection" type="com.cloud.commonsmng.entity.appletEntity.SignEntity">
+        <id column="id" property="id"></id>
+        <result column="readymade" property="readymade"></result>
+        <result column="remark" property="remark"></result>
+        <result column="customization" property="customization"></result>
+        <result column="createTime" property="createTime"></result>
+        <result column="phone" property="phone"></result>
+        <result column="memberId" property="memberId"></result>
+        <result column="name" property="name"></result>
+        <association property="act" javaType="com.cloud.commonsmng.entity.appletEntity.ActivityEntity">
+            <result column="name" property="name"></result>
+            <result column="code" property="code"></result>
+            <result column="title" property="title"></result>
+            <result column="pic" property="pic"></result>
+            <result column="description" property="description"></result>
+            <result column="url" property="url"></result>
+            <result column="thumbUpNumber" property="thumbUpNumber"></result>
+        </association>
+    </resultMap>
+
+    <select id="countSignList" parameterType="com.cloud.servicewechat.common.PageVo" resultType="java.lang.Integer">
+    select  COUNT(1) as tolNum
+    from sign s
+    where
+       s.userId =#{pageVo.userId}
+    </select>
+
+    <select id="getSignList" parameterType="com.cloud.servicewechat.common.PageVo"
+            resultMap="collection" >
+        SELECT a.id,
+               a.title,
+               s.phone,
+               s.name,
+               s.memberId,
+               s.remark,
+               s.readymade,
+               s.customization,
+               DATE_FORMAT(s.createTime, '%Y-%c-%d') as createTime
+        FROM activity a
+                 INNER JOIN sign s ON a.id = s.activityEventId
+            AND s.id = (
+                SELECT n.id
+                FROM sign n
+                WHERE n.userId = #{pageVo.userId}
+                  AND n.activityEventId = s.activityEventId
+                ORDER BY n.modifyTime DESC
+            LIMIT 0
+           , 1)
+            LIMIT ${pageVo.page.beginIndex-1}
+           , ${pageVo.page.pageSize}
+    </select>
+
+
+
+    <select id="getSignDetail"
+              resultMap="collection" >
+       select
+       s.id,
+       s.phone,
+       s.name,
+       s.memberId,
+       s.readymade,
+       s.remark,
+       s.customization,
+       a.thumbUpNumber,
+       a.articleviews
+       FROM activity a
+                INNER JOIN sign s ON a.id = s.activityEventId
+           AND s.id = (
+               SELECT n.id
+               FROM sign n
+               WHERE n.userId = #{userId}
+                 AND n.activityEventId = #{activityEventId}
+               ORDER BY n.modifyTime DESC
+           LIMIT 0
+          , 1)
+    </select>
+
+
+    <select id="getSignTemAs" resultType="com.cloud.commonsmng.entity.appletEntity.SignDetail" >
+        select sd.*,
+               ate.template as templateName,
+               ate.seq,
+               ate.templateType
+        from sign_detail sd
+                 left join activity_template ate on sd.templateId = ate.id
+        where signId = #{id}
+        ORDER BY ate.seq
+    </select>
+
+</mapper>

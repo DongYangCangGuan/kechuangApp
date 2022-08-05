@@ -1,0 +1,44 @@
+<view class="searchContainer">
+  <!-- 搜索框 -->
+  <view class="top">
+    <view class="search">
+      <text class="iconfont iconfangdajing"></text>
+      <input class="input" bindinput="searchInput" placeholder-class="placeholder"
+        placeholder="金融行业发展趋势" value="{{searchValue}}" />
+    </view>
+      <view wx:if="{{input}}" style="color: #40A9FF;" bindtap="cleanSearchValue">取消</view>
+    <view wx:else style="color: #40A9FF;" bindtap="search">搜索</view>
+  </view>
+
+  <!-- 最近搜索 -->
+  <view wx:if="{{ flag }}" class="search_history">
+    <view class="title">
+      <text class="title_text">最近搜索</text>
+      <text class="iconfont iconlajitong" bindtap="cleanStorage"></text>
+    </view>
+    <view class="search_history_content">
+      <view class="cell" wx:for="{{ historySearchText }}" wx:key="index" data-item="{{ item }}" bindtap="selectSearchText">{{ item }}</view>
+    </view>
+  </view>
+  <!-- 展示搜索结果 -->
+  <view wx:else class="showSearchList">
+  <view class="noData" wx:if="{{showNoData}}" >
+    <image src="{{noData}}"></image>
+    <view class="noDataText">没有找到相关数据</view>
+  </view>
+  
+      <view class="bj">
+        <view class="ssd" wx:for="{{returnResult}}" wx:key="index">
+          <image class="ssd_img" src='{{item.productPicture.pic}}'></image>
+          <view class="box">
+            <text class="box_title">{{item.product.productName}}</text>
+            <text class="content">{{item.product.introduction}}</text>
+          </view>
+          <!-- <text class="ssd_collect">❤️</text> -->
+  
+
+      </view>
+      <view wx:if="{{showBottom}}" class="bottomHint">已经到底了！</view>
+    </view>
+  </view>
+</view>

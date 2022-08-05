@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.servicewechat.mapper.ReportMapper">
+
+    <resultMap id="reportEntity" type="com.cloud.commonsmng.entity.appletEntity.Report">
+        <id property="id" column="id"/>
+        <result property="code" column="code"></result>
+        <result property="title" column="title"></result>
+        <result property="pic" column="pic"></result>
+        <result property="description" column="description"></result>
+        <result property="url" column="url"></result>
+        <result property="thumbUpNumber" column="thumbUpNumber"></result>
+        <result property="articleviews" column="articleviews"></result>
+        <result property="modifyTime" column="modifyTime"></result>
+        <result property="favorite" column="favorite"></result>
+        <result property="collectFlag" column="collectFlag"></result>
+        <result property="voice" column="voice"></result>
+        <association property="reportKind" javaType="com.cloud.commonsmng.entity.appletEntity.ReportKind">
+            <id column="id" property="id"/>
+            <result column="reportId" property="reportId"/>
+            <result column="kindId" property="kindId"/>
+            <result column="theme" property="theme"/>
+            <result column="area" property="area"/>
+            <result column="industry" property="industry"/>
+            <result column="label" property="label"/>
+            <result column="special" property="special"/>
+            <result column="economy" property="economy"/>
+            <result column="delFlag" property="delFlag"/>
+        </association>
+    </resultMap>
+
+    <sql id="kindId">
+        <if test="pageVo.searchdata.reportKind">
+            and k.kindId like '%${pageVo.searchdata.reportKind}%'
+        </if>
+    </sql>
+    <sql id="theme">
+        <if test="pageVo.searchdata.theme">
+            and k.theme like '%${pageVo.searchdata.theme}%'
+        </if>
+    </sql>
+    <!--    根据时间查询-->
+    <sql id="timeValue">
+        <if test="pageVo.searchdata.timeValue != null and pageVo.searchdata.timeValue != ''">
+            and r.modifyTime>DATE_SUB(CURDATE(), INTERVAL #{pageVo.searchdata.timeValue} MONTH) ORDER BY r.modifyTime
+            desc
+        </if>
+    </sql>
+
+    <!--    根据地区查询-->
+    <sql id="areaCode">
+        <if test="pageVo.searchdata.areaCode != null and pageVo.searchdata.areaCode != ''">
+            and substring_index(d.name,'(',1) like '${pageVo.searchdata.areaCode}%'
+        </if>
+    </sql>
+
+    <!--    根据行业查询-->
+    <sql id="industry">
+        <if test="pageVo.searchdata.industryValue != null and pageVo.searchdata.industryValue != ''">
+            and k.industry like '%${pageVo.searchdata.industryValue},%'
+        </if>
+    </sql>
+    <!--    根据宏观经济中的主题查询-->
+    <sql id="economy">
+        <if test="pageVo.searchdata.economyValue != null and pageVo.searchdata.economyValue != ''">
+            and k.economy like '%${pageVo.searchdata.economyValue},%'
+        </if>
+    </sql>
+
+    <!--    根据专题报告中的主题查询-->
+    <sql id="special">
+        <if test="pageVo.searchdata.specialValue != null and pageVo.searchdata.specialValue != ''">
+            and k.special like '%${pageVo.searchdata.specialValue},%'
+        </if>
+    </sql>
+
+    <!--    根据最新、最热以及收藏最多排序-->
+    <sql id="tmpPageQry">
+        <if test="pageVo.searchdata.rank != null and pageVo.searchdata.rank != ''">
+            <if test="pageVo.searchdata.rank == 'time'">
+                order by date_format(r.modifyTime,'%Y-%m-%d') DESC
+            </if>
+            <if test="pageVo.searchdata.rank == 'hot'">
+                order by r.articleviews desc
+            </if>
+            <if test="pageVo.searchdata.rank == 'favorite'">
+                ORDER BY
+                CONVERT ( r.favorite, SIGNED ) DESC
+            </if>
+            <if test="pageVo.searchdata.mark != null">
+                ,k.label desc, r.articleviews desc
+            </if>
+        </if>
+    </sql>
+
+    <sql id="searchData">
+        <if test="pageVo.searchdata.searchValue != null and pageVo.searchdata.searchValue != ''">
+            and r.title like '%${pageVo.searchdata.searchValue}%'
+            <!--     or r.description like '%${pageVo.searchdata.searchValue}%'
+                    or k.theme like '%${pageVo.searchdata.searchValue}%'
+                    or k.industry like '%${pageVo.searchdata.searchValue}%'
+                    or k.economy like '%${pageVo.searchdata.searchValue}%'
+                    or k.special like '%${pageVo.searchdata.searchValue}%'-->
+        </if>
+    </sql>
+    <!--根据点击切换的报告类型查询报告-->
+    <select id="getReportList" resultMap="reportEntity">
+        SELECT
+        r.id,
+        r.`code`,
+        r.title,
+        r.pic,
+        r.description,
+        r.url,
+        r.thumbUpNumber,
+        r.articleviews,
+        k.kindId,
+        k.label,
+        k.area,
+        k.industry,
+        k.economy,
+        k.special,
+        r.modifyTime,
+        r.favorite,
+        r.voice
+        <if test="(userId != null and userId != '') or (enterpriseCode != null and enterpriseCode != '')">
+            , CASE
+            WHEN IFNULL( c.id, 0 ) = 0 THEN
+            0 ELSE 1
+            END AS collectFlag
+        </if>
+        <if test="(userId == null or userId == '') and (enterpriseCode == null or enterpriseCode == '')">
+            , -1 AS collectFlag
+        </if>
+
+        FROM `report` r
+        left join reportkind k on r.id = k.reportId AND k.delFlag = 1
+
+        <if test="pageVo.searchdata.theme != null and pageVo.searchdata.theme != ''">
+            <if test="pageVo.searchdata.theme == 'qyfz'">
+                left join dictionary d on substring_index(k.area,',',1)=d.code
+            </if>
+            <if test="pageVo.searchdata.theme == 'hyfx'">
+                left join dictionary d on substring_index(k.industry,',',1)=d.code
+            </if>
+            <if test="pageVo.searchdata.theme == 'ztbg'">
+                left join dictionary d on substring_index(k.special,',',1)=d.code
+            </if>
+            <if test="pageVo.searchdata.theme == 'hgjj'">
+                left join dictionary d on substring_index(k.economy,',',1)=d.code
+            </if>
+        </if>
+        <if test="(userId != null and userId != '') or (enterpriseCode != null and enterpriseCode != '')">
+            LEFT JOIN collect c ON r.id = c.reportId AND c.delFlag = 1
+            <if test="userId != null and userId != ''">
+                and c.userId = #{userId}
+            </if>
+            <if test="enterpriseCode != null and enterpriseCode != ''">
+                and c.enterpriseCode = #{enterpriseCode}
+            </if>
+        </if>
+        where r.delFlag = 1
+        <if test="pageVo.searchdata.periodIndex != null and pageVo.searchdata.periodIndex != ''">
+            and k.period = #{pageVo.searchdata.periodIndex}
+        </if>
+        <if test="pageVo != null and pageVo.searchdata != null">
+            <include refid="kindId"></include>
+            <include refid="theme"></include>
+            <include refid="areaCode"></include>
+            <include refid="industry"></include>
+            <include refid="economy"></include>
+            <include refid="special"></include>
+            <include refid="searchData"></include>
+            <include refid="tmpPageQry"></include>
+            <include refid="timeValue"></include>
+        </if>
+        limit ${pageVo.page.beginIndex-1}, ${pageVo.page.pageSize}
+    </select>
+
+    <!--    根据kind查询字典表中的name以及pic，方便小程序端接收-->
+    <select id="getNameByKind" resultType="java.util.Map">
+        select `name`, `code`, picurl
+        from dictionary
+        where kind = "reportLabel"
+           or kind = "industry"
+           or kind = "economy"
+           or kind = "special"
+           or kind = "area"
+           and isused = 1
+    </select>
+    <!--查询页面总条数-->
+    <select id="getPageTotal" parameterType="com.cloud.servicewechat.common.PageVo"
+            resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM report as r
+                 left join reportkind k on r.id = k.reportId
+        WHERE r.delFlag = 1
+          and k.kindId = #{reportkind}
+    </select>
+
+    <!--    修改浏览次数-->
+    <update id="addArticleviews">
+        update report
+        set articleviews = articleviews + 1
+        where id = #{id}
+    </update>
+
+    <!--查询报告的路径和相关属性信息-->
+    <select id="getReportPathAndProperty" parameterType="java.lang.String" resultMap="reportEntity">
+        SELECT r.id,
+               r.`code`,
+               r.url,
+               k.label,
+               k.area,
+               k.industry,
+               k.economy,
+               k.special
+        FROM report r
+                 LEFT JOIN reportkind k ON k.reportId = r.id
+            AND k.delFlag = 1
+        WHERE r.delFlag = 1
+          AND r.id = #{id}
+    </select>
+
+    <!--根据报告属性查询编号-->
+    <select id="getIdByReportProperty" parameterType="com.cloud.commonsmng.entity.appletEntity.Report"
+            resultType="java.lang.String">
+        <if test="report != null">
+            <trim prefixOverrides="UNION">
+                <if test="report.areaList != null and report.areaList.size() > 0">
+                    UNION SELECT a.id
+                    FROM dictionary a
+                    WHERE a.kind = 'area'
+                    AND a.`code` IN
+                    <foreach collection="report.areaList" item="item" index="index" open="(" close=")" separator=",">
+                        #{item}
+                    </foreach>
+                </if>
+
+                <if test="report.industryList != null and report.industryList.size() > 0">
+                    UNION
+                    SELECT b.id
+                    FROM dictionary b
+                    WHERE b.kind = 'industry'
+                    AND b.`code` IN
+                    <foreach collection="report.industryList" item="item" index="index" open="(" close=")"
+                             separator=",">
+                        #{item}
+                    </foreach>
+                </if>
+
+                <if test="report.economyList != null and report.economyList.size() > 0">
+                    UNION
+                    SELECT c.id
+                    FROM dictionary c
+                    WHERE c.kind = 'economy'
+                    AND c.`code` IN
+                    <foreach collection="report.economyList" item="item" index="index" open="(" close=")" separator=",">
+                        #{item}
+                    </foreach>
+                </if>
+
+                <if test="report.specialList != null and report.specialList.size() > 0">
+                    UNION
+                    SELECT d.id
+                    FROM dictionary d
+                    WHERE d.kind = 'special'
+                    AND d.`code` IN
+                    <foreach collection="report.specialList" item="item" index="index" open="(" close=")" separator=",">
+                        #{item}
+                    </foreach>
+                </if>
+            </trim>
+        </if>
+        <if test="report == null">
+            SELECT NULL
+        </if>
+    </select>
+
+    <!--获取用户下的报告属性-->
+    <select id="getIdByMemberId" parameterType="java.lang.String" resultType="java.lang.String">
+        SELECT d.id
+        FROM member_dictionary md
+                 LEFT JOIN dictionary d ON d.`code` = md.reportKind
+            AND d.kind = md.propertyKind and d.isused = 1
+        WHERE md.memberId = #{memberId}
+    </select>
+
+    <select id="getMemberIdByUserId" parameterType="java.lang.String" resultType="java.lang.String">
+        SELECT m.id
+        FROM member m
+                 LEFT JOIN member_detail md ON md.memberId = m.id
+                 LEFT JOIN `user` u ON md.userId = u.id
+        WHERE m.delFlag = 1
+          AND u.delFlag = 1
+          and u.id = #{userId} LIMIT 0,1
+    </select>
+
+    <select id="getMemberIdByEnterpriseCode" parameterType="java.lang.String" resultType="java.lang.String">
+        SELECT m.id
+        FROM member m
+        WHERE m.delFlag = 1
+          and m.enterpriseCode = #{enterpriseCode}
+    </select>
+
+    <select id="getUserNotesNoReadNumber" parameterType="java.lang.String" resultType="java.lang.Integer">
+        SELECT
+         count(c.read_status)
+        FROM
+         (
+         SELECT
+				n.delFlag,
+				n.status,
+				nd.userId,
+         CASE
+           nd.`status`
+           WHEN 1 THEN
+           '已读' ELSE '未读'
+          END AS read_status
+         FROM
+          notes n
+          LEFT JOIN notes_detail nd ON n.id = nd.notesId
+         WHERE
+          n.taskType = 'all'
+         OR ( n.taskType = 'user' AND nd.userId = '870699332163481600' )) c
+        WHERE
+        c.delFlag = 1 and
+        c.status = 1 and
+         IFNULL( c.userId, '870699332163481600' ) = '870699332163481600'
+				 and c.read_status = '未读'
+    </select>
+</mapper>

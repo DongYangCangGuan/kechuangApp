@@ -1,0 +1,11 @@
+<view class="container-member">
+  <view class="header">
+    <view class="blue"></view>
+    <view class="questionnaire">用户问卷</view>
+  </view>
+  <view class="content" data-a="{{item}}" bindtap="getFeedbackItems" wx:for="{{dataList}}" wx:key="index">
+   <view class="textName">{{item.questionname}}</view>
+   <view class="time">{{item.createTime}}</view>
+
+  </view>
+</view>

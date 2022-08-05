@@ -1,0 +1,233 @@
+/* pages/product/entfirm/loans/detail/detail.wxss */
+/* .detail_container {
+    width: 100%;
+
+} */
+.top {
+    width: 100%;
+    height: 25vh;
+    /* line-height: 25vh; */
+    color: #ffffff;
+    display: flex;
+    justify-content: space-around;
+    /* background:-webkit-gradient(linear, 0% 0%, 0% 100%,from(#2a2396), to(#5290ee)); */
+}
+.top>.top_pic {
+    width: 35%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.top_pic>image {
+    width: 180rpx;
+    height: 180rpx;
+}
+.top>.top_title {
+    width: 65%;
+    text-align: left;
+    font-size: 44rpx;
+    letter-spacing: 1rpx;
+    display: flex;
+    align-items: center;
+}
+.iconshoucang2 {
+    color: #FFA141;
+  }
+.shoucang{
+    font-size: 28rpx;
+    text-align: center;
+    margin-left: 60rpx;
+}
+.shoucang2{
+    font-size: 28rpx;
+    text-align: center;
+    margin-left: 60rpx;
+    color: #FFA141;
+}
+.iconshoucang2,
+.iconshoucang1 {
+    font-size: 28rpx;
+    text-align: center;
+    margin-left: 10rpx;
+  }
+  .yulan{
+    font-size: 28rpx;
+    text-align: center;
+    margin-left: 10rpx;
+  }
+.scang{
+    display: flex;
+    flex-direction: row-reverse;
+    
+}
+.xihuan-yixihuan{
+    font-size: 27rpx;
+    text-align: center;
+    margin-left: 30rpx;
+    margin-top:5rpx;
+  }
+.content {
+    width: 90%;
+    margin: 20rpx auto;
+}
+.con_title {
+    width: 100%;
+    margin: 20rpx 0;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+.con_title>.title_line {
+    width: 30%;
+    height: 2rpx;
+    background: skyblue;
+}
+.con_item {
+    background: rgb(175, 225, 245);
+    padding: 20rpx 0;
+    border-radius: 15rpx;
+    margin: 40rpx 0;
+    box-sizing: border-box;
+}
+.con_item1 {
+  /* padding: 20rpx 0; */
+  border-radius: 15rpx;
+  margin: 40rpx 0;
+  box-sizing: border-box;
+}
+.con_item11 {
+  margin: 40rpx 0;
+  box-sizing: border-box;
+}
+.con_item>.item_title{
+    width: 60%;
+    margin-left: -5%;
+    height: 80rpx;
+    padding-left: 50rpx;
+
+    /* padding: 5rpx 0 5rpx 30rpx;
+    border-radius: 0 30rpx 30rpx 0;
+    background: rgb(54, 171, 218); */
+    color: #ffffff;
+}
+.item_title1{
+  color: #ffffff;
+  font-weight: 900;
+  font-size: 35rpx;
+  margin-left:8%;
+  padding-top:40rpx;
+}
+.con_item1>.item_title1{
+  width: 60%;
+  margin-left: -5%;
+  height: 80rpx;
+  padding-left: 50rpx;
+
+  /* padding: 5rpx 0 5rpx 30rpx;
+  border-radius: 0 30rpx 30rpx 0;
+  background: rgb(54, 171, 218); */
+  color: #ffffff;
+}
+.con_item>.item_text {
+    width: 100%;
+    padding: 25rpx 30rpx 10rpx 30rpx;
+    box-sizing: border-box;
+    word-break: break-all;
+}
+.item_text1{
+  color:#ffffff;
+  padding-top:10rpx;
+  padding-bottom:35rpx;
+  padding-left:60rpx;
+  padding-right: 30rpx;
+}
+.con_item1>.item_text {
+  width: 100%;
+  padding: 25rpx 30rpx 10rpx 30rpx;
+  box-sizing: border-box;
+  word-break: break-all;
+}
+.filebtn {
+    
+}
+.btn {
+    margin-bottom: 150rpx;
+    background-color: rgb(247, 137, 93);
+    color: #18145c;
+    width: 70%!important;
+}
+.popup {
+    /* display: none; */
+    width: 85%;
+    background-color: #ffffff;
+    border-radius: 3%;
+    box-shadow: 4px 4px 5px #ababab;
+    position: fixed;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 6%;
+    box-sizing: border-box;
+}
+.pop_img {
+    width: 180rpx;
+    height: 180rpx;
+    margin-left: 5%;
+}
+.pop_img>image {
+    width: 100%;
+    height: 100%;
+}
+.pop_content {
+    margin-top: 70rpx;
+}
+.pop_item {
+    margin: 25rpx 0;
+}
+.pop_item text {
+    margin-left: 30rpx;
+}
+/* .pop_content {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 8% 5% 2% 5%;
+}
+.pop_content>.con_img {
+    width: 180rpx;
+    height: 180rpx;
+}
+.con_img>image {
+    width: 100%;
+    height: 100%;
+}
+.pop_content>.con_text {
+    width: calc(90% - 180rpx);
+}
+.pop_hujiao {
+    display: flex;
+    justify-content: center;
+}
+.pop_hujiao>image {
+    width: 300rpx;
+    height: 300rpx;
+    margin: 30rpx auto;
+}
+.pop_text {
+    text-align: center;
+    margin-left: 30%;
+    line-height: 55rpx;
+}
+.iconyoujiantou {
+    font-size: 15px;
+    margin-left: 4%;
+    font-weight: 700;
+}
+.pop_btn {
+    display: flex;
+    justify-content: space-around;
+    margin: 50rpx 0;
+}
+.pop_btn .popbtn {
+    width: 40%;
+} */

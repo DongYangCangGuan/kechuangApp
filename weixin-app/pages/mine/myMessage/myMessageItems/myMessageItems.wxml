@@ -1,0 +1,13 @@
+
+  <view class="box" >
+    <view class="content">消息名称</view>
+    <view class="time">{{title}}</view>
+  </view>
+  <view class="box" >
+    <view class="content">消息内容</view>
+    <view class="time">{{content}}</view>
+  </view>
+  <view class="box" >
+    <view class="content">发布时间</view>
+    <view class="time">{{time}}</view>
+  </view>

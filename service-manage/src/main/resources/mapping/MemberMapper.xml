@@ -1,0 +1,1102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.servicemanage.mapper.MemberMapper">
+    <!--会员的resultMap-->
+    <resultMap id="memberEntity" type="com.cloud.commonsmng.entity.appletEntity.Member">
+        <id column="id" property="id"/>
+        <result column="enterpriseCode" property="enterpriseCode"/>
+        <result column="enterpriseName" property="enterpriseName"/>
+        <result column="pwd" property="pwd"/>
+        <result column="contact" property="contact"/>
+        <result column="phone" property="phone"/>
+        <result column="address" property="address"/>
+        <result column="email" property="email"/>
+        <result column="startTime" property="startTime"/>
+        <result column="endTime" property="endTime"/>
+        <result column="accountManager" property="accountManager"/>
+        <result column="accountManagerName" property="accountManagerName"/>
+        <result column="remark" property="remark"/>
+        <collection property="reportKinds" ofType="java.lang.String" javaType="java.util.List">
+            <result column="reportKinds"/>
+        </collection>
+        <collection property="dictionaryList" ofType="com.cloud.commonsmng.entity.appletEntity.Dictionary"
+                    javaType="java.util.List">
+            <id column="dictionaryId" property="id"/>
+            <result column="dictionaryCode" property="code"/>
+            <result column="dictionaryName" property="name"/>
+            <result column="dictionaryKind" property="kind"/>
+        </collection>
+    </resultMap>
+
+    <!-- sql 条件判断 -->
+    <sql id="tmpPageQry">
+        <trim prefix="where" prefixOverrides="and | or">
+            AND m.delFlag = 1
+            <if test="pageVo.searchData != null">
+                <if test="pageVo.searchdata.memberType != null and pageVo.searchdata.memberType != ''">
+                    AND m.memberType = #{pageVo.searchdata.memberType}
+                </if>
+                <if test="pageVo.searchdata.enterpriseCode != null and pageVo.searchdata.enterpriseCode != ''">
+                    AND m.enterpriseCode LIKE concat('%',#{pageVo.searchdata.enterpriseCode},'%')
+                </if>
+                <if test="pageVo.searchdata.enterpriseName != null and pageVo.searchdata.enterpriseName != ''">
+                    AND m.enterpriseName LIKE concat('%',#{pageVo.searchdata.enterpriseName},'%')
+                </if>
+
+                <if test="pageVo.searchdata.accountManager != null and pageVo.searchdata.accountManager != ''">
+                    AND m.accountManager = #{pageVo.searchdata.accountManager}
+                </if>
+                <if test="pageVo.searchdata.startTime != null and pageVo.searchdata.startTime != ''">
+                    <if test="pageVo.searchdata.endTime != null and pageVo.searchdata.endTime != ''">
+                        AND date_format(m.createTime,'%Y-%m-%d') BETWEEN #{pageVo.searchdata.startTime} AND
+                        #{pageVo.searchdata.endTime}
+                    </if>
+                </if>
+
+            </if>
+        </trim>
+    </sql>
+
+    <!--sql 分页-->
+    <sql id="pagination">
+        <if test="pageVo.page != null">
+            limit ${pageVo.page.beginIndex-1}, ${pageVo.page.pageSize}
+        </if>
+    </sql>
+
+    <!-- 分页获取会员信息 -->
+    <select id="getMemberInfoPageVo" parameterType="com.cloud.servicemanage.common.PageVo"
+            resultType="com.cloud.commonsmng.entity.appletEntity.Member">
+        SELECT
+        m.id,
+        m.enterpriseCode,
+        m.enterpriseName,
+        m.memberType,
+        d.name AS typeName,
+        m.contact,
+        m.phone,
+        m.address,
+        m.email,
+        m.pwd,
+        u.realName AS accountManagerName,
+        m.createTime,
+        case m.flag  when 1 then '是' else '否' end as flag
+        FROM `member` m
+        LEFT JOIN `user` u ON u.uRole = 0
+        AND m.accountManager = u.id
+        LEFT JOIN dictionary d ON d.kind = 'membertype'
+        AND m.memberType = d.`code`
+        <include refid="tmpPageQry"/>
+        ORDER BY m.createTime DESC
+        <include refid="pagination"/>
+    </select>
+
+    <!-- 查询页面的数据总条数 -->
+    <select id="getPageTotal" parameterType="com.cloud.servicemanage.common.PageVo" resultType="java.lang.Integer">
+        SELECT count(1)
+        FROM `member` m
+        <include refid="tmpPageQry"/>
+    </select>
+
+    <!--添加会员信息-->
+    <!--
+    rhinocerosLabelId1,
+            rhinocerosLabelId2,
+            rhinocerosLabelId3,
+            rhinocerosLabelId4,
+            rhinocerosLabelId5,
+            rhinocerosLabelId6,
+       #{member.rhinocerosLabelId1},#{member.rhinocerosLabelId2},#{member.rhinocerosLabelId3},
+                #{member.rhinocerosLabelId4},#{member.rhinocerosLabelId5},#{member.rhinocerosLabelId6},
+    -->
+    <insert id="insertMember" parameterType="com.cloud.commonsmng.entity.appletEntity.Member">
+        INSERT INTO member(
+            id,
+            enterpriseCode,
+            enterpriseName,
+            pwd,
+            contact,
+            phone,
+            address,
+            email,
+            memberType,
+            accountManager,
+            remark,
+            creatorId,
+            createTime,
+            modifierId,
+            modifyTime,
+            delFlag,
+            address1,
+            abbreviation,
+            investmentFund,
+            SHOffice,
+            attentionIndustryId,
+            attentionStageId,
+            investmentManager,
+            industryClassificationId,
+            directInvestmentClassificationId,
+            rhinocerosLabelId,
+            firstInvestmentStageId,
+            participationFundId,
+            firstInvestmentTime,
+            leadInvestment,
+            job,
+            flag
+        )
+        VALUES (
+                   #{member.id},
+                   #{member.enterpriseCode},
+                   #{member.enterpriseName},
+                   #{member.pwd},
+                   #{member.contact},
+                   #{member.phone},
+                   #{member.address},
+                   #{member.email},
+                   #{member.memberType},
+                   #{member.accountManager},
+                   #{member.remark},
+                   #{member.creatorId},
+                   NOW(),
+                   #{member.modifierId},
+                   NOW(),
+                   1,
+                   #{member.address1},
+                   #{member.abbreviation},
+                   #{member.investmentFund},
+                   #{member.SHOffice},#{member.attentionIndustryId},#{member.attentionStageId},
+                   #{member.investmentManager},#{member.industryClassificationId},
+                   #{member.directInvestmentClassificationId},
+                   #{member.rhinocerosLabelId},
+                   #{member.firstInvestmentStageId},#{member.participationFundId},
+                   #{member.firstInvestmentTime},
+                   #{member.leadInvestment},
+                   #{member.job},0
+               );
+    </insert>
+
+
+    <!--修改会员信息-->
+    <!--
+         rhinocerosLabelId1 = #{member.rhinocerosLabelId1},
+        rhinocerosLabelId2 = #{member.rhinocerosLabelId2},
+        rhinocerosLabelId3 = #{member.rhinocerosLabelId3},
+        rhinocerosLabelId4 = #{member.rhinocerosLabelId4},
+        rhinocerosLabelId5 = #{member.rhinocerosLabelId5},
+        rhinocerosLabelId6 = #{member.rhinocerosLabelId6},
+    -->
+    <update id="updateMember" parameterType="com.cloud.commonsmng.entity.appletEntity.Member">
+        UPDATE member SET
+                          enterpriseCode = #{member.enterpriseCode},
+                          enterpriseName = #{member.enterpriseName},
+                          contact = #{member.contact},
+                          phone = #{member.phone},
+                          address = #{member.address},
+                          email = #{member.email},
+                          accountManager = #{member.accountManager},
+                          remark = #{member.remark},
+                          modifierId = #{member.modifierId},
+                          modifyTime = NOW(),
+                          address1 = #{member.address1},
+                          abbreviation = #{member.abbreviation},
+                          investmentFund = #{member.investmentFund},
+                          SHOffice = #{member.SHOffice},
+                          attentionIndustryId = #{member.attentionIndustryId},
+                          attentionStageId = #{member.attentionStageId},
+                          investmentManager = #{member.investmentManager},
+                          industryClassificationId = #{member.industryClassificationId},
+                          directInvestmentClassificationId = #{member.directInvestmentClassificationId},
+                          rhinocerosLabelId = #{member.rhinocerosLabelId},
+                          firstInvestmentStageId = #{member.firstInvestmentStageId},
+                          participationFundId = #{member.participationFundId},
+                          firstInvestmentTime = #{member.firstInvestmentTime},
+                          leadInvestment = #{member.leadInvestment},
+                          job = #{member.job}
+        WHERE id = #{member.id};
+    </update>
+
+    <!--审核成功 -->
+    <!--
+    <update id="memberReviewSuccess" parameterType="com.cloud.commonsmng.entity.appletEntity.MemberDetail">
+         UPDATE `user` u
+         SET u.certificationMark = 3,
+             u.modifierId        = #{memberDetail.modifierId},
+             u.modifyTime        = NOW()
+         WHERE u.id = #{memberDetail.userId};
+
+         INSERT INTO member_detail(id,
+                                   userId,
+                                   memberId,
+                                   creatorId,
+                                   createTime,
+                                   modifierId,
+                                   modifyTime,
+                                   delFlag)
+             VALUE
+             (#{memberDetail.id},#{memberDetail.userId},#{memberDetail.memberId},
+             #{memberDetail.creatorId},NOW(),#{memberDetail.modifierId},NOW(),1);
+     </update>
+     -->
+
+    <!-- 查询会员套餐的代码和名称信息 -->
+    <select id="selectComboOfCodeAndNameList" resultType="com.cloud.commonsmng.entity.appletEntity.Dictionary">
+        SELECT d.`code`,
+               d.`name`,
+               d.`value`
+        FROM dictionary d
+        WHERE d.kind = 'comboMessage'
+        ORDER BY d.`index` ASC
+    </select>
+
+    <!--查询客户经理相关信息  AND u.uRole = 0-->
+    <select id="selectUserByUroleEqZeroList" resultType="com.cloud.commonsmng.entity.appletEntity.User">
+        SELECT u.id,
+               u.realName
+        FROM `user` u
+        WHERE u.delFlag = 1
+        ORDER BY u.createTime DESC
+    </select>
+
+    <!--根据编号查询会员相关信息-->
+    <!--SELECT m.id,
+    m.enterpriseCode,
+    m.enterpriseName,
+    m.pwd,
+    m.contact,
+    m.phone,
+    m.address,
+    m.email,
+    m.memberType,
+    d.`name` as typeName,
+    m.accountManager,
+    m.remark,
+    u.realName AS accountManagerName
+    FROM member m
+    LEFT JOIN `user` u ON u.id = m.accountManager AND u.delFlag = 1 AND u.uRole = 0
+    LEFT JOIN dictionary d ON d.`code` = m.memberType AND d.kind = 'membertype'
+    WHERE m.delFlag = 1
+    AND m.id = #{id}-->
+
+
+    <!-- d5.`name` AS rhinocerosLabel,
+    LEFT JOIN dictionary d5 ON d5.`code` = m.rhinocerosLabelId AND d5.kind = 'rhinocerosLabel'-->
+    <!--关注行业  d1.`name` AS attentionIndustry,
+    LEFT JOIN dictionary d1 ON d1.`code` = m.attentionIndustryId AND d1.kind = 'attentionIndustry'-->
+    <!--关注阶段  d2.`name` AS attentionStage,
+     LEFT JOIN dictionary d2 ON d2.`code` = m.attentionStageId AND d2.kind = 'attentionStage' -->
+    <!--lp 参与科创基金 d7.`name` AS participationFund
+      LEFT JOIN dictionary d7 ON d7.`code` = m.participationFundId AND d7.kind = 'participationFund'-->
+    <!--投资基金
+     -->
+    <select id="getMemberById" parameterType="java.lang.String" resultType="com.cloud.commonsmng.entity.appletEntity.Member">
+
+        SELECT m.*,
+               d.`name` as typeName,m1.enterpriseName as investmentFundName,
+               u.realName AS accountManagerName,
+               d3.`name` AS industryClassification,
+               d4.`name` AS directInvestmentClassification,
+               d6.`name` AS firstInvestmentStage
+        FROM member m
+                 LEFT JOIN `user` u ON u.id = m.accountManager AND u.delFlag = 1 AND u.uRole = 0
+                 LEFT JOIN member m1 ON m1.id = m.investmentFund
+                 LEFT JOIN dictionary d ON d.`code` = m.memberType AND d.kind = 'membertype'
+                 LEFT JOIN dictionary d3 ON d3.`code` = m.industryClassificationId AND d3.kind = 'industryClassification'
+                 LEFT JOIN dictionary d4 ON d4.`code` = m.directInvestmentClassificationId AND d4.kind = 'directInvestmentClassification'
+                 LEFT JOIN dictionary d6 ON d6.`code` = m.firstInvestmentStageId AND d6.kind = 'firstInvestmentStage'
+        WHERE m.delFlag = 1
+          AND m.id = #{id}
+    </select>
+
+    <sql id="memberDetailQry">
+        <trim prefix="where" prefixOverrides="and | or">
+            AND md.delFlag = 1
+            <if test="pageVo.searchData != null">
+                <if test="pageVo.searchdata.ci != null and pageVo.searchdata.ci.size() > 0" >
+                    AND m.investmentFund in
+                    <foreach collection="pageVo.searchdata.ci" item="item" index="index" open="(" close=")" separator=",">
+                        #{item}
+                    </foreach>
+                </if>
+                <if test="pageVo.searchdata.memberId != null and pageVo.searchdata.memberId != ''">
+                    AND md.memberId = #{pageVo.searchdata.memberId}
+                </if>
+                <if test="pageVo.searchdata.userName != null and pageVo.searchdata.userName != ''">
+                    AND u.userName LIKE concat('%',#{pageVo.searchdata.userName},'%')
+                </if>
+
+                <if test="pageVo.searchdata.userId != null and pageVo.searchdate.userId != ''">
+                    AND md.userId = #{pageVo.searchdata.userId}
+                </if>
+
+                <if test="pageVo.searchdata.memberType != null and pageVo.searchdata.memberType != ''">
+                    AND md.uRole = #{pageVo.searchdata.memberType}
+                </if>
+
+                <if test="pageVo.searchdata.enterpriseName != null and pageVo.searchdata.enterpriseName != ''">
+                    AND m.enterpriseName = #{pageVo.searchdata.enterpriseName}
+                </if>
+
+                <if test="pageVo.searchdata.memberType != null and pageVo.searchdata.memberType != ''">
+                    AND m.memberType = #{pageVo.searchdata.memberType}
+                </if>
+
+                <if test="pageVo.searchdata.contact != null and pageVo.searchdata.contact != ''">
+                    AND m.contact = #{pageVo.searchdata.contact}
+                </if>
+
+                <if test="pageVo.searchdata.approvalstatus != null and pageVo.searchdata.approvalstatus != ''">
+                    AND md.approvalstatus = #{pageVo.searchdata.approvalstatus}
+                </if>
+                <if test="pageVo.searchdata.uRole1 != null and pageVo.searchdata.uRole1.size() > 0">
+                    AND md.uRole in
+                    <foreach collection="pageVo.searchdata.uRole1" item="item" index="index" open="(" close=")" separator=",">
+                        #{item}
+                    </foreach>
+
+                </if>
+            </if>
+        </trim>
+    </sql>
+
+
+    <!-- 查询页面的数据总条数 -->
+    <select id="getUserPageTotal" parameterType="com.cloud.servicemanage.common.PageVo" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM user u
+        WHERE u.delFlag = 1 AND  u.isused = 1
+        <if test="pageVo.searchdata.memberId != null and pageVo.searchdata.memberId != ''">
+            AND u.memberId = #{pageVo.searchdata.memberId}
+        </if>
+        <if test="pageVo.searchdata.userName != null and pageVo.searchdata.userName != ''">
+            AND u.userName LIKE concat('%',#{pageVo.searchdata.userName},'%')
+        </if>
+    </select>
+
+    <!--根据会员编号查询会员下属用户信息-->
+    <select id="selectUserByMemberIdPageVo" parameterType="com.cloud.servicemanage.common.PageVo"
+            resultType="com.cloud.commonsmng.entity.appletEntity.User">
+        SELECT u.userName,
+        u.realName,
+        u.nickName
+        FROM user u
+        WHERE u.delFlag = 1 AND  u.isused = 1
+        <if test="pageVo.searchdata.memberId != null and pageVo.searchdata.memberId != ''">
+            AND u.memberId = #{pageVo.searchdata.memberId}
+        </if>
+        <if test="pageVo.searchdata.userName != null and pageVo.searchdata.userName != ''">
+            AND u.userName LIKE concat('%',#{pageVo.searchdata.userName},'%')
+        </if>
+        ORDER BY u.createTime DESC
+        <include refid="pagination"/>
+    </select>
+
+    <!--查询最高级机构的代码和名称信息-->
+    <select id="selectDepartmentOfCodeAndNameList" resultType="com.cloud.servicemanage.entity.Department">
+        SELECT d.id,
+               d.`name`
+        FROM department d
+        WHERE d.isused = 1
+          AND d.parentid = 0
+    </select>
+
+    <!--根据机构编号查询出该机构下属用户的信息-->
+    <select id="selectUserByDepartmentIdAndUroleEqZeroList" parameterType="java.lang.String"
+            resultType="com.cloud.commonsmng.entity.appletEntity.User">
+        SELECT u.id,
+               u.realName
+        FROM `user` u
+                 LEFT JOIN department d ON u.departmentId = d.id
+        WHERE u.delFlag = 1
+          AND u.uRole = 0
+          AND (
+                u.departmentId = #{departmentId}
+                OR d.treeabout LIKE concat('%', #{departmentId}, '%'))
+    </select>
+
+    <!--获取小程序端的全部用户信息-->
+    <select id="selectUserByUroleEqOneList" resultType="com.cloud.commonsmng.entity.appletEntity.User">
+        SELECT u.id,
+               u.userName,
+               u.nickName
+        FROM `user` u
+        WHERE u.delFlag = 1
+          AND u.uRole = 1
+    </select>
+
+    <!--码表的resultMap-->
+    <resultMap id="dictionaryEntity" type="com.cloud.commonsmng.entity.appletEntity.Dictionary">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <collection column="{id=id}" property="children"
+                    ofType="dictionaryEntity" javaType="java.util.ArrayList"
+                    select="selectDictionaryByPropertyParentId"/>
+    </resultMap>
+
+    <!--获取报告的属性信息-->
+    <select id="selectDictionaryByPropertyList" resultMap="dictionaryEntity">
+        SELECT d.id,
+               d.`name`
+        FROM dictionary d
+        WHERE d.isused = 1
+          AND d.kind = 'dict'
+          AND d.type = 'reportProperty'
+          AND d.parentId = 0
+    </select>
+
+    <!--根据父级编号查询报告的属性信息-->
+    <select id="selectDictionaryByPropertyParentId" resultMap="dictionaryEntity">
+        SELECT d.id,
+               d.`name`
+        FROM dictionary d
+        WHERE d.isused = 1
+          AND d.parentId = #{id}
+    </select>
+
+    <!--根据编号查询在与该用户在同一个机构的用户信息-->
+    <select id="selectUserOfDepartmentByIdList" resultType="com.cloud.commonsmng.entity.appletEntity.User">
+        SELECT u.id,
+               u.`realName`,
+               u.departmentId
+        FROM `user` u
+        WHERE u.delFlag = 1
+          AND u.uRole = 0
+          AND u.departmentId = (
+            SELECT u.departmentId
+            FROM `user` u
+            WHERE u.delFlag = 1
+              AND u.id = #{userId})
+    </select>
+
+    <!--根据字典编号查询字典的相关信息-->
+    <select id="selectDictionaryById" parameterType="java.util.List"
+            resultType="com.cloud.commonsmng.entity.appletEntity.Dictionary">
+        <if test="dictionaryIdList != null and dictionaryIdList.size() > 0">
+            SELECT
+            a.`code`,
+            a.`kind`,
+            a.`name`
+            FROM dictionary a
+            WHERE a.isused = 1
+            AND a.kind IN (SELECT d.`code`
+            FROM dictionary d
+            WHERE d.isused = 1
+            AND d.kind = 'dict'
+            AND d.type = 'reportProperty')
+            AND a.id IN
+            <foreach collection="dictionaryIdList" item="item" index="index" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+    </select>
+
+    <!--批量导入-->
+    <insert id="batchImportMember" parameterType="java.util.List">
+        <if test="insertList != null and insertList.size > 0">
+            INSERT INTO member(
+            id,
+            enterpriseCode,
+            enterpriseName,
+            pwd,
+            contact,
+            phone,
+            address,
+            email,
+            memberType,
+            accountManager,
+            remark,
+            creatorId,
+            createTime,
+            modifierId,
+            modifyTime,
+            delFlag,
+            address1,
+            abbreviation,
+            investmentFund,
+            SHOffice,
+            attentionIndustryId,
+            attentionStageId,
+            investmentManager,
+            industryClassificationId,
+            directInvestmentClassificationId,
+            rhinocerosLabelId,
+            firstInvestmentStageId,
+            participationFundId,
+            firstInvestmentTime,
+            leadInvestment,
+            job,
+            flag,
+            registrationProvince,
+            productSection,
+            productName
+            )
+            VALUES
+            <foreach collection="insertList" item="item" index="index" close=";" separator=",">
+                (
+                #{item.id},
+                #{item.enterpriseCode},
+                #{item.enterpriseName},
+                #{item.pwd},
+                #{item.contact},
+                #{item.phone},
+                #{item.address},
+                #{item.email},
+                #{item.memberType},
+                #{item.accountManager},
+                #{item.remark},
+                #{item.creatorId},
+                NOW(),
+                #{item.modifierId},
+                NOW(),
+                1,
+                #{item.address1},
+                #{item.abbreviation},
+                #{item.investmentFund},
+                #{item.SHOffice},#{item.attentionIndustryId},#{item.attentionStageId},
+                #{item.investmentManager},#{item.industryClassificationId},
+                #{item.directInvestmentClassificationId},
+                #{item.rhinocerosLabelId},
+                #{item.firstInvestmentStageId},#{item.participationFundId},
+                #{item.firstInvestmentTime},
+                #{item.leadInvestment},
+                #{item.job},
+                1,
+                #{item.registrationProvince},
+                #{item.productSection},
+                #{item.productName}
+                )
+
+            </foreach>
+        </if>
+
+        <if test="updateList != null and updateList.size > 0">
+            <if test="updatetype == 1">
+                <foreach collection="updateList" item="item" index="index">
+                    UPDATE member
+                    SET enterpriseCode = #{item.enterpriseCode},
+                    enterpriseName = #{item.enterpriseName},
+                    abbreviation = #{item.abbreviation},
+                    contact = #{item.contact},
+                    phone = #{item.phone},
+                    address = #{item.address},
+                    job = #{item.job},
+                    email = #{item.email},
+                    accountManager = #{item.accountManager},
+                    remark = #{item.remark},
+                    modifierId = #{item.modifierId},
+                    modifyTime = NOW(),
+                    `flag` = 1
+                    WHERE id = #{item.id};
+
+
+                </foreach>
+            </if>
+            <if test="updatetype == 2">
+                <foreach collection="updateList" item="item" index="index">
+                    UPDATE member
+                    SET enterpriseCode = #{item.enterpriseCode},
+                    enterpriseName = #{item.enterpriseName},
+                    abbreviation = #{item.abbreviation},
+                    contact = #{item.contact},
+                    phone = #{item.phone},
+                    address = #{item.address},
+                    job = #{item.job},
+                    email = #{item.email},
+                    accountManager = #{item.accountManager},
+                    SHOffice = #{item.SHOffice},
+                    attentionIndustryId = #{item.attentionIndustryId},
+                    attentionStageId = #{item.attentionStageId},
+                    investmentManager = #{item.investmentManager},
+                    participationFundId = #{item.participationFundId},
+                    remark = #{item.remark},
+                    modifierId = #{item.modifierId},
+                    modifyTime = NOW(),`flag` = 1
+                    WHERE id = #{item.id};
+                </foreach>
+            </if>
+            <if test="updatetype == 3">
+                <foreach collection="updateList" item="item" index="index">
+                    UPDATE member
+                    SET enterpriseCode = #{item.enterpriseCode},
+                    enterpriseName = #{item.enterpriseName},
+                    abbreviation = #{item.abbreviation},
+                    contact = #{item.contact},
+                    phone = #{item.phone},
+                    address = #{item.address},
+                    job = #{item.job},
+                    email = #{item.email},
+                    accountManager = #{item.accountManager},
+                    address1 = #{item.address1},
+                    industryClassificationId = #{item.industryClassificationId},
+                    directInvestmentClassificationId = #{item.directInvestmentClassificationId},
+                    rhinocerosLabelId = #{item.rhinocerosLabelId},
+                    firstInvestmentStageId = #{item.firstInvestmentStageId},
+                    participationFundId = #{item.participationFundId},
+                    firstInvestmentTime = #{item.firstInvestmentTime},
+                    leadInvestment = #{item.leadInvestment},
+                    remark = #{item.remark},
+                    modifierId = #{item.modifierId},
+                    modifyTime = NOW(),`flag` = 1,
+                    registrationProvince = #{item.registrationProvince}
+                    WHERE id = #{item.id};
+                </foreach>
+            </if>
+            <if test="updatetype == 4">
+                <foreach collection="updateList" item="item" index="index">
+                    UPDATE member
+                    SET enterpriseCode = #{item.enterpriseCode},
+                    enterpriseName = #{item.enterpriseName},
+                    abbreviation = #{item.abbreviation},
+                    contact = #{item.contact},
+                    phone = #{item.phone},
+                    job = #{item.job},
+                    email = #{item.email},
+                    participationFundId = #{item.participationFundId},
+                    remark = #{item.remark},
+                    modifierId = #{item.modifierId},
+                    modifyTime = NOW(),`flag` = 1
+                    WHERE id = #{item.id};
+                </foreach>
+            </if>
+            <if test="updatetype == 5">
+                <foreach collection="updateList" item="item" index="index">
+                    UPDATE member
+                    SET enterpriseCode = #{item.enterpriseCode},
+                    enterpriseName = #{item.enterpriseName},
+                    abbreviation = #{item.abbreviation},
+                    contact = #{item.contact},
+                    phone = #{item.phone},
+                    job = #{item.job},
+                    email = #{item.email},
+                    accountManager = #{item.accountManager},
+                    remark = #{item.remark},
+                    modifierId = #{item.modifierId},
+                    modifyTime = NOW(),`flag` = 1, productSection=#{item.productSection},productName=#{item.productName}
+                    WHERE id = #{item.id};
+                </foreach>
+            </if>
+        </if>
+    </insert>
+
+    <!--去重-->
+    <update id="deleteWeight">
+        UPDATE member m
+        SET m.delFlag = 0
+        WHERE m.id NOT IN (
+            SELECT id
+            FROM (SELECT min(id) AS ID FROM member WHERE delFlag = 1 GROUP BY enterpriseName) AS b
+        )
+    </update>
+
+    <!--去重-->
+    <update id="deleteWeightMemberUser">
+        UPDATE member_user m
+        SET m.delFlag = 0
+        WHERE  m.approvalstatus = 0 AND m.delFlag =1  AND m.id NOT IN (
+            SELECT id
+            FROM (SELECT max(id) AS ID FROM member_user WHERE delFlag = 1 AND approvalstatus = 0 GROUP BY userId) AS b
+        )
+    </update>
+
+    <!--去重-->
+    <update id="deleteWeightbyType">
+        UPDATE member m
+        SET m.delFlag = 0
+        WHERE m.id NOT IN (
+            SELECT id
+            FROM (SELECT min(id) AS ID FROM member WHERE delFlag = 1 and memberType = #{type} GROUP BY enterpriseName) AS b
+        ) and m.memberType = #{type}
+    </update>
+
+    <!--根据会员代码查询会员信息-->
+    <select id="getMemberByEnterpriseCode" parameterType="java.lang.String"
+            resultType="com.cloud.commonsmng.entity.appletEntity.Member">
+        SELECT m.id,
+               m.enterpriseCode,
+               m.enterpriseName
+        FROM member m
+        WHERE m.delFlag = 1
+          AND m.enterpriseCode = #{enterpriseCode} LIMIT 0, 1
+    </select>
+
+    <!--根据会员名称查询会员信息-->
+    <select id="getMemberByEnterpriseName" parameterType="java.lang.String"
+            resultType="com.cloud.commonsmng.entity.appletEntity.Member">
+        SELECT m.id,
+               m.enterpriseName
+        FROM member m
+        WHERE m.delFlag = 1
+          AND m.enterpriseName = #{enterpriseName} LIMIT 0, 1
+    </select>
+
+    <!--根据套餐名称得到套餐代码-->
+    <select id="selectDictionaryCodeByName" parameterType="java.lang.String"
+            resultType="com.cloud.commonsmng.entity.appletEntity.Dictionary">
+        SELECT d.`code`,
+               d.`value`
+        FROM dictionary d
+        WHERE d.isused = 1
+          AND d.kind = 'comboMessage'
+          AND d.`name` = #{name} LIMIT 0,1
+    </select>
+
+    <select id="selectDictionaryByCode" parameterType="java.lang.String"
+            resultType="com.cloud.commonsmng.entity.appletEntity.Dictionary">
+        SELECT d.`code`,
+               d.`name`
+        FROM dictionary d
+        WHERE d.isused = 1
+          AND d.kind = #{kind}
+          AND d.`code` = #{code} LIMIT 0,1
+    </select>
+
+    <!--根据报告属性名称查询报告属性的相关信息-->
+    <select id="selectDictionaryByName" parameterType="java.util.List"
+            resultType="com.cloud.commonsmng.entity.appletEntity.Dictionary">
+        <if test="dictionaryNameList != null and dictionaryNameList.size() > 0">
+            SELECT a.`code`,
+            a.`kind`,
+            a.`name`
+            FROM dictionary a
+            WHERE a.isused = 1
+            AND a.kind IN (SELECT d.`code`
+            FROM dictionary d
+            WHERE d.isused = 1
+            AND d.kind = 'dict'
+            AND d.type = 'reportProperty')
+            AND a.`name` IN
+            <foreach collection="dictionaryNameList" item="item" index="index" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+    </select>
+
+    <!--根据编号和真实姓名查询用户信息-->
+    <!--<select id="selectUserInfoByIdAndRealName" parameterType="com.cloud.commonsmng.entity.appletEntity.User"
+            resultType="com.cloud.commonsmng.entity.appletEntity.User">
+        SELECT u.id,
+               u.realName
+        FROM `user` u
+        WHERE u.delFlag = 1
+          AND (u.id = #{user.id}
+            OR u.realName = #{user.realName})
+    </select>-->
+
+    <!--根据编号和真实姓名查询用户信息-->
+    <select id="selectUserInfoByIdAndRealName" parameterType="com.cloud.commonsmng.entity.appletEntity.User"
+            resultType="com.cloud.commonsmng.entity.appletEntity.User">
+        SELECT u.id,
+               u.realName
+        FROM `user` u
+        WHERE u.delFlag = 1
+          AND u.id = #{user.id}
+    </select>
+
+    <select id="getsameGp" resultType="java.lang.String">
+        SELECT  m.id from member m where
+                m.enterpriseKey=(SELECT m1.enterpriseKey from member m1 WHERE m1.id = #{memberId}) and m.delFlag = 1;
+    </select>
+
+    <!--获取用户认证总条数-->
+    <select id="getMemberDetailPageTotal" parameterType="com.cloud.servicemanage.common.PageVo" resultType="java.lang.Integer">
+        SELECT COUNT(1) from member_user md
+        LEFT JOIN  user u ON u.id = md.userId
+        LEFT JOIN member m ON md.memberId = m.id AND m.delFlag = 1
+        LEFT JOIN dictionary d ON d.kind = 'membertype'
+        AND md.uRole = d.`code`
+        <include refid="memberDetailQry"></include>
+        ORDER BY md.createTime DESC
+    </select>
+
+    <!--获取用户认证list-->
+    <select id="getMemberDetails" parameterType="com.cloud.servicemanage.common.PageVo" resultType="com.cloud.commonsmng.entity.appletEntity.MemberUser">
+        SELECT md.id, md.userId, md.memberId, md.approvalstatus, u.realName as realName, d.name as typeName,md.job,
+        m.enterpriseName ,m.contact ,u.phone, u.email, md.createTime,md.uRole as memberType,um.realName as modifierName
+        FROM member_user md
+        LEFT JOIN  user u ON u.id = md.userId
+        LEFT join member m ON md.memberId = m.id AND m.delFlag = 1
+        LEFT JOIN  user um ON um.id = md.modifierId
+        LEFT JOIN dictionary d ON d.kind = 'membertype'
+        AND md.uRole = d.`code`
+        <include refid="memberDetailQry"></include>
+        ORDER BY md.createTime DESC
+        <include refid="pagination"/>
+    </select>
+    <!--1-->
+    <select id="getMemberDetailById" resultType="com.cloud.commonsmng.entity.appletEntity.MemberUser">
+        SELECT md.id, md.userId, md.memberId, md.approvalstatus, md.uRole as memberType , d.name as typeName,md.job,
+               m.enterpriseName ,m.contact ,m.phone, m.email, u.userName,u.realName, md.createTime, u.phone as uphone, u.email as uemail
+        FROM member_user md
+                 LEFT join member m ON md.memberId = m.id AND m.delFlag = 1
+                 LEFT JOIN `user` u ON u.id = md.userId
+                 LEFT JOIN dictionary d ON d.kind = 'membertype'
+            AND md.uRole = d.`code`
+        WHERE md.id = #{id}
+    </select>
+
+    <select id="getMemberDetailstatus" resultType="java.lang.String">
+        SELECT approvalstatus FROM member_user where id=#{md.id}
+    </select>
+
+    <update id="updateApprovalstatus" parameterType="com.cloud.commonsmng.entity.appletEntity.MemberUser">
+        UPDATE member_user
+        set approvalstatus = #{md.approvalstatus},modifierId = #{md.modifierId},modifyTime = NOW()
+        WHERE id = #{md.id}
+    </update>
+
+    <select id="getMemberTypelist" resultType="com.cloud.commonsmng.entity.appletEntity.Dictionary">
+        select code,`name` FROM dictionary WHERE `kind` = #{kind} and isused = 1
+    </select>
+
+    <select id="getEmail" resultType="com.cloud.commonsmng.entity.appletEntity.Dictionary">
+        select code,`name`,picurl FROM dictionary WHERE `kind` = #{kind} and isused = 1 limit 0,1
+    </select>
+
+    <select id="getMemberByType" resultType="com.cloud.commonsmng.entity.appletEntity.Member">
+        select id,enterpriseName from member where memberType = #{memberType} and delFlag = 1
+    </select>
+
+    <select id="getinvestmentFundlist" resultType="com.cloud.commonsmng.entity.appletEntity.Member">
+        select m.id,m.investmentFund as enterpriseName from member m where m.memberType = #{memberType} and m.delFlag = 1
+                                                                       AND m.investmentFund is not  null AND m.investmentFund != ''
+    </select>
+
+    <select id="getDictionaryCodeByName" parameterType="java.lang.String"
+            resultType="com.cloud.commonsmng.entity.appletEntity.Dictionary">
+        SELECT d.`code`,
+               d.`name`
+        FROM dictionary d
+        WHERE d.isused = 1
+          AND d.kind = #{kind}  AND d.`name` = #{name} LIMIT 0,1
+    </select>
+
+    <!--新增消息信息-->
+    <insert id="insertNotes" parameterType="com.cloud.commonsmng.entity.appletEntity.Notes">
+        <if test="notes.notesDetailList != null and notes.notesDetailList.size() > 0">
+            INSERT notes_detail(id, notesId, status, userId, createTime)
+            VALUES
+            <foreach collection="notes.notesDetailList" item="item" index="index" separator=",">
+                (#{item.id},#{item.notesId},#{item.status},#{item.userId},NOW())
+            </foreach>;
+        </if>
+
+        INSERT notes (id, title, content, creatorId, createTime, modifierId, modifyTime, taskType,
+        isFeedBack,delFlag,status)
+        VALUES (#{notes.id},#{notes.title},#{notes.content},
+        #{notes.creatorId},NOW(),#{notes.modifierId},NOW(),#{notes.taskType},#{notes.isFeedBack},1,#{notes.status});
+    </insert>
+
+    <update id="batchupdateApprovalstatus" parameterType="com.cloud.commonsmng.entity.appletEntity.MemberUser">
+
+        <if test="updatelist != null and updatelist.size() > 0">
+
+            <foreach collection="updatelist" item="item" index="index" separator=";">
+                UPDATE member_user
+                set approvalstatus = #{item.approvalstatus},modifierId = #{item.modifierId},modifyTime = NOW()
+                WHERE id = #{item.id}
+            </foreach>;
+        </if>
+
+    </update>
+
+    <!--新增notesdetails-->
+    <insert id="insertNotesDetails" parameterType="com.cloud.commonsmng.entity.appletEntity.NotesDetail">
+        <if test="notesDetails != null and notesDetails.size() > 0">
+            INSERT notes_detail(id, notesId, status, userId, createTime)
+            VALUES
+            <foreach collection="notesDetails" item="item" index="index" separator=",">
+                (#{item.id},#{item.notesId},#{item.status},#{item.userId},NOW())
+            </foreach>;
+        </if>
+
+    </insert>
+
+    <select id="getNotesCountById" resultType="java.lang.Integer">
+        SELECT COUNT(1) from  notes WHERE id = #{id}
+    </select>
+
+    <select id="getUnApprovedCount" resultType="java.lang.Integer">
+        SELECT COUNT(1) from member_user WHERE approvalstatus = #{approvalstatus} AND delFlag = 1
+    </select>
+
+    <select id="getInvestmentFundByUser" resultType="java.lang.String">
+        select m.id from member_user mu left join  member m on mu.memberId = m.id where mu.userId = #{userId} order by m.createTime desc LIMIT 0,1
+    </select>
+
+    <select id="getmemberIdByUser" resultType="java.lang.String">
+        SELECT memberId from user WHERE id=#{userId}
+    </select>
+
+    <select id="exportMemberInfo" parameterType="com.cloud.servicemanage.common.PageVo"
+            resultType="com.cloud.commonsmng.entity.appletEntity.Member">
+        SELECT m.*,
+        d.`name` as typeName,m1.enterpriseName as investmentFundName,
+        u.realName AS accountManagerName,
+        d3.`name` AS industryClassification,
+        d4.`name` AS directInvestmentClassification,
+        d6.`name` AS firstInvestmentStage
+        FROM member m
+        LEFT JOIN `user` u ON u.id = m.accountManager AND u.delFlag = 1 AND u.uRole = 0
+        LEFT JOIN member m1 ON m1.id = m.investmentFund
+        LEFT JOIN dictionary d ON d.`code` = m.memberType AND d.kind = 'membertype'
+        LEFT JOIN dictionary d3 ON d3.`code` = m.industryClassificationId AND d3.kind = 'industryClassification'
+        LEFT JOIN dictionary d4 ON d4.`code` = m.directInvestmentClassificationId AND d4.kind = 'directInvestmentClassification'
+        LEFT JOIN dictionary d6 ON d6.`code` = m.firstInvestmentStageId AND d6.kind = 'firstInvestmentStage'
+        <include refid="tmpPageQry"/>
+        ORDER BY m.createTime DESC
+    </select>
+
+    <select id="selectmember" resultType="java.lang.Integer">
+        SELECT count(*) from member WHERE id = #{memberId} AND memberType = #{uRole} AND delFlag = 1
+    </select>
+
+    <update id="updateMemberUser" parameterType="com.cloud.commonsmng.entity.appletEntity.MemberUser">
+        UPDATE member_user set memberId = #{memberuser.memberId},uRole = #{memberuser.memberType}, modifierId = #{memberuser.modifierId},job= #{memberuser.job},modifyTime = NOW()
+        where id=#{memberuser.id};
+        UPDATE `user` set phone = #{memberuser.uphone}, email = #{memberuser.uemail},departmentId = #{memberuser.departmentId},
+                          uRole = #{memberuser.memberType},job= #{memberuser.job}, realName= #{memberuser.realName},modifierId = #{memberuser.modifierId},modifyTime = NOW()
+        WHERE id = (SELECT userId from member_user WHERE id = #{memberuser.id})
+    </update>
+
+    <update id="updateMemberUsernoUrole" parameterType="com.cloud.commonsmng.entity.appletEntity.MemberUser">
+        UPDATE member_user set memberId = #{memberuser.memberId},uRole = #{memberuser.memberType}, modifierId = #{memberuser.modifierId},job= #{memberuser.job},modifyTime = NOW()
+        where id=#{memberuser.id};
+        UPDATE `user` set phone = #{memberuser.uphone},job= #{memberuser.job}, realName= #{memberuser.realName} ,email = #{memberuser.uemail},departmentId = #{memberuser.departmentId},
+                          modifierId = #{memberuser.modifierId},modifyTime = NOW()
+        WHERE id = (SELECT userId from member_user WHERE id = #{memberuser.id})
+    </update>
+
+    <update id="updateMemberUsernoUrole2" parameterType="com.cloud.commonsmng.entity.appletEntity.MemberUser">
+        UPDATE member_user set memberId = #{memberuser.memberId},uRole = #{memberuser.memberType}, modifierId = #{memberuser.modifierId},job= #{memberuser.job},modifyTime = NOW()
+        where id=#{memberuser.id};
+        UPDATE `user` set phone = #{memberuser.uphone},job= #{memberuser.job}, realName= #{memberuser.realName}, email = #{memberuser.uemail},
+                          modifierId = #{memberuser.modifierId},modifyTime = NOW()
+        WHERE id = (SELECT userId from member_user WHERE id = #{memberuser.id})
+    </update>
+
+    <select id="getDelMemberUsers" parameterType="com.cloud.servicemanage.common.PageVo" resultType="com.cloud.commonsmng.entity.appletEntity.MemberUser">
+        SELECT md.id, md.userId, md.memberId, md.approvalstatus, u.realName as realName, d.name as typeName,
+        m.enterpriseName ,m.contact ,m.phone, m.email, md.createTime,md.uRole as memberType,um.realName as modifierName
+        FROM member_user md
+        LEFT JOIN  user u ON u.id = md.userId
+        LEFT join member m ON md.memberId = m.id
+        LEFT JOIN  user um ON um.id = m.modifierId
+        LEFT JOIN dictionary d ON d.kind = 'membertype'
+        AND md.uRole = d.`code`
+        <include refid="memberUserQry"/>
+        ORDER BY md.createTime DESC
+        <include refid="pagination"/>
+    </select>
+
+    <sql id="memberUserQry">
+        <trim prefix="where" prefixOverrides="and | or">
+            <if test="pageVo.searchdata != null">
+                <if test="pageVo.searchdata.delFlag != null and pageVo.searchdata.delFlag != ''" >
+                    AND md.delFlag = #{pageVo.searchdata.delFlag}
+                </if>
+            </if>
+        </trim>
+    </sql>
+
+    <update id="delMemberuserById" parameterType="com.cloud.commonsmng.entity.appletEntity.MemberUser">
+        UPDATE member_user set delFlag = #{mu.delFlag},modifierId = #{mu.modifierId},modifyTime = NOW()
+        WHERE id = #{mu.id};
+        update  user set  certificationMark = 0 ,uRole = ""  ,modifyTime = NOW() where id = #{mu.userId}
+    </update>
+
+    <update id="updateUseruRole" parameterType="java.lang.String">
+        UPDATE `user` set uRole = (SELECT mu.uRole from member_user mu where mu.id = #{id}),
+                          job = (SELECT mu.job from member_user mu where mu.id = #{id}),
+                          memberId =  (SELECT mu.memberId from member_user mu where mu.id = #{id}),
+                          certificationMark = 3
+        WHERE id = (SELECT mu.userId from member_user mu where mu.id = #{id})
+    </update>
+
+
+    <select id="filterQuery"  resultType="com.cloud.commonsmng.entity.appletEntity.MemberUserExport">
+        SELECT md.id, md.userId, md.memberId, md.approvalstatus, u.realName as realName, d.name as typeName,
+        m.enterpriseName ,m.contact ,m.phone, m.email, md.createTime,u.uRole as memberType,um.realName as modifierName
+        FROM member_user md
+        LEFT JOIN  user u ON u.id = md.userId
+        LEFT join member m ON md.memberId = m.id AND m.delFlag = 1
+        LEFT JOIN  user um ON um.id = m.modifierId
+        LEFT JOIN dictionary d ON d.kind = 'membertype'
+        AND u.uRole = d.`code`
+        <if test="memberId != null and memberId != '' ">
+            where md.memberId = #{memberId}
+        </if>
+        ORDER BY md.createTime DESC
+    </select>
+
+    <select id="getDictionaryLabels" resultType="java.lang.String">
+        <if test="labels != null and labels != '' ">
+            select code  FROM dictionary WHERE `kind` = #{kind} and isused = 1 AND `name`
+            <foreach collection="labels" item="item" index="index" open=" in (" close=")" separator=",">
+                #{item}
+            </foreach>;
+        </if>
+    </select>
+
+    <select id="getDictionaryLabelsbyCode" resultType="java.lang.String">
+        <if test="labels != null and labels != '' ">
+            select `name`  FROM dictionary WHERE `kind` = #{kind} and isused = 1 AND `code`
+            <foreach collection="labels" item="item" index="index" open=" in (" close=")" separator=",">
+                #{item}
+            </foreach>;
+        </if>
+    </select>
+
+    <insert id="insertDictionary">
+        INSERT INTO dictionary (id,name,code,kind,isused,`index`) VALUES (#{id},#{name},#{code},'rhinocerosLabel',1,#{index})
+    </insert>
+
+    <select id="getGPIdbyFund" resultType="java.lang.String">
+        SELECT id from member where investmentFund = #{investmentFund} and memberType=#{memberType} and delFlag=1 limit 0,1
+    </select>
+    <select id="getFundbyId" resultType="java.lang.String">
+        SELECT investmentFund from member where id = #{id}
+    </select>
+
+    <select id="getDictionarysMap" resultType="com.cloud.commonsmng.entity.appletEntity.Dictionary">
+        select code,`name` FROM dictionary WHERE `kind` = #{kind} and isused = 1
+    </select>
+
+    <!--批量导入-->
+    <insert id="batchImportDepartment" parameterType="java.util.List">
+        <if test="insertList != null and insertList.size > 0">
+            INSERT
+            INTO department(id, `code`, `name`, parentid, creatorid, createtime, modifierid, modifytime, isused,treeabout)
+            VALUES
+            <foreach collection="insertList" item="item" index="index" close=";" separator=",">
+                (#{item.id}, #{item.code}, #{item.name}, #{item.parentid}, #{item.creatorid}, NOW(), #{item.modifierid}, NOW(), #{item.isused},#{item.treeabout})
+            </foreach>
+        </if>
+    </insert>
+
+    <select id="getDepartmentById" resultType="com.cloud.servicemanage.entity.Department">
+        SELECT id,code,`name` from department WHERE id=#{id}
+    </select>
+
+    <update id="updateDepartment">
+        UPDATE department SET code = #{code}, `name`=#{name} WHERE id=#{id}
+    </update>
+
+    <select id="getDeptList" resultType="com.cloud.servicemanage.entity.Department">
+        SELECT id,enterpriseName as `name` FROM member where memberType=#{memberType} and delFlag = 1
+    </select>
+
+    <select id="getMemberDetailById2" resultType="com.cloud.commonsmng.entity.appletEntity.MemberUser">
+        SELECT md.id,md.modifierId,u.memberId as modifymemberId ,md.approvalstatus,md.uRole,md.memberId ,m.investmentFund
+        from member_user md LEFT JOIN user u on u.id = md.modifierId
+                            LEFT JOIN member m on m.id = md.memberId
+        WHERE md.id = #{id}
+    </select>
+
+    <select id="getUserInfo" resultType="com.cloud.commonsmng.entity.appletEntity.User">
+        SELECT uRole, id, memberId FROM user where id = #{id}
+    </select>
+    <update id="updateUserCherk" parameterType="java.lang.String">
+        UPDATE `user` set
+            certificationMark = 0
+        WHERE id = (SELECT mu.userId from member_user mu where mu.id = #{id})
+    </update>
+</mapper>

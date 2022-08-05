@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.servicemanage.mapper.RoleMapper">
+
+    <sql id="tmpPageQry">
+        <if test="searchdata !=null">
+
+            <if test="searchdata.name !=null and searchdata.name !='' ">
+                AND a.name like'%${searchdata.name}%'
+            </if>
+            <if test="searchdata.code !=null and searchdata.code !='' ">
+                AND a.code like '%${searchdata.code}%'
+            </if>
+        </if>
+    </sql>
+    <!--分页-->
+    <sql id="pagination">
+        <if test="page!=null">
+            LIMIT ${page.beginIndex-1}, ${page.pageSize}
+        </if>
+    </sql>
+
+    <!--查询页面总条数-->
+    <select id="getPageTotal" parameterType="com.cloud.servicemanage.common.PageVo"
+            resultType="java.lang.Integer">
+        SELECT
+        COUNT(1)
+        FROM
+        role a
+        <where>
+            1=1 <include refid="tmpPageQry"></include>
+        </where>
+        ORDER BY CREATETIME DESC
+    </select>
+
+    <!--查询角色基本信息-->
+    <select id="getRole" parameterType="com.cloud.servicemanage.common.PageVo"
+            resultType="com.cloud.servicemanage.entity.Role">
+        select
+                a.area,
+                a.id,
+                a.code,
+                a.name,
+                a.creatorid,
+                a.modifytime as createtime,
+                a.modifierid,
+                a.modifytime,
+                a.isused,
+                b.id as userid,
+                b.userName as username
+        from role as a left join  user as b on   a.modifierid=b.id
+        <where>
+         1=1   <include refid="tmpPageQry"></include>
+        </where>
+        ORDER BY modifytime DESC
+       <include refid="pagination"></include>
+    </select>
+
+    <!--增加角色-->
+    <insert id="addRole" parameterType="com.cloud.servicemanage.entity.Role">
+        INSERT into role(id,`name`,code,isused,creatorid,modifierid,createtime,modifytime,area)
+        VALUES(#{id},#{name},#{code},#{isused},#{creatorid},#{modifierid},now(),now(),#{area})
+    </insert>
+    <update id="updateRole" parameterType="com.cloud.servicemanage.entity.Role">
+        UPDATE role
+        <set>
+
+            <if test="name!=null and name !=''">name =#{name},</if>
+            <if test="code!=null and code !=''">code=#{code},</if>
+
+                <if test="isused==true">
+                    isused =1,
+                </if>
+                <if test="isused==false">
+                    isused =0,
+                </if>
+
+
+            <if test="area!=null and area !=''">area =#{area},</if>
+            modifierid=#{modifierid} ,
+             modifytime=now()
+        </set>
+        WHERE id=#{id}
+    </update>
+
+
+
+
+
+
+    <!--查找角色编号重复-->
+    <select id="checkRoleCode"  resultType="java.lang.Integer">
+      select   COUNT(1)  from role where id!=#{id} and code=#{code}
+    </select>
+
+    <!--查找角色名称重复-->
+    <select id="checkRoleName" resultType="java.lang.Integer">
+      select   COUNT(1) from role where id!=#{id} and `name`=#{name}
+    </select>
+
+    <!--判断该角色下是否有人员-->
+    <select id="isRoleUsed" resultType="int">
+        SELECT COUNT(a.roleid) FROM userrolerelation a LEFT JOIN role b ON a.roleid = b.id WHERE b.`code` = #{code}
+    </select>
+
+    <!--删除角色-->
+    <delete id="deleteRole" parameterType="java.lang.String">
+
+   delete from role   where  id=#{id}  and   not exists
+      (select roleid from userrolerelation where roleid   =#{id})
+
+    </delete>
+</mapper>

@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.servicemanage.mapper.DepartmentMapper">
+
+    <resultMap id="department" type="com.cloud.servicemanage.entity.Department">
+        <result  property="id"          column="id"         jdbcType="VARCHAR"/>
+        <result  property="code"        column="code"       jdbcType="VARCHAR"/>
+        <result  property="name"        column="name"       jdbcType="VARCHAR"/>
+        <result  property="address"     column="address"    jdbcType="VARCHAR"/>
+        <result  property="parentid"    column="parentid"   jdbcType="VARCHAR"/>
+        <result  property="parentname"  column="parentname" jdbcType="VARCHAR"/>
+        <result  property="creatorid"   column="creatorid"  jdbcType="VARCHAR"/>
+        <result  property="createtime"  column="createtime" jdbcType="DATE"/>
+        <result  property="modifierid"  column="modifierid" jdbcType="VARCHAR"/>
+        <result  property="modifytime"  column="modifytime" jdbcType="DATE"/>
+        <result  property="isused"      column="isused"     jdbcType="BIT"/>
+        <result  property="treeabout"   column="treeabout"  jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <resultMap id="deptTreeMap" type="com.cloud.servicemanage.entity.Department">
+        <result  property="id"          column="id"         jdbcType="VARCHAR"/>
+        <result  property="name"        column="name"       jdbcType="VARCHAR"/>
+        <result  property="parentid"    column="parentid"   jdbcType="VARCHAR"/>
+        <result  property="parentname"  column="parentname" jdbcType="VARCHAR"/>
+        <collection column="{id=id}" property="children"
+                    ofType="deptTreeMap" javaType="java.util.ArrayList" select="getDeptTreeByParentId"/>
+    </resultMap>
+
+    <sql id="isusedSql">
+        <if test="isused != null">
+            <![CDATA[ AND a.isused = #{isused} ]]>
+        </if>
+    </sql>
+
+    <select id="getDeptInfoByDeptId" resultMap="department">
+        SELECT
+                DEM.ID         as id,
+                DEM.CODE       as code,
+                DEM.NAME       as name,
+                DEM.ADDRESS    as address,
+                DEM.PARENTID   as parentid,
+                DET.NAME       as parentname,
+                DEM.CREATORID  as creatorid,
+                DEM.CREATETIME as createtime,
+                DEM.MODIFIERID as modifierid,
+                DEM.MODIFYTIME as modifytime,
+                DEM.ISUSED     as isused,
+                DEM.TREEABOUT  as treeabout
+      FROM	   DEPARTMENT DEM
+        LEFT JOIN     DEPARTMENT DET ON DEM.PARENTID= DET.ID
+        WHERE  DEM.ID = #{id,jdbcType=VARCHAR}
+    </select>
+
+    <select id="getSubDeptsByDeptId" resultMap="department">
+        SELECT
+                a.id,
+                a.code,
+                a.name,
+                a.address,
+                a.parentid,
+                b.name AS parentname,
+                a.creatorid,
+                a.createtime,
+                a.modifierid,
+                a.modifytime,
+                a.isused,
+                a.treeabout
+        FROM
+                department a
+    LEFT JOIN   department b ON a.parentid = b.id
+        WHERE
+                 a.parentid = #{parentid}
+        <include refid="isusedSql"/>
+    </select>
+
+    <select id="isDeptCodeExisted" resultType="boolean">
+        <![CDATA[
+          SELECT
+              COUNT(1)
+          FROM
+              department
+          WHERE
+              id != #{id}
+              AND code = #{code}
+        ]]>
+    </select>
+
+    <insert id="addDeptInfo" parameterType="com.cloud.servicemanage.entity.Department">
+        INSERT INTO
+          department(id, code, name, address, parentid, creatorid, createtime, modifierid, modifytime, isused)
+        VALUES
+          (#{id}, #{code}, #{name}, #{address}, #{parentid}, #{creatorid}, #{createtime}, #{modifierid}, #{modifytime}, #{isused})
+    </insert>
+    <!--SELECT queryParentDepartment(#{id});-->
+
+    <update id="updateDeptInfo" parameterType="com.cloud.servicemanage.entity.Department">
+        UPDATE department
+        SET
+          code = #{code},
+          name = #{name},
+          address = #{address},
+          parentid = #{parentid},
+          modifierid = #{modifierid},
+          modifytime = #{modifytime},
+          isused = #{isused}
+        WHERE
+          id = #{id}
+
+
+    </update>
+    <!-- SELECT queryParentDepartment(#{id});-->
+
+    <!-- 设置下拉框类型的机构树 -->
+    <select id="getDeptTreeByParentId" resultMap="deptTreeMap">
+      SELECT
+              a.id,
+              a.name,
+              a.parentid,
+              b.Name as parentname
+      FROM
+              department a
+  LEFT JOIN   department b ON a.parentid = b.id
+      WHERE
+              a.parentid = #{id}
+        AND   a.isused = 1
+    </select>
+</mapper>

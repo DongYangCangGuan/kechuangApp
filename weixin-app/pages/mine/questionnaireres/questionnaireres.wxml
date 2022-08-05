@@ -1,0 +1,38 @@
+<!--pages/mine/questionnaireres/questionnaireres.wxml-->
+<view class="container-questionnaireres">
+  <scroll-view scroll-y scroll-anchoring="true" class="top" >
+    <view class="box" wx:for="{{itemList}}" wx:key="index">
+      <view class="question">{{index+1}}. {{item.questionDescription}}
+        <text>{{(item.questionType=="多选") ? " (多选)" : ""}}</text>
+      </view>
+      
+      <view class="answer" wx:for="{{item.questionOptionsList}}" wx:key="index"> {{item.content}} </view>
+    </view>
+    <view class="footer">
+      
+    </view>
+    
+    
+    <!-- <view class="box">
+      <view class="question">2. 您的公司目前所处阶段</view>
+      <view class="answer">初创型科技企业</view>
+    </view>
+    <view class="box">
+      <view class="question">3. 您的公司最新一年的主要财务指标</view>
+      <view class="answer">主营业务收入1亿元以下</view>
+    </view>
+    <view class="box">
+      <view class="question">4. 您所期望的银行融资额度（请根据公司现阶段的实需及自身还款能力进行选择）</view>
+      <view class="answer">300万元人民币以内</view>
+    </view>
+    <view class="box">
+      <view class="question">5. 下列描述符合您的公司是（多选）</view>
+      <view class="answer">具备政府相关部门资质认证（如高新技术/专精特新/小巨人等）</view>
+      <view class="answer">具备专利权、软著权等知识产权</view>
+    </view>-->
+  </scroll-view>
+  <button class="btn" bindtap="getQesTJ">查看产品推荐</button>
+  <view class="mid"></view>
+  <view class="under"></view> 
+</view>
+

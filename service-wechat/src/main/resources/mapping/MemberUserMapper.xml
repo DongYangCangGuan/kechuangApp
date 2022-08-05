@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.servicewechat.mapper.MemberUserMapper">
+    <insert id="addMemberUser" parameterType="com.cloud.commonsmng.entity.appletEntity.MemberUser">
+        INSERT INTO member_user(id,
+                                  userId,
+                                  uRole,
+                                  job,
+                                  memberId,
+                                  creatorId,
+                                  createTime,
+                                  modifierId,
+                                  modifyTime,
+                                  delFlag,
+                                  approvalstatus)
+            VALUE
+            (#{memberUser.id},#{memberUser.userId},#{memberUser.uRole},#{memberUser.job},#{memberUser.memberId},
+            #{memberUser.creatorId},NOW(),#{memberUser.modifierId},NOW(),1,0);
+        UPDATE user set passWord = '123456',departmentId = #{memberUser.departmentId},uRole=0,certificationMark=1 WHERE id = #{memberUser.userId};
+    </insert>
+
+</mapper>

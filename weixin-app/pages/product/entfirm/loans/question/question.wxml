@@ -1,0 +1,66 @@
+<view class="question_container">
+    <form action="" bindsubmit="gosubmitDetail">
+        <view class="form_item" wx:for="{{questionnaire}}" wx:key="index" wx:for-index="index" wx:for-item="item" data-answer='{{item}}'>
+            <view class="item_number"
+            style="background-image: url({{numberBackground}});background-size: 100%;background-repeat:no-repeat;"
+            >{{index+1}}</view>
+            <view class="item_title" bindtap="laternext" name="loan_reasontitle" value="{{item.questionDescription}}">{{item.questionDescription}}{{item.questionType=='1' ? '(多选)':'(单选)'}}</view>
+            <checkbox-group  name="{{item.id}}" wx:if="{{item.questionType=='1'}}">
+                <label wx:for="{{item.questionOptionsList}}"  wx:for-item="itm" wx:for-index="idx"  wx:key="{{idx}}">
+                    <checkbox   value="{{itm.answer}}" checked="{{itm.checked}}" bind="{{onChecked}}">{{itm.answer}}:{{itm.content}}</checkbox>
+                </label>
+            </checkbox-group>
+
+            <radio-group  name="{{item.id}}"  wx:else>
+                <label wx:for="{{item.questionOptionsList}}" wx:for-item="itm" wx:for-index="idx" wx:key="{{idx}}">
+                    <radio name="{{itm.content}}"  value="{{itm.answer}}" checked="{{itm.checked}}" bind="{{onChecked}}">{{itm.answer}}:{{itm.content}}</radio>
+                </label>
+            </radio-group>
+        </view>
+        <!-- <view class="form_item">
+            <view class="item_number"
+            style="background-image: url({{numberBackground}});background-size: 100%;background-repeat:no-repeat;"
+            >2</view>
+            <view class="item_title">您的公司目前所处阶段 </view>
+            <radio-group name="company_stage">
+                <label wx:for="{{companyStage}}" wx:for-index="idx" wx:key="{{idx}}">
+                    <radio value="{{item.name}}" checked="{{item.checked}}" bind="{{onChecked}}">{{item.name}}</radio>
+                </label>
+            </radio-group>
+        </view>
+        <view class="form_item">
+            <view class="item_number"
+            style="background-image: url({{numberBackground}});background-size: 100%;background-repeat:no-repeat;"
+            >3</view>
+            <view class="item_title">您的公司最新一年的主要财务指标（多选）</view>
+            <checkbox-group name="fin_target">
+                <label wx:for="{{finTarget}}" wx:for-index="idx" wx:key="{{idx}}">
+                    <checkbox value="{{item.name}}" checked="{{item.checked}}" bind="{{onChecked}}">{{item.name}}</checkbox>
+                </label>
+            </checkbox-group>
+        </view>
+        <view class="form_item">
+            <view class="item_number"
+            style="background-image: url({{numberBackground}});background-size: 100%;background-repeat:no-repeat;"
+            >4</view>
+            <view class="item_title">您所期望的银行融资额度（请根据公司现阶段的实需及自身还款能力）</view>
+            <radio-group name="expect_line">
+                <label wx:for="{{expectLine}}" wx:for-index="idx" wx:key="{{idx}}">
+                    <radio value="{{item.name}}" checked="{{item.checked}}" bind="{{onChecked}}">{{item.name}}</radio>
+                </label>
+            </radio-group>
+        </view>
+        <view class="form_item">
+            <view class="item_number"
+            style="background-image: url({{numberBackground}});background-size: 100%;background-repeat:no-repeat;"
+            >5</view>
+            <view class="item_title">下列描述符合您的公司是（多选）</view>
+            <checkbox-group name="com_describe">
+                <label wx:for="{{description}}" wx:for-index="idx" wx:key="{{idx}}">
+                    <checkbox value="{{item.name}}" checked="{{item.checked}}" bind="{{onChecked}}">{{item.name}}</checkbox>
+                </label>
+            </checkbox-group>
+        </view> -->
+        <button form-type="submit">提交</button>
+    </form>
+</view>

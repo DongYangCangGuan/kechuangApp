@@ -1,0 +1,80 @@
+/* pages/index/advices/advices.wxss */
+.haveNoNote{
+  display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.showAdvices{
+  height: 100%;
+}
+.noticeText{
+  color: #9d9d9d
+}
+.advices_item {
+  display: flex;
+  flex-direction: column;
+  letter-spacing: 3rpx;
+}
+
+.advices_area {
+  display: flex;
+  justify-content: space-around;
+  padding: 0 30rpx;
+}
+
+.head_img {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.advices_text {
+  flex: 1;
+  margin: 0 30rpx;
+}
+
+.advices_content {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 368rpx;
+  font-size: 27rpx;
+  color: #4D4D4D;
+}
+
+.right {
+  white-space: nowrap;
+  text-align: right;
+}
+
+.time {
+  font-size: 24rpx;
+}
+
+.number {
+  display: inline-block;
+  padding: 0rpx 15rpx;
+  margin: 10rpx 0;
+  font-size: 24rpx;
+  border-radius: 50rpx;
+  background: #FC011A;
+  color: white;
+}
+
+.hengxian_area {
+  display: flex;
+  justify-content: flex-end;
+  margin: 10rpx;
+}
+
+.hengxian {
+  width: 100%;
+  border: 1px solid #b2b2b2;
+  transform: scaleY(0.1);
+}
+.bottomHint {
+  text-align: center;
+}

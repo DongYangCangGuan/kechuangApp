@@ -1,0 +1,25 @@
+<view class="information">
+  <view class="content">
+    <view class="show_content">
+      <scroll-view class="content_img_info" scroll-y="true" lower-threshold="100" bindscrolltolower="bindscrolltolower">
+        <view class="content_img_info_item" wx:for="{{ informationList }}" wx:key="index" data-item="{{ item }}"
+          bindtap="openHtml">
+          <view class="content_info">
+            <view class="top">
+              <view class="content_info_title">{{ item.title }}</view>
+            </view>
+            <view class="bottom">
+              <view class="date">{{ item.modifyTime }}</view>
+              <view class="iconfont iconyanjing"></view>
+              <view class="number">{{ item.articleviews }}</view>
+            </view>
+          </view>
+          <view class="content_img">
+            <image wx:if='{{item.pic}}' class="image" src='{{item.pic}}'></image>
+          </view>
+        </view>
+        <view wx:if="{{showBottom}}" class="bottomHint">已经到底了！</view>
+      </scroll-view>
+    </view>
+  </view>
+</view>

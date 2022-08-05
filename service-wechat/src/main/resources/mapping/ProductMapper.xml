@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.servicewechat.mapper.ProductMapper">
+
+    <select id="getAboutus" resultType="com.cloud.commonsmng.entity.appletEntity.Aboutus">
+        select
+            id,
+            information,
+            creatorId,
+            createTime,
+            modifierId,
+            modifyTime
+          from aboutus
+    </select>
+
+    <delete id="deleteAnswers" parameterType="java.lang.String">
+        delete
+        from answer
+        where userId =  #{userId} and questionBelong =#{questionBelong}
+    </delete>
+
+
+    <insert id="insertAnswers" parameterType="com.cloud.commonsmng.entity.appletEntity.AnswerEntity">
+
+        INSERT INTO answer(id,
+                         questionId,
+                         answer,
+                         userId,
+                         delFlag,
+                         ordinal,
+                         questionBelong,
+                         creatorId,
+                         createTime,
+                         modifierId,
+                         modifyTime)
+            VALUE
+            (
+            uuid(),#{answerEntity.questionId},#{answerEntity.answer},
+             #{answerEntity.userId},1,#{answerEntity.ordinal},#{answerEntity.questionBelong},
+             #{answerEntity.userId},NOW(),#{answerEntity.userId},NOW()
+             );
+    </insert>
+
+    <select id="getAnswers" resultType="com.cloud.commonsmng.entity.appletEntity.AnswerEntity">
+        select
+            a.id,
+            a.questionId,
+            a.answer,
+            a.userId,
+            a.delFlag,
+            a.creatorId,
+            a.createTime,
+            a.modifierId,
+            a.modifyTime
+        from answer a left join question q on a.questionId = q.id where  a.delFlag = 1 and a.userId=  #{userId}  order by a.createTime  desc  ,q.sequen LIMIT 0,5
+    </select>
+
+    <select id="getQuestionnaire" resultType="com.cloud.commonsmng.entity.appletEntity.QuestionEntity">
+        select
+            id,
+            questionDescription,
+            creatorId,
+            createTime,
+            modifierId,
+            modifyTime,
+            delFlag,
+            sequen,
+            releaseFlag,
+            questionname,
+            questionType
+        from question where   delFlag = 1 and  questionBelong = #{type}  order by sequen
+    </select>
+
+    <select id="getOpinion" resultType="com.cloud.commonsmng.entity.appletEntity.QuestionOptionsEntity">
+        select
+            id,
+            questionId,
+            answer,
+            content,
+            creatorId,
+            createTime,
+            modifierId,
+            modifyTime,
+            delFlag
+        from myquestion where questionId = #{id} and delFlag = 1 order by answer
+    </select>
+
+
+    <select id="getProductByProSeq" resultType="com.cloud.commonsmng.entity.appletEntity.Product">
+        select
+        p.*,
+        pp.pic as pic
+        from product p left join product_picture pp on p.img=pp.id  left join dictionary d on p.productType = d.code where
+          p.status = 2 and d.kind = 'producttype' and d.isused =  1
+        <if test="seq != null and seq != ''">
+            and p.proSeq = #{seq}
+        </if>
+        <if test="type != null and type != ''">
+        and  ( p.productType = #{type} or  d.parentId = #{type})
+        </if>
+        <if test="id != null and id != ''">
+            and p.id = #{id}
+        </if>
+
+        <if test="sort == null or sort == ''">
+            order by p.createTime
+        </if>
+        <if test="sort != null and sort != ''">
+            order by p.departmentId,p.createTime
+        </if>
+
+    </select>
+
+
+<!--    <select id="getHotProduct" resultType="com.cloud.commonsmng.entity.appletEntity.Product">-->
+<!--        select  p.*,-->
+<!--                pp.pic as pic, t.*-->
+<!--        from product p left join product_picture pp on p.img=pp.id-->
+<!--            left join  (select pi.pageId,count(1) AS pointTimes from point pi left join product pd-->
+<!--           on  pi.pageId = pd.id where pd.productType = #{type} GROUP BY pi.pageId  order by times desc )-->
+<!--                t on  p.id = t.pageId where  t.pageId is not null   order by   pointTimes desc-->
+<!--    </select>-->
+    <select id="getHotProduct" resultType="com.cloud.commonsmng.entity.appletEntity.Product">
+        select  p.*,
+                pp.pic as pic, t.*
+        from product p left join product_picture pp on p.img=pp.id
+                       left join  (select pi.pageId,count(1) AS pointTimes from point pi left join product pd
+                                                                                                   on  pi.pageId = pd.id where pd.productType = #{type} GROUP BY pi.pageId  order by times desc )
+            t on  p.id = t.pageId where  t.pageId is not null and p.`status` = 2  order by   pointTimes desc
+    </select>
+
+    <select id="getAnswersMsg" resultType="java.lang.String">
+        select
+            content
+        from myquestion where questionId = #{questionId} and answer= #{answer}
+    </select>
+
+    <select id="getProductReadTimes" resultType="int">
+        select
+            count(*)
+        from point where type = 'pd' and pageId= #{productId}
+    </select>
+
+    <select id="getUserordinal" resultType="java.lang.String">
+        select ordinal
+        from answer
+        where userId = #{userId} order by createTime desc limit 0,1;
+    </select>
+
+    <select id="checkProduct" resultType="java.lang.Integer">
+        select count(*) from collect where productId = #{productId}  and  userId = #{userId}
+    </select>
+
+    <select id="getProductTypes" resultType="com.cloud.commonsmng.entity.appletEntity.Dictionary">
+        select id, `code`, `name`, parentId from dictionary where `kind`=#{kind} and parentId=#{parentId} and isused = 1 order by `index` asc
+    </select>
+
+    <select id="getContactUs" resultType="com.cloud.commonsmng.entity.appletEntity.Product">
+        select * from product  where id = #{id}
+    </select>
+
+    <update id="setTime">
+        update answer set createTime = now() where  questionBelong = #{questionBelong} and userId = #{userId}
+    </update>
+
+    <select id="getQuestionBelong" resultType="java.lang.String">
+        select questionBelong from question where id = #{id}
+    </select>
+
+    <insert id="setAnswerPush" parameterType="java.lang.String">
+        delete from answer_push where  userId = #{userId} and questionBelong  =  #{questionBelong };
+        INSERT INTO answer_push (
+            id,
+            userId,
+            questionBelong,
+            isPush,
+            creatorId,
+            createTime,
+            modifierId,
+            modifyTime
+        )
+        VALUES
+        (uuid(),#{userId},#{questionBelong},0,#{userId},now(),#{userId},now())
+    </insert>
+
+
+    <select id="getProductExpandList" resultType="com.cloud.commonsmng.entity.appletEntity.ProductsExpand">
+        select * from product_expand where productId = #{id} and status = 1
+    </select>
+
+    <insert id="addConsultingInfo" parameterType="com.cloud.commonsmng.entity.appletEntity.ConsultingInfo">
+        INSERT INTO consultingInfo (
+            id,
+            userId,
+            accountmanager,
+            telephone,
+            email,
+            creatorId,
+            createTime,
+            modifierId,
+            modifyTime,
+            delFlag
+        )
+        VALUES (#{consultingInfo.id},#{consultingInfo.userId},#{consultingInfo.accountmanager},
+        #{consultingInfo.telephone},#{consultingInfo.email},#{consultingInfo.creatorId},#{consultingInfo.createTime},
+        #{consultingInfo.modifierId},#{consultingInfo.modifyTime},1);
+    </insert>
+</mapper>

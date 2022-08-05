@@ -1,0 +1,454 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.servicemanage.mapper.StaffMapper">
+    <resultMap id="staffEntity" type="com.cloud.servicemanage.entity.StaffInfo">
+        <id column="id" property="id"/>
+        <result column="birthdate" property="birthday"/>
+        <result column="gender" property="sex"/>
+        <result column="job" property="job"/>
+        <result column="empid" property="empid"/>
+        <result column="headImg" property="pic"/>
+        <result column="userName" property="loginname"/>
+        <result column="phone" property="mobile"/>
+        <result column="realName" property="name"/>
+        <result column="departmentId" property="departmentid"/>
+        <result column="email" property="email"/>
+        <result column="isused" property="isused"/>
+    </resultMap>
+
+
+    <sql id="isusedSql">
+        <if test="isused != '' and isused != null">
+            <![CDATA[ AND isused = #{isused} ]]>
+        </if>
+    </sql>
+    <!--根据departmentId查询人员列表-->
+    <select id="getStaffById" resultMap="staffEntity" parameterType="HashMap">
+        SELECT * FROM(
+        SELECT a.id,
+        a.birthdate,
+        a.gender,
+        a.job,
+        a.empid,
+        a.headImg,
+        a.userName,
+        a.phone,
+        a.realName,
+        b.`name` AS departmentname,
+        a.departmentId,
+        a.email,
+        a.isused
+        FROM `user` a,
+        department b
+        WHERE 1 = 1
+        <choose>
+            <when test="switch1">
+                AND a.departmentId = b.id
+                AND a.departmentid = #{departmentid}
+            </when>
+            <otherwise>
+                AND a.departmentId = b.id
+                AND a.departmentId IN (SELECT id
+                FROM department
+                where id = #{departmentid}
+                OR treeabout LIKE CONCAT('%', #{departmentid}, '%'))
+            </otherwise>
+        </choose>
+        ) c
+        <if test="orderName != null and orderName != ''">
+            ORDER BY ${orderName} ${orderKind}
+        </if>
+        LIMIT ${CurrentPage1},${PageSize1}
+    </select>
+    <!--根据条件查询人员总数-->
+    <select id="getStaffSum" resultType="java.lang.Integer">
+        SELECT COUNT(id) as SUM
+        FROM `user`
+        WHERE 1 = 1
+        <choose>
+            <when test="switch1">
+                AND departmentId = #{departmentid}
+            </when>
+            <otherwise>
+                AND departmentId IN (SELECT id
+                FROM department
+                where id = #{departmentid}
+                OR treeabout LIKE CONCAT('%', #{departmentid}, '%'))
+            </otherwise>
+        </choose>
+        <include refid="isusedSql"/>
+    </select>
+    <!--根据名字模糊查询人员-->
+    <select id="selectByName" resultMap="staffEntity" parameterType="HashMap">
+        SELECT *
+        FROM (
+                 SELECT a.id,
+                        a.birthdate,
+                        a.gender,
+                        a.job,
+                        a.empid,
+                        a.headImg,
+                        a.userName,
+                        a.phone,
+                        a.realName,
+                        b.`name` AS departmentname,
+                        a.departmentId,
+                        a.email,
+                        a.isused
+                 FROM user a,
+                      department b
+                 WHERE a.departmentId = b.id
+                   AND a.departmentId IN (SELECT id
+                                          FROM department
+                                          where id = #{departmentid}
+                                             OR treeabout LIKE CONCAT('%', #{departmentid}, '%'))) as c
+        WHERE c.realName LIKE CONCAT('%', #{name}, '%')
+    </select>
+    <!--新增人员-->
+    <insert id="insertStaff" parameterType="com.cloud.servicemanage.entity.StaffInfo">
+        INSERT INTO user (id,
+        realName,
+        birthdate,
+        departmentId,
+        modifierId,
+        creatorId,
+        createTime,
+        modifyTime,
+        gender,
+        job,
+        isused,
+        empid,
+        userName,
+        phone,
+        email,
+        headImg,
+        `passWord`,
+        uRole,
+        delFlag)
+        VALUES (#{StaffInfo.id}, #{StaffInfo.name}, #{StaffInfo.birthday}, #{StaffInfo.departmentid},
+        #{StaffInfo.userId}, #{StaffInfo.userId}, NOW(), NOW(), #{StaffInfo.sex}, #{StaffInfo.job}, '1',
+        #{StaffInfo.empid}, #{StaffInfo.loginname}, #{StaffInfo.mobile}, #{StaffInfo.email}, #{StaffInfo.pic},
+        '123456', 0, 1);
+
+        INSERT INTO userrolerelation (id, userid, roleid, createtime, modifytime)
+        VALUES
+        <foreach collection="StaffInfo.role" item="item" separator=",">
+            (UUID(), #{StaffInfo.id}, #{item}, NOW(), NOW())
+        </foreach>;
+
+        INSERT INTO user_dpt (id, departmentid, entrytime, userstatus, userid)
+        VALUES
+        <foreach collection="StaffInfo.experienceList" item="item" separator=",">
+            (UUID(), #{item.departmentid}, #{item.entrytime}, #{item.userstatus}, #{StaffInfo.id})
+        </foreach>;
+
+        INSERT INTO user_edu (id, education, major, starttime, endtime, userid, status)
+        VALUES
+        <foreach collection="StaffInfo.educationList" item="item" separator=",">
+            (UUID(), #{item.education}, #{item.major}, #{item.starttime}, #{item.endtime}, #{StaffInfo.id}, '1')
+        </foreach>;
+    </insert>
+
+    <!--停用人员-->
+    <update id="deleteStaff">
+        UPDATE user
+        set isused = #{isused}
+        where id = #{id}
+    </update>
+
+    <!--角色下拉框-->
+    <select id="selectRole" resultType="com.cloud.servicemanage.entity.Role">
+        SELECT id, `name`
+        FROM role
+    </select>
+
+    <!--从字典表查询下拉框-->
+    <select id="selectEducationOrType" resultType="com.cloud.servicemanage.entity.Dictionary">
+        SELECT id, `code`, `name`
+        FROM dictionary
+        where kind = #{kind}
+        ORDER BY `code` asc
+    </select>
+
+    <!--查询人员编号是否重复-->
+    <select id="isStaffIdExisted" resultType="java.lang.Boolean">
+        <![CDATA[
+        SELECT COUNT(1)
+        FROM user
+        WHERE id != #{id}
+          AND empid = #{empid}
+        ]]>
+    </select>
+
+    <!--查询人员编号是否重复-->
+    <select id="isStaffLoginNameExisted" resultType="java.lang.Boolean">
+        <![CDATA[
+        SELECT COUNT(1)
+        FROM user
+        WHERE id != #{id}
+          AND userName = #{loginname}
+        ]]>
+    </select>
+
+    <select id="selectUserRoleId" resultType="java.lang.String">
+        SELECT a.roleid as id
+        FROM userrolerelation a,
+             role b
+        WHERE b.id = a.roleid
+          AND a.userid = #{id}
+    </select>
+
+    <select id="selectUserRoleName" resultType="java.lang.String">
+        SELECT b.name as name
+        FROM userrolerelation a,
+             role b
+        WHERE b.id = a.roleid
+          AND a.userid = #{id}
+    </select>
+
+    <select id="selectUserEdu" resultType="com.cloud.servicemanage.entity.UserEducation">
+        SELECT a.id                                 as id,
+               a.education                          as education,
+               b.`name`,
+               a.major                              as major,
+               DATE_FORMAT(a.starttime, '%Y-%c-%d') as starttime,
+               DATE_FORMAT(a.endtime, '%Y-%c-%d')   as endtime,
+               a.userid                             as userid
+        FROM user_edu a,
+             dictionary b
+        WHERE b.id = a.education
+          AND a.userid = #{id}
+    </select>
+
+    <select id="selectUserDepart" resultType="com.cloud.servicemanage.entity.UserDepart">
+        SELECT a.id                                 as id,
+               a.departmentid                       as departmentid,
+               b.name                               as departmentname,
+               DATE_FORMAT(a.entrytime, '%Y-%c-%d') as entrytime,
+               a.userstatus                         as userstatus,
+               c.name                               as userstatusname,
+               a.userid                             as userid
+        FROM user_dpt a,
+             department b,
+             dictionary c
+        WHERE a.userid = #{id}AND b.id=a.departmentid  AND c.id=a.userstatus
+    </select>
+
+
+    <update id="updateStaff" parameterType="com.cloud.servicemanage.entity.StaffInfo">
+        UPDATE `user`
+        SET realName = #{StaffInfo.name},
+        birthdate = #{StaffInfo.birthday},
+        departmentId = #{StaffInfo.departmentid},
+        modifyTime = NOW(),
+        modifierId = #{StaffInfo.userId},
+        gender = #{StaffInfo.sex},
+        job = #{StaffInfo.job},
+        empid = #{StaffInfo.empid},
+        userName = #{StaffInfo.loginname},
+        phone = #{StaffInfo.mobile},
+        email = #{StaffInfo.email},
+        headImg = #{StaffInfo.pic}
+        WHERE id = #{StaffInfo.id};
+
+        DELETE
+        FROM userrolerelation
+        where userid = #{StaffInfo.id};
+
+        DELETE
+        FROM user_dpt
+        where userid = #{StaffInfo.id};
+
+        DELETE
+        FROM user_edu
+        where userid = #{StaffInfo.id};
+        <if test="null != StaffInfo.role and StaffInfo.role.size > 0">
+            INSERT INTO userrolerelation (id, userid, roleid, createtime, modifytime)
+            VALUES
+            <foreach collection="StaffInfo.role" item="item" separator=",">
+                (UUID(), #{StaffInfo.id}, #{item}, NOW(), NOW())
+            </foreach>;
+        </if>
+
+        <if test="null != StaffInfo.experienceList and StaffInfo.experienceList.size > 0">
+            INSERT INTO user_dpt (id, departmentid, entrytime, userstatus, userid)
+            VALUES
+            <foreach collection="StaffInfo.experienceList" item="item" separator=",">
+                (UUID(), #{item.departmentid}, #{item.entrytime}, #{item.userstatus}, #{StaffInfo.id})
+            </foreach>;
+        </if>
+
+        <if test="null != StaffInfo.educationList and StaffInfo.educationList.size > 0">
+            INSERT INTO user_edu (id, education, major, starttime, endtime, userid, status)
+            VALUES
+            <foreach collection="StaffInfo.educationList" item="item" separator=",">
+                (UUID(), #{item.education}, #{item.major}, #{item.starttime}, #{item.endtime}, #{StaffInfo.id}, '1')
+            </foreach>;
+        </if>
+    </update>
+
+
+    <insert id="insertFileImport">
+        INSERT INTO user_import_file (`id`,
+        filepath,
+        batchid,
+        creatorid,
+        createtime,
+        modifierid,
+        modifytime)
+        VALUES (#{fileImport.id},
+        #{fileImport.filepath},
+        #{fileImport.batchid},
+        #{fileImport.creatorid},
+        NOW(),
+        #{fileImport.modifierid},
+        NOW());
+        <foreach collection="fileImport.fileImportDetailList" item="index" separator=";">
+            INSERT INTO user_import_file_detail (`id`, batchid, user_id, user_name, user_sex, user_loginname, user_dept,
+            user_birth, user_role, user_phone, user_email, creatorid, createtime,
+            modifierid, modifytime, errorCode, errorMsg)
+            VALUES (UUID(),
+            #{fileImport.batchid},
+            #{index.user_id},
+            #{index.user_name},
+            #{index.user_sex},
+            #{index.user_loginname},
+            #{index.user_dept},
+            #{index.user_birth},
+            #{index.user_role},
+            #{index.user_phone},
+            #{index.user_email},
+            #{fileImport.creatorid},
+            NOW(),
+            #{fileImport.modifierid},
+            NOW(),
+            #{index.errorCode},
+            #{index.errorMsg})
+        </foreach>
+    </insert>
+
+    <!--调用存储过程校验-->
+    <select id="checkFileImportDetail" statementType="CALLABLE">
+        {call cal_import_user(
+                #{batchid,mode=IN,jdbcType=VARCHAR}
+            )}
+    </select>
+
+    <resultMap id="FileImportDetailEntity" type="com.cloud.servicemanage.entity.FileImportDetail">
+        <id column="id" property="id"/>
+        <result column="user_id" property="user_id"/>
+        <result column="user_name" property="user_name"/>
+        <result column="user_sex" property="user_sex"/>
+        <result column="user_loginname" property="user_loginname"/>
+        <result column="user_dept" property="user_dept"/>
+        <result column="user_birth" property="user_birth"/>
+        <result column="user_role" property="user_role"/>
+        <result column="user_phone" property="user_phone"/>
+        <result column="user_email" property="user_email"/>
+        <result column="creatorid" property="creatorid"/>
+        <result column="createtime" property="createtime"/>
+        <result column="modifierid" property="modifierid"/>
+        <result column="modifytime" property="modifytime"/>
+        <result column="errorCode" property="errorCode"/>
+        <result column="errorMsg" property="errorMsg"/>
+    </resultMap>
+
+    <!--回显数据 分页-->
+    <select id="showStaffData" parameterType="com.cloud.servicemanage.common.PageVo" resultMap="FileImportDetailEntity">
+        SELECT
+        a.id,
+        a.user_id,
+        a.user_name,
+        a.user_sex,
+        a.user_loginname,
+        a.user_dept,
+        a.user_birth,
+        a.user_role,
+        a.user_phone,
+        a.user_email,
+        a.creatorid,
+        a.createtime,
+        a.modifierid,
+        a.modifytime,
+        a.errorCode,
+        a.errorMsg
+        FROM
+        user_import_file_detail a
+        where a.batchid = #{searchdata.batchid}
+        <if test="page != null">
+            LIMIT ${page.pageIndex-1},${page.pageSize}
+        </if>
+    </select>
+
+    <!--查询总条数-->
+    <select id="getStaffDataTotal" resultType="java.lang.Integer"
+            parameterType="com.cloud.servicemanage.common.PageVo">
+        select count(1)
+        from user_import_file_detail
+        where batchid = #{searchdata.batchid}
+    </select>
+
+    <select id="isEmptyErrorMsg" resultType="java.lang.Integer" parameterType="java.lang.String">
+        select count(1)
+        from user_import_file_detail
+        where batchid = #{batchid}
+          and errorMsg != ''
+    </select>
+
+    <select id="selectErrorMsg" resultType="com.cloud.servicemanage.entity.FileImportDetail"
+            parameterType="java.lang.String">
+        select *
+        from user_import_file_detail
+        where batchid = #{batchid}
+          and errorMsg != ''
+    </select>
+
+    <!--导入user表-->
+    <insert id="insertUserData">
+        INSERT INTO `user` (id, empid, realName, gender, userName, departmentId, `passWord`, birthdate, isused, phone,
+        email, creatorId, createTime, modifierId, modifyTime, uRole, delFlag)
+        SELECT UUID(),
+        u.user_id,
+        u.user_name,
+        dic.code,
+        u.user_loginname,
+        d.id,
+        '123456',
+        u.user_birth,
+        '1',
+        u.user_phone,
+        u.user_email,
+        u.creatorid,
+        u.createtime,
+        u.modifierid,
+        u.modifytime,
+        0,
+        1
+        FROM user_import_file_detail u
+        LEFT JOIN department d ON d.NAME = u.user_dept
+        left join dictionary dic on dic.name = u.user_sex
+        where u.batchid = #{batchid};
+
+
+        <foreach collection="fileImportDetailList" item="fileImportDetail">
+            <foreach collection="fileImportDetail.user_role.split(',')" item="item">
+                INSERT INTO userrolerelation (id, userid, roleid, createtime, modifytime)
+                VALUES (UUID(), #{fileImportDetail.user_id},
+                (select id from role where name = #{item}),
+                NOW(), NOW());
+            </foreach>
+        </foreach>
+    </insert>
+
+    <select id="selectPwdByUserId" resultType="string">
+        select u.passWord
+        from `user`u
+        where u.`id` = #{userId}
+    </select>
+
+    <update id="updatePassword">
+        update `user`
+        set passWord = #{password}
+        where id = #{userId}
+    </update>
+</mapper>

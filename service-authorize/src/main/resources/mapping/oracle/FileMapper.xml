@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.serviceauthorize.mapper">
+
+    <resultMap id="fileInfo" type="com.cloud.serviceauthorize.entity.FileEntity">
+        <result property="id" column="ID"/>
+        <result property="author" column="AUTHOR"/>
+        <result property="systemName" column="SYSTEMNAME"/>
+        <result property="uploadTime" column="UPLOADTIME"/>
+        <result property="fileSize" column="FILESIZE"/>
+        <result property="fileName" column="FILENAME"/>
+        <result property="versionCode" column="VERSIONCODE"/>
+    </resultMap>
+
+    <insert id="insertFile">
+        INSERT INTO M_FILE(ID,AUTHOR,SYSTEMNAME,UPLOADTIME,FILESIZE,FILENAME,VERSIONCODE)VALUES
+        (
+        file_seq.nextval,
+        #{FileEntity.author},
+        #{FileEntity.systemName},
+        #{FileEntity.uploadTime},
+        #{FileEntity.fileSize},
+        #{FileEntity.fileName},
+        #{FileEntity.versionCode}
+        )
+    </insert>
+
+</mapper>

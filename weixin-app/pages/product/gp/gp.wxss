@@ -1,0 +1,44 @@
+/* pages/product/gp/gp.wxss */
+.pageTotal{
+    height: 100vh;
+    position: relative;
+}
+.content {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+}
+.box {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    box-sizing: border-box;
+    border: 1rpx solid #ebebeb;
+    padding-top: 5%;
+    width: 50%;
+    height: 23vh;
+}
+.pic {
+    width: 150rpx;
+    height: 150rpx;
+}
+image {
+    width: 100%;
+    height: 100%;
+}
+.footer {
+    margin-top: 60rpx;
+}
+.footer>button {
+    width: 65%!important;
+    background-color: #F4EAC9;
+    border: 2rpx solid #FAD563;
+    color: #8A7E5C;
+}
+.footerpage {
+    position: absolute;
+    bottom: 5%;
+    left: 50%;
+    transform: translateX(-50%);
+}

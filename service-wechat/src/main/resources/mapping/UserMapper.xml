@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.servicewechat.mapper.UserMapper">
+    <resultMap id="userEntity" type="com.cloud.commonsmng.entity.appletEntity.User">
+        <id property="id" column="id"/>
+        <result property="openId" column="openId"/>
+        <result property="userName" column="userName"/>
+        <result property="nickName" column="nickName"/>
+        <result property="realName" column="realName"/>
+        <result property="gender" column="gender"/>
+        <result property="birthdate" column="birthdate"/>
+        <result property="identityCard" column="identityCard"/>
+        <result property="headImg" column="headImg"/>
+        <result property="email" column="email"/>
+        <result property="phone" column="phone"/>
+        <result property="uRole" column="uRole"/>
+        <result property="delFlag" column="delFlag"/>
+        <result property="departmentId" column="departmentId"/>
+        <association property="member" javaType="com.cloud.commonsmng.entity.appletEntity.Member">
+            <result property="enterpriseCode" column="memberEnterpriseCode"/>
+            <result property="enterpriseName" column="memberEnterpriseName"/>
+            <result property="contact" column="memberContact"/>
+            <result property="phone" column="memberPhone"/>
+            <result property="address" column="memberAddress"/>
+            <result property="email" column="memberEmail"/>
+        </association>
+        <association property="memberUser" javaType="com.cloud.commonsmng.entity.appletEntity.MemberUser">
+            <result property="memberType" column="memberType"/>
+        </association>
+    </resultMap>
+
+    <select id="getUserInMemberInfo" parameterType="java.lang.String" resultMap="userEntity">
+        SELECT m.enterpriseCode as memberEnterpriseCode,
+               m.enterpriseName as memberEnterpriseName,
+               m.contact        as memberContact,
+               m.phone          as memberPhone,
+               m.address        as memberAddress,
+               m.email          as memberEmail
+        FROM member m
+        WHERE m.delFlag = 1
+          AND m.enterpriseCode = #{enterpriseCode}
+    </select>
+
+    <select id="getUser" parameterType="java.lang.String" resultMap="userEntity">
+        SELECT u.id,
+               u.openId,
+               u.userName,
+               u.nickName,
+               u.realName,
+               u.email,
+               u.gender,
+               u.birthdate,
+               u.identityCard,
+               u.headImg,
+               u.enterpriseName,
+               u.contactAddress,
+               u.phone,
+               u.uRole,
+               u.certificationMark,
+               u.delFlag,
+               u.job,
+               u.departmentId,
+               md.approvalstatus,
+               m.enterpriseCode as memberEnterpriseCode,
+               m.enterpriseName as memberEnterpriseName,
+               m.contact        as memberContact,
+               m.phone          as memberPhone,
+               m.address        as memberAddress,
+               m.email          as memberEmail
+        FROM USER u
+                 LEFT JOIN member_user md ON md.userId = u.id
+                 LEFT JOIN member m ON m.id = md.memberId
+            AND m.delFlag = 1
+        WHERE u.delFlag = 1
+          AND u.id = #{userid}
+    </select>
+
+    <update id="upDateUser" parameterType="com.cloud.commonsmng.entity.appletEntity.User">
+        UPDATE
+            user
+        SET nickName  = #{user.nickName},
+            gender    = #{user.gender},
+            birthdate = #{user.birthdate},
+            phone     = #{user.phone},
+            email     = #{user.email}
+        WHERE id = #{user.id}
+    </update>
+
+    <update id="addURole" parameterType="com.cloud.commonsmng.entity.appletEntity.User">
+        UPDATE `user` set uRole = (SELECT mu.uRole from member_user mu where mu.id = #{id}),
+                          job = (SELECT mu.job from member_user mu where mu.id = #{id}),
+                          memberId = (SELECT mu.memberId from member_user mu where mu.id = #{id}),
+                          certificationMark = 3
+        WHERE id = (SELECT mu.userId from member_user mu where mu.id = #{id})
+    </update>
+
+
+    <update id="addUserDetail" parameterType="com.cloud.commonsmng.entity.appletEntity.User">
+        UPDATE
+            user
+        SET
+            realName =#{user.realName},
+            phone=#{user.phone},
+            email=#{user.email},
+            memberId = null
+        WHERE id = #{user.id}
+    </update>
+    <select id="getuRolebyId" resultType="com.cloud.commonsmng.entity.appletEntity.User">
+        SELECT id,uRole,job from `user` where id=#{id} and  delFlag = 1
+    </select>
+
+    <select id="getUserListByRole" resultType="String">
+        select ur.userid  from userrolerelation ur  left join  role r on ur.roleid  = r.id  left join user u on ur.userid = u.id where r.`code` = #{role} and  u.delFlag = 1
+    </select>
+
+
+    <select id="getCountByUser" parameterType="String"
+            resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM userrolerelation  ur left join role r on ur.roleid = r.id
+        WHERE ur.userid = #{id} and r.code = #{code}
+    </select>
+
+    <update id="updateUserCherk" parameterType="java.lang.String">
+        UPDATE `user` set
+        certificationMark = 0
+        WHERE id = (SELECT mu.userId from member_user mu where mu.id = #{id})
+    </update>
+
+    <select id="getRole" parameterType="String"
+            resultType="java.lang.String">
+        select r.code from userrolerelation ur  left join role r on ur.roleid = r.id where ur.userid = #{id} and r.code = #{code}
+    </select>
+</mapper>

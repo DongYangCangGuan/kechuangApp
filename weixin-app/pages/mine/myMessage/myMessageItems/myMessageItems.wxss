@@ -1,0 +1,28 @@
+
+/* pages/mine/getMessage/getMessage.wxss */
+.box{
+  width: 100%;
+  /* height: 100rpx; */
+  padding: 15rpx 0;
+  display: flex;
+  /* flex-direction: column; */
+  border-bottom: 2rpx solid #dbdbdb;
+}
+/* .box1{
+  height: 100rpx;
+  line-height: 100rpx;
+  display: flex;
+  justify-content: space-between;
+} */
+.content{
+    width: 30%;
+  font-family: Arial;
+  font-weight: 600;
+  padding-left: 40rpx;
+}
+.time{
+    width: 70%;
+  font-size: 30rpx;
+  padding-right: 40rpx;
+  line-height: 1.8em;
+}

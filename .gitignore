@@ -1,0 +1,10 @@
+.idea
+.idea/libraries
+target
+node_modules
+*.iml
+dist
+node_modules.*
+service-manage/src/main/resources/static/manage
+
+weixin-app/miniprogram_npm/

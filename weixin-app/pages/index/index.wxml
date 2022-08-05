@@ -1,0 +1,143 @@
+<!-- <view class="all"> -->
+  <view class="all">
+  <view class="title">
+    <view class="notes" bindtap="toAdvices">
+      <!-- <view class="iconfont iconxiaoxi1"></view> -->
+      <mp-badge wx:if="{{ noReadNumber > 0 }}" content="{{ noReadNumber }}" class="myBadge" />
+    </view>
+   
+    <!-- <view class="eXunTitle">科创生态圈</view> -->
+    <view class="swiper_area">
+      <!-- 滚动图片部分开始 -->
+      <view class="photoArea">
+      <view class="swiper" style="background-image: url({{noReadNumber1[0].pic}});margin-top:3%;background-size: 100%;">
+        <view class="swipertitle">{{noReadNumber1[0].title}}</view>
+        <!-- <view class="swipertitle">上海科创基金直投企业</view> -->
+        <!-- <view class="swipertitle2">三迭纪宣布完成数亿元B+轮融资</view> -->
+      </view>
+        <!-- <swiper class="swiper" autoplay="true" circular="true" indicator-dots="true"
+          indicator-color="rgba(225, 225, 225, 1)">
+          <swiper-item wx:for="{{ swiper }}" wx:key="index" data-index="{{ index }}">
+            <image class="photo" src='{{ item.pic }}'>
+              <image class="view11" src="../../images/report/researchBackground.png"></image>
+            </image>
+          </swiper-item>
+        </swiper> -->
+      </view>
+      <!-- 中间图片部分结束 -->
+    </view>
+  </view>
+  <!-- <view class="rdhda">
+    <view class="list">
+      <view>
+        <image class="rdhd11" src="../../images/report/rdhd@.png"></image>
+        <text class="rdhd22">热点活动</text>
+      </view>
+      <view>
+        <image class="rdhd11" src="../../images/report/zxzx@.png"></image>
+        <text class="rdhd22">最新资讯</text>
+      </view>
+      <view>
+        <image class="rdhd11" src="../../images/report/cptj@.png"></image>
+        <text class="rdhd22">产品推荐</text>
+      </view>
+    </view>
+  </view> -->
+  <view class="tit_img">
+    <!-- <image class="view11" src="../../images/report/stqhd.png"></image> -->
+    <image class="view11" src="{{noReadNumber1[1].pic}}"></image>
+    
+  </view>
+  
+  <view class="content">
+    <!-- <view class="content_title">
+      <view class="{{ currentId == 1 ? 'select_content_title_item' : 'content_title_item'}}" bindtap="selected" id="1"
+        data-title="hotHeadline">
+        热点头条 
+      
+      </view>
+      <view class="{{ currentId == 2 ? 'select_content_title_item' : 'content_title_item'}}" bindtap="selected" id="2"
+        data-title="voiceReport">
+        每日资讯
+      </view>
+      <view class="{{ currentId == 2 ? 'select_content_title_item' : 'content_title_item'}}" bindtap="selected" id="2"
+        data-title="voiceReport">
+        每日资讯
+      </view>
+    </view> -->
+    <!-- 两个选项部分结束 -->
+    <!-- 信息展示部分 -->
+   <view class="viewbody1">
+    <view wx:for="{{activitylist}}" wx:key="index" wx:if="{{index<3}}" wx:for-index="index" wx:for-item="item" bindtap="goDetail2" data-theme2="{{item}}" data-theme="entfirm" style="background-image: url({{myBackground1}});background-repeat: no-repeat;margin-top:3%;background-size: 100%;padding: 3% 0;box-sizing: border-box;">
+      <view class="viewbody1view1">
+      
+        <view class="viewbody1view1title">
+          <text>{{item.name}}</text>
+        </view>
+        <view  class="viewbody1image">
+          <view>
+            <image class="viewbody1view1Image2"  src="../../images/report/syzhjy5.png"></image>
+          </view>
+          <!-- 跳转到详情页面 -->
+          <view  data-theme="entfirm" >
+            <image class="viewbody1view1Image" src="../../images/report/xq@.png"></image>
+          </view>
+        </view>
+      </view>
+      <view class="viewbody1view2" >{{item.description}}</view>
+      <!-- <view class="viewbody1view2" bindtap="goDetail2" data-theme="entfirm">嘉定区计划提升区内智慧教育的水平,建设以学生为中心，自组织学习、自适应教学为特征的“未来学校”。</view> -->
+      <!-- <view class="viewbody1view3">
+       
+      </view> -->
+    </view>
+    
+   </view>
+  </view>
+  <view class="tit_img">
+    <!-- <image class="view11" src="../../images/report/kcxw.png"></image> -->
+    <image class="view11" src="{{noReadNumber1[2].pic}}"></image>
+  </view>
+  <view class="view3color">
+    <!-- <view class="view3aa">
+      <view class="view3sizetitle">习近平会见平安建设表彰大会代表</view>
+      <view class="view3">
+        <view class="view3top">置顶</view>
+        <view class="iconfont xiaoxi"></view>
+        <view class="view3number">7</view>
+        <view class="view3title">新华网</view>
+      </view>
+    </view>
+    <view class="view3aa">
+      <view class="view3sizetitle">中国人办奥运 细节有多绝?</view>
+      <view class="view3" >
+        <view class="view3top">置顶</view>
+        <view class="iconfont xiaoxi"></view>
+        <view class="view3number">7</view>
+        <view class="view3title">人民网政务</view>
+      </view>
+      
+    
+    </view> -->
+    <!-- <view class="view3bb" bindtap="test">
+      <view class="view3bb1" >
+        <view class="view3bbtitle">基带芯片第一股！上海科创基金投资组合企业翱捷科技科创板上市</view>
+          <view class="view3bbbtitle2number">2022-01-14 14:25</view>
+      </view>
+      <view> <image class="view3bbimage" src="../../images/report/bodytitle1.jpg"></image></view>
+    </view> -->
+
+    <scroll-view class="content_img_info" scroll-y="true" lower-threshold="100" bindscrolltolower="bindscrolltolower">
+      <view class="view3bb" wx:for="{{newsList}}" wx:key="index" wx:for-index="index" wx:for-item="item" data-theme="{{item.newsLink}}" bindtap="test">
+        <view class="view3bb1">
+          <view class="view3bbtitle">{{item.title}}</view>
+            <view class="view3bbbtitle2number">{{item.createTime}}</view>
+        </view>
+        <view> <image class="view3bbimage" src="{{item.newsPic}}"></image></view>
+      </view>
+      <view wx:if="{{showBottom}}" class="bottomHint">已经到底了！</view>
+    </scroll-view>
+
+    
+  </view>
+   
+</view>

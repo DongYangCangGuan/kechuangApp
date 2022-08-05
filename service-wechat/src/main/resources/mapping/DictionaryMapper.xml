@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.servicewechat.mapper.DictionaryMapper">
+
+<!--    <resultMap id="dictionary" type="com.cloud.commonsmng.javaBean.Dictionary">-->
+<!--        <id      property="id"        column="id"/>-->
+<!--        <result  property="code"      column="code"/>-->
+<!--        <result  property="name" column="name"/>-->
+<!--        <result  property="kind"   column="kind"/>-->
+<!--        <result  property="creatorid"  column="creatorid"/>-->
+<!--        <result  property="createtime"  column="createtime"/>-->
+<!--        <result  property="modifierid"  column="modifierid"/>-->
+<!--        <result  property="modifytime"  column="modifytime"/>-->
+<!--        <result  property="pic"  column="pic"/>-->
+<!--        <result  property="picurl"  column="picurl"/>-->
+<!--        <result  property="modifyname"  column="modifyname"/>-->
+<!--        <result  property="isused"  column="isused"/>-->
+<!--        <result  property="kindCode"  column="kindCode" />-->
+<!--    </resultMap>-->
+    <!--根据kind查询字典表中的数据-->
+    <select id="selectByKind" resultType="com.cloud.commonsmng.entity.appletEntity.Dictionary" parameterType="java.lang.String">
+        SELECT distinct(substring_index(name,'(',1)) name from dictionary where kind=#{kind} and isused=1
+    </select>
+
+    <!--根据父级编号查询字典表中的数据-->
+    <select id="selectByParent" resultType="com.cloud.commonsmng.entity.appletEntity.Dictionary" parameterType="java.lang.String">
+        SELECT
+            id,
+            `code`,
+            `name`,
+            kind,
+            creatorid,
+            createtime,
+            modifierid,
+            modifytime,
+            pic,
+            picurl,
+            isused,
+            `index`,
+            `parameter`,
+            `type`,
+            `value`,
+            parentId
+        from dictionary where
+        <if test="parentId != null and parentId != ''">
+            parentId=#{parentId}
+        </if>
+        <if test="kind != null and kind != ''">
+            and kind = #{kind}
+        </if>
+           and isused=1
+        order by `index`
+    </select>
+</mapper>

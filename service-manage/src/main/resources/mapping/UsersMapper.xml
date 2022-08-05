@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.servicemanage.mapper.UsersMapper">
+    <resultMap id="userinfo" type="com.cloud.commonsmng.entity.BaseUserInfo">
+        <id property="id" column="id"/>
+        <result property="nickName" column="nickName"/>
+        <result property="userName" column="userName"/>
+        <result property="email" column="email"/>
+        <result property="departmentId" column="departmentId"/>
+        <result property="headImg" column="headImg"/>
+        <result property="gender" column="gender"/>
+        <result property="deptName" column="deptName"/>
+        <collection property="listrole" select="getRoleByUserid" column="id">
+        </collection>
+    </resultMap>
+
+    <resultMap id="getRole" type="com.cloud.commonsmng.entity.BaseRole">
+        <id property="id" column="id"/>
+        <result property="code" column="code"/>
+        <result property="name" column="name"/>
+    </resultMap>
+
+    <select id="getUsersByLoginName" resultMap="userinfo">
+        SELECT a.*,
+               b.`name` AS deptName
+        FROM `user` a
+                 LEFT JOIN department b ON a.departmentId = b.id
+        WHERE a.uRole = 0
+          AND a.userName = #{userName}
+          AND a.`passWord` = #{passWord}
+    </select>
+
+    <select id="getUsersByID" resultMap="userinfo">
+        SELECT a.userName
+        FROM `user` a
+        WHERE id = #{id}
+    </select>
+
+    <select id="getRoleByUserid" parameterType="String" resultMap="getRole">
+        SELECT a.id,
+               a.`code`,
+               a.`name`
+        FROM role a
+                 INNER JOIN userrolerelation b ON a.id = b.roleid
+            AND b.userid = #{id}
+    </select>
+
+    <select id="getUserInfo" resultType="com.cloud.commonsmng.entity.BaseUserInfo">
+        SELECT a.id,
+               a.nickName,
+               a.userName,
+               a.email,
+               a.phone,
+               a.headImg,
+               a.creatorid,
+               a.createtime,
+               a.delFlag,
+               a.gender,
+               a.birthdate
+        FROM `user` a
+        WHERE a.delFlag = 1
+          AND a.userName = #{id}
+    </select>
+
+    <sql id="tmpPageQry">
+        <trim prefix="WHERE" prefixOverrides="AND | OR">
+            u.delFlag =1
+            <if test="pageVo.searchData != null">
+                <if test="pageVo.searchdata.uRole != null and pageVo.searchdata.uRole != '' ">
+                    AND u.uRole = #{pageVo.searchdata.uRole}
+                </if>
+                <if test="pageVo.searchdata.realName != null and pageVo.searchdata.realName != '' ">
+                    AND u.realName LIKE concat('%',#{pageVo.searchdata.realName},'%')
+                </if>
+                <if test="pageVo.searchdata.certificationMark != null and pageVo.searchdata.certificationMark != '' ">
+                    AND u.certificationMark = #{pageVo.searchdata.certificationMark}
+                </if>
+                <if test="pageVo.searchdata.id != null and pageVo.searchdata.id != '' ">
+                    AND u.id LIKE concat('%',#{pageVo.searchdata.id},'%')
+                </if>
+                <if test="pageVo.searchdata.startTime != null and pageVo.searchdata.startTime != ''">
+                    <if test="pageVo.searchdata.endTime != null and pageVo.searchdata.endTime != ''">
+                        AND date_format(u.createTime,'%Y-%m-%d') BETWEEN #{pageVo.searchdata.startTime} AND
+                        #{pageVo.searchdata.endTime}
+                    </if>
+                </if>
+            </if>
+        </trim>
+    </sql>
+
+    <!--//分页-->
+    <sql id="pagination">
+        <if test="pageVo.page!=null">
+            LIMIT ${pageVo.page.beginIndex-1}, ${pageVo.page.pageSize}
+        </if>
+    </sql>
+
+    <!-- 查询总条数-->
+    <select id="getUserCount" parameterType="com.cloud.servicemanage.common.PageVo" resultType="java.lang.Integer">
+        select count(0) from user u
+        <include refid="tmpPageQry"></include>
+    </select>
+
+    <select id="getUserList" parameterType="com.cloud.servicemanage.common.PageVo" resultType="com.cloud.commonsmng.entity.appletEntity.User">
+        select
+        u.id,
+        u.userName,
+        u.passWord,
+        u.openId,
+        u.nickName,
+        u.realName,
+        u.gender,
+        u.birthdate,
+        u.identityCard,
+        u.headImg,
+        u.phone,
+        u.email,
+        --         u.enterpriseName,
+        u.departmentId,
+        u.uRole,
+        u.creatorId,
+        u.createTime,
+        u.modifierId,
+        u.modifyTime,
+        u.certificationMark,
+        u.contactAddress,
+        u.delFlag,
+        u.name,
+        u.loginname,
+        u.mobile,
+        u.pic,
+        u.empid,
+        u.isused,
+        u.sex,
+        u.birthday,
+        u.job,
+        u.memberId,
+        u.userType  as enterpriseName  from user  u
+        <include refid="tmpPageQry"></include>
+        ORDER BY u.createTime DESC
+        <include refid="pagination"></include>
+    </select>
+
+    <!-- 查询总条数-->
+    <select id="getEnterpriseName" parameterType="java.lang.String" resultType="java.lang.String">
+        select  m.enterpriseName as enterpriseName  from user  u LEFT JOIN member_user ur on u.id = ur.userid left join member m on ur.memberId = m.id
+        where u.id = #{id} and ur.delFlag = 1 order by ur.createTime desc LIMIT 0,1
+    </select>
+
+    <insert id="insertUser" parameterType="com.cloud.servicemanage.entity.Users">
+        insert into user(
+            id,
+            userName,
+            passWord,
+            openId,
+            nickName,
+            realName,
+            gender,
+            birthdate,
+            identityCard,
+            headImg,
+            phone,
+            email,
+            enterpriseName,
+            departmentId,
+            uRole,
+            creatorId,
+            createTime,
+            modifierId,
+            modifyTime,
+            certificationMark,
+            contactAddress,
+            delFlag,
+            name,
+            loginname,
+            mobile,
+            pic,
+            empid,
+            isused,
+            sex,
+            birthday,
+            job,
+            memberId,
+            userType
+        )
+        VALUES (
+                   uuid(),
+                   #{userName},
+                   #{passWord},
+                   #{openId},
+                   #{nickName},
+                   #{realName},
+                   #{gender},
+                   #{birthdate},
+                   #{identityCard},
+                   #{headImg},
+                   #{phone},
+                   #{email},
+                   #{enterpriseName},
+                   #{departmentId},
+                   #{uRole},
+                   #{creatorId},
+                   now(),
+                   #{modifierId},
+                   now(),
+                   #{certificationMark},
+                   #{contactAddress},
+                   1,
+                   #{name},
+                   #{loginname},
+                   #{mobile},
+                   #{pic},
+                   #{empid},
+                   #{name},
+                   1,
+                   #{birthday},
+                   #{job},
+                   #{memberId},
+                   #{userType}
+               )
+    </insert>
+
+    <!--删除角色-->
+    <delete id="deleteUser" parameterType="java.lang.String">
+        delete from user   where  id=#{id}
+    </delete>
+
+    <update id="updateUser" parameterType="com.cloud.servicemanage.entity.Users">
+        update user set
+                        userName =  #{userName},
+                        passWord =  #{passWord},
+                        openId =  #{openId},
+                        nickName =  #{nickName},
+                        realName =  #{realName},
+                        gender =  #{gender},
+                        birthdate = #{birthdate},
+                        identityCard = #{identityCard},
+                        headImg = #{headImg},
+                        phone = #{phone},
+                        email = #{email},
+                        enterpriseName = #{enterpriseName},
+                        departmentId = #{departmentId},
+                        uRole = #{uRole},
+                        creatorId = #{creatorId},
+                        createTime = #{createTime},
+                        modifierId = #{modifierId},
+                        modifyTime = #{modifyTime},
+                        certificationMark = #{certificationMark},
+                        contactAddress = #{contactAddress},
+                        delFlag = #{delFlag},
+                        name = #{name},
+                        loginname = #{loginname},
+                        mobile = #{mobile},
+                        pic = #{pic},
+                        empid = #{empid},
+                        isused = #{isused},
+                        sex = #{sex},
+                        birthday = #{birthday},
+                        job = #{job},
+                        memberId = #{memberId},
+                        userType = #{userType}
+        where  id = #{id}
+    </update>
+</mapper>

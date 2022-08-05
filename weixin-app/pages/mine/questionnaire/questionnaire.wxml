@@ -1,0 +1,39 @@
+<!--pages/questionnaire/questionnaire.wxml-->
+<view class="container-questionnaire">
+  <view class="header">
+    <view class="black"></view>
+    <view class="questionnaire">问卷</view>
+  </view>
+  <view class="box" wx:for="{{questionList}}" wx:key="index">
+    <view class="box_top">
+        <view class="card">
+            <view>{{item.name}}</view>
+        </view>
+    </view>
+    <view class="box_bottom">
+        <!-- <view class="img">
+            <image src="{{productRecommendationList[0].img}}"></image>
+        </view>
+        <view class="img">
+            <image src="{{productRecommendationList[1].img}}"></image>
+        </view>
+        <view class="more" bindtap="getQesTJ">查看更多推荐 >></view> -->
+        <view class="card">
+            <view>{{item.createTime}}</view>
+            <view style="color: rgb(107, 107, 107);font-size: 14px;" 
+                bindtap="getQes"  data-b="{{item.id}}">问卷详情 >></view>
+        </view>
+    </view>
+  </view>
+
+  <!-- <view class="footer">
+    <button bindtap="getQesTJ">跳转产品推荐页</button>
+  </view> -->
+
+  
+  <!-- <view class="box" bindtap="getQesTJ"  data-b="{{item.id}}" wx:for="{{questionList}}" wx:key="index">
+    <view class="card">
+      <view class="left">跳转产品推荐页</view>
+    </view>
+  </view> -->
+</view>

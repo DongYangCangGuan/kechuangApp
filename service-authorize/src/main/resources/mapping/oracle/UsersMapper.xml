@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.serviceauthorize.mapper">
+
+
+    <resultMap id="userinfo" type="com.cloud.commonsmng.entity.BaseUserInfo">
+        <id  property="id" column="id"/>
+        <result  property="name" column="name"/>
+        <result  property="loginname" column="loginname"/>
+        <result  property="email" column="email"/>
+        <result  property="departmentid" column="departmentid"/>
+        <result  property="pic" column="pic"/>
+        <result  property="sex" column="sex"/>
+        <result property="deptName" column="deptName"/>
+        <collection property="listrole" select="getRoleByUserid" column="id">
+        </collection>
+    </resultMap>
+
+
+    <resultMap id="getRole" type="com.cloud.commonsmng.entity.BaseRole">
+        <id  property="id" column="id"/>
+        <result  property="code" column="code"/>
+        <result  property="name" column="name"/>
+    </resultMap>
+
+    <select id="getUsersByLoginName" resultMap="userinfo">
+	    SELECT
+                USI.ID             AS id,
+                USI.NAME           AS name,
+                USI.DEPARTMENTID   AS departmentid,
+                USI.EMPID          AS empid,
+                DET.NAME           AS departname,
+                USI.LOGINNAME      AS loginname,
+                USI.EMAIL          AS email,
+                USI.PIC            AS pic,
+                USI.SEX            AS sex
+
+          FROM USER_INFO USI
+          LEFT JOIN DEPARTMENT DET ON USI.DEPARTMENTID	= DET.CODE
+         WHERE USI.LOGINNAME = #{LOGINNAME} AND USI.PASSWORD = #{PASSWORD}
+    </select>
+
+    <!--通过id获取用户-->
+    <select id="getUsersByID" resultMap="userinfo">
+        SELECT
+                USI.ID             AS id,
+                USI.NAME           AS name,
+                USI.DEPARTMENTID   AS departmentid,
+                USI.EMPID          AS empid,
+                DET.NAME           AS departname,
+                USI.LOGINNAME      AS loginname,
+                USI.EMAIL          AS email,
+                USI.PIC            AS pic,
+                USI.SEX            AS sex
+          FROM USER_INFO USI WHERE USI.ID = #{ID}
+    </select>
+
+
+    <!--通过用户id获取角色-->
+    <select id="getRoleByUserid" resultMap="getRole" parameterType="java.lang.String">
+        SELECT
+                ROL.ROL_ID 		    AS id,
+			    ROL.ROL_NAME		AS name,
+			    ROL.ROL_CODE	    AS code
+          FROM  ROLE ROL
+    INNER JOIN  USERROLERELATION URRL ON URRL.ROLEID = ROL.ROL_ID AND  URRL.USERID = #{ID}
+    </select>
+
+</mapper>

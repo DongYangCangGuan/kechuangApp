@@ -1,0 +1,56 @@
+.voice_container {
+  background-color: #FBF7F7;
+  width: 100%;
+  padding-bottom: 50rpx;
+}
+.top {
+  width: 100%;
+  height: 260rpx;
+}
+.content {
+  width: 85%;
+  margin: 20rpx auto;
+}
+.con_item {
+  margin: 40rpx 0;
+}
+.inputicon {
+  position: absolute;
+  margin-left: 10rpx;
+}
+.inputbox {
+  border: 1rpx solid rgb(43, 125, 247);
+  height: 80rpx;
+  line-height: 80rpx;
+  background: #ffffff;
+  margin: 20rpx 0;
+  padding-left: 70rpx;
+}
+/* 循环input框 */
+.inputbox2 {
+  border: 1rpx solid rgb(43, 125, 247);
+  height: 80rpx;
+  line-height: 80rpx;
+  background: #ffffff;
+  margin: 20rpx 0;
+  padding-left: 20rpx;
+}
+.checkBox {
+  margin: 30rpx 0;
+}
+textarea {
+  width: 100%;
+  border: 1rpx solid rgb(43, 125, 247);
+  margin: 20rpx 0;
+  background: #ffffff;
+}
+.footer {
+  margin-top: 150rpx;
+}
+button {
+  margin-top: 50rpx;
+  width: 80%!important;
+  color: #ffffff;
+  background: #0577C8;
+  border-radius: 20rpx;
+}

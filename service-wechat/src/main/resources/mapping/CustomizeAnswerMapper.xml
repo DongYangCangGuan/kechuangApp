@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.servicewechat.mapper.CustomizeAnswerMapper">
+    <resultMap id="CustomizeAnswerEntity" type="com.cloud.commonsmng.entity.appletEntity.CustomizeAnswer">
+        <id property="id" column="id"/>
+        <result property="questionDescription" column="questionDescription"/>
+        <result property="answer" column="answer"/>
+        <result property="createTime" column="createTime"/>
+        <result property="reply" column="reply"/>
+        <result property="replyTime" column="replyTime"/>
+        <result property="answer" column="answer"/>
+        <result property="modifyTime" column="modifyTime"/>
+        <association property="answerUser" javaType="com.cloud.commonsmng.entity.appletEntity.User">
+            <result column="answerNickName" property="nickName"/>
+            <result column="answerImg" property="headImg"/>
+        </association>
+
+        <association property="replyerUser" javaType="com.cloud.commonsmng.entity.appletEntity.User">
+            <result column="replyerNickName" property="nickName"/>
+            <result column="replyerImg" property="headImg"/>
+        </association>
+    </resultMap>
+
+    <!--sql 分页-->
+    <sql id="pagination">
+        <if test="pageVo.page!=null">
+            LIMIT ${pageVo.page.beginIndex-1}, ${pageVo.page.pageSize}
+        </if>
+    </sql>
+
+    <select id="getCustomizeAnswerPageVoByQuestionId" parameterType="com.cloud.servicewechat.common.PageVo"
+            resultMap="CustomizeAnswerEntity">
+        SELECT
+        cq.questionDescription,
+        ca.answer,
+        ca.createTime,
+        ca.reply,
+        ca.replyTime,
+        u1.nickName AS answerNickName,
+        u1.headImg AS answerImg,
+        u2.nickName AS replyerNickName,
+        u2.headImg AS replyerImg,
+        ca.modifyTime
+        FROM customize_answer ca
+        LEFT JOIN customize_question cq ON cq.id = ca.questionId AND ca.delFlag = 1
+        LEFT JOIN `user` u1 ON u1.delFlag = 1 AND u1.uRole = 1 AND u1.id = ca.creatorId
+        LEFT JOIN `user` u2 ON u2.delFlag = 1 AND u2.uRole = 0 AND u2.id = ca.replyerId
+        WHERE ca.delFlag = 1
+        AND ca.questionId = #{pageVo.searchdata.questionId}
+        ORDER BY ca.modifyTime DESC
+        <include refid="pagination"/>
+    </select>
+
+    <insert id="addCustomizeAnswer" parameterType="java.util.List">
+        <if test="answerList != null and answerList.size() > 0">
+            INSERT INTO customize_answer
+            (id, questionId,creatorId, answer, createTime,modifierId,modifyTime,delFlag)
+            VALUES
+            <foreach collection="answerList" index="index" item="item" separator=",">
+                (#{item.id},#{item.questionId}, #{item.creatorId}, #{item.answer},NOW(),#{item.modifierId},NOW(),1)
+            </foreach>;
+        </if>
+    </insert>
+
+
+</mapper>

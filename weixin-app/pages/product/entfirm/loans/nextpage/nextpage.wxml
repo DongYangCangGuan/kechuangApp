@@ -1,0 +1,84 @@
+<view class="nextpage_container">
+    <view>
+        <view class="nav_title">
+            <view class="{{currentIndex == 1 ? 'selected' : ''}}" id="1" bindtap="getCurrentIndex">
+                <text>产品推荐</text>
+            </view>
+            <view class="{{currentIndex == 2 ? 'selected' : ''}}" id="2" bindtap="getCurrentIndex">
+                <text>最新产品</text>
+            </view>
+            <view class="{{currentIndex == 3 ? 'selected' : ''}}" id="3" bindtap="getCurrentIndex">
+                <text>最热产品</text>
+            </view>
+        </view>
+    </view>
+    <view class="content"
+          style="background-image: url({{myBackground5}});background-position:0 80rpx;background-size: 100%;background-repeat:no-repeat;"
+    >
+        <scroll-view class="con_scroll">
+            <view class="con_item" bindtap="goDetail" data-productlist='{{item}}' wx:for="{{Latest}}" wx:key="index" wx:for-index="index" wx:for-item="item">
+                <view class="item_title">{{item.productName}}</view>
+                <view class="item_content">
+                    <view class="con_img" style="position: relative;">
+                        <image style="z-index:1;"  src="{{item.pic}}"></image>
+                        <!-- <view wx:if="{{item.departmentId==='006'}}" 
+                              style="width: 30px;height:30px;z-index:999;position:absolute;left:0;top: 0;border-radius: 50%;overflow: hidden;" 
+                        >
+                            <image style="width: 100%;height: 100%;" src="https://ssic-capital.com/public-gateway/service-manage/pictureloads/SSVBlogo.jpg"></image>
+                        </view> -->
+                    </view>
+                    <view wx:if="{{item.productFeatures && item.productFeatures !== ''}}" class="text_main"  style="color:black">{{item.productFeatures}}</view>
+                    <view wx:else="{{item.productFeatures && item.productFeatures !== ''}}" class="text_main">{{item.introduction}}</view>
+                </view>
+                
+            </view>
+        </scroll-view>
+        <!-- <scroll-view class="con_scroll">
+            <view class="con_item"  bindtap="goDetail">
+                <view class="con_img">
+                    <image src="../../../../../images/product/img1.png"></image>
+                </view>
+                <view class="con_text">
+                    <view class="text_title">上市贷</view>
+                    <view class="text_main">浦发银行针对高成长科技型企业及拟上市企业开发的纯信用贷款用于巴拉巴拉巴拉巴拉巴拉巴拉巴拉</view>
+                </view>
+            </view>
+            <view class="con_item">
+                <view class="con_img">
+                    <image src="../../../../../images/product/img2.png"></image>
+                </view>
+                <view class="con_text">
+                    <view class="text_title">科技履约贷</view>
+                    <view class="text_main">浦发银行与政府机构、政策性担保公司或担保基金、保险公司合作，各自巴拉巴拉巴拉巴拉巴拉巴拉</view>
+                </view>
+            </view>
+            <view class="con_item">
+                <view class="con_img">
+                    <image src="../../../../../images/product/img3.png"></image>
+                </view>
+                <view class="con_text">
+                    <view class="text_title">小巨人信用贷</view>
+                    <view class="text_main">浦发银行推出的业内首个科技企业纯信用贷款产品</view>
+                </view>
+            </view>
+            <view class="con_item">
+                <view class="con_img">
+                    <image src="../../../../../images/product/img4.png"></image>
+                </view>
+                <view class="con_text">
+                    <view class="text_title">专精特新贷</view>
+                    <view class="text_main">浦发银行最新推出“专精特新信用贷业务，满足企业发展过程中的流动资金巴巴拉拉巴巴拉拉巴巴拉拉</view>
+                </view>
+            </view>
+            <view class="con_item">
+                <view class="con_img">
+                    <image src="../../../../../images/product/img5.png"></image>
+                </view>
+                <view class="con_text">
+                    <view class="text_title">科技含权贷</view>
+                    <view class="text_main">企业与浦发银行合作的基金签署《认股选择协议》，实现增信，获得巴拉巴拉巴拉巴拉啊</view>
+                </view>
+            </view>
+        </scroll-view> -->
+    </view>
+</view>

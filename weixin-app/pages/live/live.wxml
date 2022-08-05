@@ -1,0 +1,63 @@
+<view class="live">
+  <view class="content">
+    <view class="live_list" wx:for="{{liveList}}" wx:key="*this">
+      <view class="live_header">
+        <view>
+          <image src="{{item.portrait}}" mode="widthFix"></image>
+          <text>{{item.username}}</text>
+        </view>
+        <view>
+          <text>#{{item.genre}}</text>
+        </view>
+      </view>
+      <view class="live_content">
+        <text>{{item.introduce}}</text>
+      </view>
+      <view class="live_tail">
+        <view class="live_tail_icon">
+          <text wx:if="{{item.status == 1}}">正在直播 | {{item.popularity}}人气</text>
+          <text wx:if="{{item.status == 2}}">回放 | {{item.attendance}}</text>
+        </view>
+        <image style="width:100%" mode="widthFix" src="{{item.pic}}"></image>
+      </view>
+    </view>
+
+    <!-- 模拟直播 -->
+    <view class="live_list">
+      <view class="live_header">
+        <view>
+          <image src="https://vpic.cms.qq.com/nj_vpic/2549831437/1625192388339951989" mode="widthFix"></image>
+          <text class="tilte_name">无聊财经人</text>
+        </view>
+        <view>
+          <text>2021年09月08日</text>
+        </view>
+      </view>
+      <view class="live_content">
+        <text>第15次出手！英国再次重操故技，叫停中资收购！还有2.8万家英企完全依赖中国，这一矛盾做法能持续多久？</text>
+      </view>
+      <view class="live_tail">
+        <txv-video vid="d3274ijrp8g" playerid="txv1" playBtnPosition="center">
+        </txv-video>
+      </view>
+    </view>
+
+    <view class="live_list">
+      <view class="live_header">
+        <view>
+          <image src="https://vpic.cms.qq.com/nj_vpic/1626886439/1617680054943499505" mode="widthFix"></image>
+          <text class="tilte_name">德云社</text>
+        </view>
+        <view>
+          <text>2021年06月22日</text>
+        </view>
+      </view>
+      <view class="live_content">
+        <text>种业板块股票集体上涨，上涨的逻辑什么？</text>
+      </view>
+      <view class="live_tail">
+        <txv-video vid="d3254uzrrir" playerid="txv2" playBtnPosition="center"></txv-video>
+      </view>
+    </view>
+  </view>
+</view>

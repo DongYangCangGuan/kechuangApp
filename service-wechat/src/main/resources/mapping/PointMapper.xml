@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.servicewechat.mapper.PointMapper">
+    <resultMap id="point" type="com.cloud.commonsmng.entity.appletEntity.Point">
+        <id column="id" property="id"></id>
+        <result column="productId" property="productId"></result>
+        <result column="createTime" property="createTime"></result>
+        <association property="product" javaType="com.cloud.commonsmng.entity.appletEntity.Product">
+            <result column="img" property="img"></result>
+            <result column="productName" property="productName"></result>
+            <result column="introduction" property="introduction"></result>
+            <result column="modifyTime" property="modifyTime"></result>
+            <result column="loanAmount" property="loanAmount"></result>
+            <result column="timeLimit" property="timeLimit"></result>
+            <result column="interestRate" property="interestRate"></result>
+        </association>
+        <association property="productPicture" javaType="com.cloud.commonsmng.entity.appletEntity.ProductPicture">
+            <result column="pic" property="pic"></result>
+        </association>
+    </resultMap>
+
+
+    <update id="updateLocationAndAddress" parameterType="com.cloud.commonsmng.entity.appletEntity.Point">
+        UPDATE
+            point
+        SET location = #{point.location},
+            address = #{point.address}
+        WHERE userId = #{point.userId}
+    </update>
+
+    <select id="getPageTotal" parameterType="com.cloud.servicewechat.common.PageVo"
+            resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM point a
+                 left join product p on  a.pageId = p.id
+                 left join product_picture pp on p.img=pp.id
+        where
+            a.userId = #{pageVo.userId}   and  a.type='pd'
+            LIMIT
+            ${pageVo.page.beginIndex-1}, ${pageVo.page.pageSize}
+    </select>
+
+    <sql id="page">
+        <if test="pageVo.page!=null">
+            LIMIT ${pageVo.page.beginIndex-1}, ${pageVo.page.pageSize}
+        </if>
+    </sql>
+
+    <select id="getPointList" parameterType="com.cloud.servicewechat.common.PageVo"
+            resultMap="point">
+        select
+               p.productName,
+               p.introduction,
+               p.loanAmount,
+               p.timeLimit,
+               p.interestRate,
+               pp.pic
+        FROM product p
+                 left join product_picture pp on p.img = pp.id
+                 inner JOIN point a ON a.pageId = p.id
+            AND a.id = (
+                SELECT n.id
+                FROM point n
+                WHERE n.userId = #{pageVo.userId}
+                  AND n.pageId = a.pageId
+                ORDER BY n.modifyTime DESC
+            LIMIT 0, 1)
+        <include refid="page"></include>
+    </select>
+
+    <select id="getPointDetail" parameterType="com.cloud.servicewechat.common.PageVo"
+            resultMap="point">
+        select
+        a.pageId as productId,
+        a.createTime,
+        p.productName,
+        p.introduction,
+        p.loanAmount,
+        p.timeLimit,
+        p.interestRate,
+        pp.pic
+        from
+        point a
+        left join product p on a.pageId = p.id
+        left join product_picture pp on p.img=pp.id
+      where a.userId=#{userId} and  a.productId=#{productId}
+    </select>
+
+
+    <insert id="addPoint" parameterType="com.cloud.commonsmng.entity.appletEntity.PointEntity">
+            INSERT INTO point(
+                id,
+                equipment,
+                version,
+                address,
+                location,
+                consume,
+                openid,
+                dateTime,
+                pageId,
+                type,
+                timeLong,
+                userId,
+                reportId,
+                creatorId,
+                createTime,
+                modifierId,
+                modifyTime
+            )
+            VALUE
+            (uuid(),#{pe.equipment},#{pe.version},
+            #{pe.address},#{pe.location},#{pe.consume},
+            #{pe.openid},#{pe.dateTime},#{pe.pageId},
+            #{pe.type},#{pe.timeLong},#{pe.userId},
+            #{pe.reportId},
+            #{pe.creatorId},NOW(),#{pe.modifierId},NOW());
+    </insert>
+
+</mapper>

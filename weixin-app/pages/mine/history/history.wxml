@@ -1,0 +1,72 @@
+<view class="page1">
+ 
+
+    <view>
+      <view class="bj">
+        <view class="ssd" wx:for="{{dataList}}"  wx:for-item="item" wx:key="index" bindtap="goDetail" data-src="{{item}}">
+          <image class="ssd_img" src='{{item.productPicture.pic}}'></image>
+          <view class="box">
+            <text class="title">{{item.product.productName}}</text>
+            <text class="content">{{item.product.introduction}}</text>
+          </view>
+          <!-- <text class="ssd_collect">❤️</text> -->
+        </view>
+      </view>
+    </view>
+  </view>
+
+
+<!-- <view class="page1">
+  <view class="content">
+    <scroll-view class="content_img_info" scroll-y="true" bindscrolltolower="bindscrolltolower">
+      <view class="content_img_info_item" wx:for="{{kindInfo}}" wx:key="index" data-item="{{ item }}"
+        bindtap="viewDetails">
+        <view class="content_info">
+          <view class="top">
+            <view class="content_info_title">{{  item.title }}</view>
+            <view class="content_text">{{ item.description }}</view>
+            <view class="type">111 -->
+              <!-- <view class="industryArea"> -->
+                <!-- <view class="areaItem" wx:for="{{ item.areaList }}" wx:key="index">{{ item }}</view>
+                <view class="industryItem" wx:for="{{ item.industryList }}" wx:key="index">{{ item }}</view>
+                <view class="economyItem" wx:for="{{ item.economyList }}" wx:key="index">{{ item }}</view>
+                <view class="themeItem" wx:for="{{ item.specialList }}" wx:key="index">{{ item }}</view>111 -->
+              <!-- </view> -->
+              <!-- <view class="labelarea"> -->
+                <!-- <view class="labelarea" wx:if="{{item.reportKind.label == 'freeLimitTime'}}">
+                <image class="labelImage" src="../../../images/report/xm@2x.png"></image>
+              </view>
+              <view class="labelarea" wx:elif="{{item.reportKind.label == 'exclusive' && item.visitStatus == 200}}">
+                <image class="labelImage" src="../../../images/report/zxblack@2x.png"></image>
+              </view>111 -->
+              <!-- <view class="labelarea" wx:elif="{{item.reportKind.label == 'exclusive' && item.visitStatus != 200}}">
+                <image class="labelImage" src="../../../images/report/zxgray@2x.png"></image>
+              </view> -->
+              <!-- </view> -->
+            <!-- </view>
+          </view>
+
+          <view class="bottom">
+            <view class="date">{{ item.modifyTime }}</view>
+              <view catchtap="collect" class="collection" id="{{ item.id }}" data-item="{{ item }}">
+                <image wx:if="{{item.collectFlag > 0}}"
+                  src="../../../images/report/collect_sel@2x.png"></image>
+                <image wx:else
+                  src="../../../images/report/collect_nor@2x.png"></image>
+              </view>111 -->
+              <!-- <view class="favorite">{{item.favorite}}</view> -->
+              <!-- <view class="iconfont iconyanjing"></view>
+              <view class="number">{{ item.articleviews }}</view>
+          </view>
+        </view>
+        <view class="content_img">
+          <image class="image" src="{{ item.pic }}"></image>
+          <view wx:if="{{ reportKind === 'voiceReport' }}" class="play">
+            <image class="playImg" src="../../images/voiceReport/suspend@2x.png"></image>
+          </view>
+        </view>
+      </view>
+      <view wx:if="{{showBottom}}" class="bottomHint">已经到底了！</view>
+    </scroll-view>
+  </view>
+</view>111 -->

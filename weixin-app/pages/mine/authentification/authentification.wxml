@@ -1,0 +1,145 @@
+<!--pages/mine/authentification/authentification.wxml-->
+<view class="auther" wx:if="{{ certificationMark==1}}">
+  <icon type="success" size="93" class="icon-box-img"></icon>
+  <view class="success">
+    亲！已经认证成功了哦
+  </view>
+</view>
+
+<view wx:else>
+
+  <view>
+    <view class="content">
+      <mp-form id="profileForm" rules="{{perfileRules}}" models="{{formData.user}}">
+        <mp-cells>
+          <mp-cell prop="realName" ext-class='erzi'>
+            <view slot='title' class='snow'><text>姓名</text></view>
+            <input bindinput="profileInputChange" data-field="realName" class="weui-input" placeholder="请输入姓名" placeholder-class="placeholder" />
+          </mp-cell>
+          <mp-cell prop="phone">
+            <view slot='title' class='snow'><text>手机号</text></view>
+            <input bindinput="profileInputChange" data-field="phone" class="weui-input" placeholder="请输入手机号" placeholder-class="placeholder" />
+          </mp-cell>
+          <mp-cell prop="email">
+            <view slot='title' class='snow'><text>邮箱</text></view>
+            <input bindinput="profileInputChange" data-field="email" class="weui-input" placeholder="请输入邮箱" placeholder-class="placeholder" />
+          </mp-cell>
+
+          
+          
+            <view class="weui-cell weui-cell_active weui-cell_select weui-cell_select-after">
+						<view class="weui-cell__hd">
+							<label class="weui-label" style="width: 6em;">身份类型</label>
+						</view>
+						<view class="weui-cell__bd">
+                            <picker aria-role="combobox" bindchange="bindPicker1Change" range="{{selectDatas}}">
+                                <view class="weui-select" >{{selectDatas[value1]}}</view>
+                            </picker>
+						</view>
+					</view>
+
+            <view wx:if="{{showJob}}" class="weui-cell weui-cell_active weui-cell_select weui-cell_select-after">
+              <view class="weui-cell__hd">
+                <label class="weui-label" style="width: 6em;">职位</label>
+              </view>
+              <view class="weui-cell__bd">
+                              <picker aria-role="combobox" bindchange="bindPicker4Change" range="{{jobList}}">
+                                  <view class="weui-select">{{jobList[value5]}}</view>
+                              </picker>
+              </view>
+					</view>
+                <view wx:else="{{showJob}}">
+                    <mp-cell prop="">
+                        <view slot='title' class='snow'><text>职位</text></view>
+                        <input bindinput="chooseJob"  class="weui-input" placeholder="请输入职位" placeholder-class="placeholder" />
+                    </mp-cell>
+					</view>
+                    <mp-cell prop="" wx:if="{{MemberType!=2}}">
+                        <view slot='title' class='snow'><text>公司名称</text></view>
+                        <input bindinput="inputType" value="{{companyName}}"  class="weui-input" placeholder="请填入法定名称或简称关键字" placeholder-class="placeholder" />
+                        <scroll-view class='scroll-view' wx:if='{{viewShowed}}' scroll-y>
+                            <view  wx:for="{{list2}}" wx:key="{{index}}">
+                                <view class='user-name' bindtap='showName' data-index="{{index}}">{{item}}</view>
+                            </view>
+                        </scroll-view>
+                    </mp-cell> 
+                    <mp-cell prop="" wx:else>
+                        <view slot='title' class='snow'><text>公司名称</text></view>
+                        <input bindinput="inputType" value="{{kechuang}}"  class="weui-input" disabled placeholder-class="placeholder" />
+                        <!-- <scroll-view class='scroll-view' wx:if='{{viewShowed}}' scroll-y>
+                            <view  wx:for="{{list2}}" wx:key="{{index}}">
+                                <view class='user-name' bindtap='showName' data-index="{{index}}">{{item}}</view>
+                            </view>
+                        </scroll-view> -->
+                    </mp-cell> 
+        <view style="height: 55vh;">
+					
+        </view>
+        </mp-cells>
+        
+      </mp-form>
+    </view>
+    <!-- <view class="footer">
+      <button class="jump" size="default" bindtap="jump">跳过</button>
+      <button class="nextStep" size="default" bindtap="nextStep">下一步</button>
+    </view> -->
+  </view>
+
+  <view>
+    <mp-form id="companyForm" rules="{{companyRules}}" models="{{formData.member}}">
+      <mp-cells>
+        <!-- <mp-cell prop="enterpriseCode"> -->
+          <!-- <view slot='title' class='snow'><text>公司名称</text><text class='red-sgin'>*</text></view>
+          <view class='uinn'>
+            <view class="weui-search-bar flex-row uinn bg_white mar-t">
+              <view class="weui-search-bar__form flex1 flex-row">
+                <input type="text" class="weui-search-bar__input" placeholder="请输入公司名称" value="{{inputVal}}" bindinput="inputType"  class='flex1 mar-l' />
+                <scroll-view class='scroll-view' wx:if='{{viewShowed}}' scroll-y>
+                  <view wx:for="{{carList}}" wx:key="{{index}}" class="msg-item ">
+                    <view class='user-name' bindtap='name' data-index="{{index}}">{{item}}</view>
+                  </view>
+                </scroll-view>
+              </view>
+            </view>
+          </view> -->
+      
+          <!-- <view class="weui-cell weui-cell_active" >
+						<view class="weui-cell__hd"><label class="weui-label">公司编号</label></view>
+						<view class="weui-cell__bd">
+							<input class="weui-input"  disabled="true"  value="{{bianhao}}"  placeholder="请选择公司名称" placeholder-class="weui-input__placeholder" />	<input class="weui-input"  bindinput="inputTyping" placeholder-class="weui-input__placeholder" />
+						</view>
+					</view>
+        
+        <mp-cell prop="pwd">
+          <view slot='title' class='weui-label'><text>认证码</text><text class='red-sgin'>*</text></view>
+          <view class="myInput">
+            <input bindinput="companyInputChange" data-field="pwd" class="weui-input" password='{{passwordType}}' placeholder="请输入认证码" placeholder-class="weui-input__placeholder" />
+          </view>
+        </mp-cell> -->
+       
+      </mp-cells>
+    </mp-form>
+    <view style="position:relative;bottom:160px;left:10%;">
+      <label  class="weui-agree" >
+        <checkbox-group bindchange="checkboxChange"> 
+            <checkbox class="weui-agree__checkbox-check"  value="{{myVal}}" checked="{{is_agree}}"  aria-labelledby="js_agree_txt js_agree_link"/>
+            <i class="weui-agree__checkbox"></i>
+            <span class="weui-agree__text"><text aria-hidden="true" id="js_agree_txt">阅读并同意</text><navigator id="js_agree_link" url="./agreement/agreement" class="weui-agree__link">《科创生态用户协议》</navigator></span>
+          </checkbox-group>
+        </label>
+    </view>
+    <view class="footer">
+      <button class="nextStep" size="default" bindtap="commitApply">确定</button>
+    </view>
+
+    <view aria-role="dialog" aria-modal="true" class="fadeIn" wx:if="{{showDialog}}">
+        <view class="weui-mask"></view>
+        <view class="weui-dialog">
+            <view>您的认证信息已收到，审核通过后将通知您！</view>
+            <view class="weui-dialog__ft">
+                <view aria-role="button" class="weui-dialog__btn weui-dialog__btn_default" bindtap="setEnsure">确定</view>
+            </view>
+        </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.servicewechat.mapper.TrackMapper">
+    <resultMap id="reportEntity" type="com.cloud.commonsmng.entity.appletEntity.Report">
+        <id property="id" column="id"/>
+        <result property="code" column="code"></result>
+        <result property="title" column="title"></result>
+        <result property="pic" column="pic"></result>
+        <result property="description" column="description"></result>
+        <result property="url" column="url"></result>
+        <result property="thumbUpNumber" column="thumbUpNumber"></result>
+        <result property="articleviews" column="articleviews"></result>
+        <result property="modifyTime" column="modifyTime"></result>
+        <result property="favorite" column="favorite"></result>
+        <result property="collectFlag" column="collectFlag"></result>
+        <association property="reportKind" javaType="com.cloud.commonsmng.entity.appletEntity.ReportKind">
+            <id column="id" property="id"/>
+            <result column="reportId" property="reportId"/>
+            <result column="kindId" property="kindId"/>
+            <result column="theme" property="theme"/>
+            <result column="area" property="area"/>
+            <result column="industry" property="industry"/>
+            <result column="label" property="label"/>
+            <result column="special" property="special"/>
+            <result column="economy" property="economy"/>
+            <result column="delFlag" property="delFlag"/>
+        </association>
+    </resultMap>
+
+    <select id="getTrackList" parameterType="com.cloud.servicewechat.common.PageVo" resultMap="reportEntity">
+        SELECT DISTINCT
+        collect.*
+        FROM
+            (
+                SELECT
+                    r.id,
+                    r.`code`,
+                    r.title,
+                    r.pic,
+                    r.description,
+                    r.url,
+                    r.thumbUpNumber,
+                    r.articleviews,
+                    r.modifyTime,
+                    r.favorite,
+                    rk.kindId,
+                    rk.label,
+                    rk.industry,
+                    rk.economy,
+                    rk.special,
+                    a.createTime,
+                    CASE
+                        WHEN collect.delFlag = 1 then 1 ELSE 0
+                        END AS collectFlag
+                FROM
+                    actionpoint a
+                        LEFT JOIN collect ON a.reportId = collect.reportId
+                        AND a.userId = collect.userId
+                        LEFT JOIN report r ON a.reportId = r.id
+                        LEFT JOIN reportkind rk ON r.id = rk.reportId
+                WHERE
+                    a.reportId IS NOT NULL
+                  AND a.consume = '进入页面'
+            <if test="pageVo.searchdata.userId!= null">
+                 and a.userId = #{pageVo.searchdata.userId}
+            </if>
+            <if test="pageVo.searchdata.enterpriseCode != null">
+                 and a.enterpriseCode = #{pageVo.searchdata.enterpriseCode}
+            </if>
+                ) collect
+        order by collect.createTime desc
+                limit ${pageVo.page.beginIndex-1}, ${pageVo.page.pageSize}
+
+    </select>
+
+    <!--查询页面总条数-->
+    <select id="getPageTotal" parameterType="com.cloud.servicewechat.common.PageVo"
+            resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM track as a
+                 left join report b on a.reportId = b.id
+        WHERE a.delFlag = 1
+    </select>
+
+</mapper>

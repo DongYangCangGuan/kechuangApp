@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.servicemanage.mapper.LogMapper">
+       <select id="getLogInfo"  resultType="com.cloud.commonsmng.entity.Loginfo" parameterType="com.cloud.servicemanage.common.PageVo">
+           select * from loginfo 
+           <where>
+               1=1 <include refid="getLogInfo"></include>
+           </where>   <include refid="page1"></include>
+       </select>
+    <select id="getPageTotal"  resultType="java.lang.Integer" parameterType="com.cloud.servicemanage.common.PageVo">
+        select count(1) from loginfo
+        <where>
+            1=1 <include refid="getLogInfo"></include>
+        </where>
+    </select>
+    <select id="getLogHour" resultType="com.cloud.servicemanage.entity.LogHourData" parameterType="java.lang.String">
+        SELECT HOUR(e.recivetime) as hourDt,count(*) as countNum FROM loginfo e  where 1=1
+            <!-- 引用一个sql片段 -->
+            <include refid="getLogInfoSelect"></include>
+        and DATE_SUB(CURDATE(), INTERVAL 0 DAY) &lt;= date(e.recivetime) GROUP BY HOUR(e.recivetime) ORDER BY Hour(e.recivetime)
+    </select>
+    <select id="getLogHourCount"   resultType="java.lang.Integer" parameterType="java.lang.String">
+        SELECT count(1)  as count FROM loginfo e  where 1=1
+            <!-- 引用一个sql片段 -->
+        <include refid="getLogInfoSelect"></include>
+        and DATE_SUB(CURDATE(), INTERVAL 0 DAY) &lt;= date(e.recivetime)
+    </select>
+    <select id="getLogWeek" resultType="com.cloud.servicemanage.entity.LogHourData" parameterType="java.lang.String">
+        select count(e.id) as countNum,substr(e.recivetime,1,10) as hourDt  from loginfo e  where 1=1
+            <!-- 引用一个sql片段 -->
+            <include refid="getLogInfoSelect"></include>
+        and DATE_SUB(CURDATE(), INTERVAL 7 DAY) &lt;= date(e.recivetime) GROUP BY substr(e.recivetime,1,10) ORDER BY substr(e.recivetime,1,10)
+    </select>
+    <select id="getLogWeekCount"   resultType="java.lang.Integer" parameterType="java.lang.String">
+        select count(1) as count  from loginfo e  where 1=1
+            <!-- 引用一个sql片段 -->
+            <include refid="getLogInfoSelect"></include>
+        and DATE_SUB(CURDATE(), INTERVAL 7 DAY) &lt;= date(e.recivetime)
+    </select>
+    <select id="getLogMonth" resultType="com.cloud.servicemanage.entity.LogHourData" parameterType="java.lang.String">
+        select count(e.id) as countNum,substr(e.recivetime,1,10) as hourDt from loginfo e  where 1=1
+            <!-- 引用一个sql片段 -->
+            <include refid="getLogInfoSelect"></include>
+        and DATE_SUB(CURDATE(), INTERVAL 30 DAY) &lt;= date(e.recivetime) GROUP BY substr(e.recivetime,1,10) ORDER BY  substr(e.recivetime,1,10)
+    </select>
+    <select id="getLogMonthCount"   resultType="java.lang.Integer" parameterType="java.lang.String">
+        select count(1) as count from loginfo e  where 1=1
+            <!-- 引用一个sql片段 -->
+            <include refid="getLogInfoSelect"></include>
+        and DATE_SUB(CURDATE(), INTERVAL 30 DAY) &lt;= date(e.recivetime)
+    </select>
+    <select id="getLogDateCount"   resultType="java.lang.Integer" parameterType="java.lang.String">
+        select count(1) as count from loginfo e  where 1=1
+        <!-- 引用一个sql片段 -->
+        <include refid="getLogInfoSelect"></include>
+        and  #{startDate}&lt;= date(e.recivetime)  and  #{endDate} &gt;=  date(e.recivetime)
+    </select>
+    <select id="getLogDate" resultType="com.cloud.servicemanage.entity.LogHourData" parameterType="java.lang.String">
+        select count(e.id) as countNum,substr(e.recivetime,1,10) as hourDt  from loginfo e  where 1=1
+        <!-- 引用一个sql片段 -->
+        <include refid="getLogInfoSelect"></include>
+        and  #{startDate} &lt;= date(e.recivetime)  and  #{endDate} &gt;=  date(e.recivetime)  GROUP BY substr(e.recivetime,1,10) ORDER BY  substr(e.recivetime,1,10)
+    </select>
+    <sql id="getLogInfoSelect">
+        <if test="actionType==0 or actionType==1">
+            and e.actiontype=#{actionType}
+        </if>
+        <if test="actionType==2">
+            and e.log_level='error'
+        </if>
+        <if test="actionType==3">
+            and e.type=1
+        </if>
+    </sql>
+    <!--分页-->
+    <sql id="page1">
+        <if test="page!=null">
+            LIMIT ${page.beginIndex-1},${page.endIndex}
+        </if>
+    </sql>
+    <sql id="getLogInfo">
+        <if test="searchdata !=null">
+        <if test="searchdata.actiontype!= null and ''!=searchdata.actiontype">
+            and actiontype =#{searchdata.actiontype}
+        </if>
+        <if  test="searchdata.log_level!= null and ''!=searchdata.log_level">
+            and log_level=#{searchdata.log_level}
+        </if>
+        <if  test="searchdata.module!= null and ''!=searchdata.module">
+            and module=#{searchdata.module}
+        </if>
+        <if  test="searchdata.type!= null and ''!=searchdata.type">
+            and type=#{searchdata.type}
+        </if>
+        <if  test="searchdata.endDate!= null and ''!=searchdata.endDate">
+            and recivetime &lt;= #{searchdata.endDate}
+        </if>
+        <if  test="searchdata.startDate!= null and ''!=searchdata.startDate">
+            and recivetime &gt;= #{searchdata.startDate}
+        </if>
+        </if>
+    </sql>
+</mapper>

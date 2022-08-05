@@ -1,0 +1,17 @@
+<!--pages/mine/authentification/subSuccess/subSuccess.wxml-->
+<view class="all">
+<!-- 进入客服 -->
+  <view class='modal-bg' wx:if="{{showConcatModal}}">
+      <view class='modal-content-bg'>
+        <text class='modal-text'>即将进入客服会话，点击进入</text>
+        <button class='modal-btn' open-type='contact'>进入</button>
+      </view>
+    </view>
+<!-- 弹窗 -->
+ <view wx:else class="win">
+   <mp-dialog   show="{{true}}" bindbuttontap="tapDialogButton" buttons="{{buttons}}" mask="{{false}}">
+     <view class="text">提交成功，是否联系客户经理进行签约</view>
+   </mp-dialog>
+ </view>
+
+</view>

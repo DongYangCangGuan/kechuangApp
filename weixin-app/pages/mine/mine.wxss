@@ -1,0 +1,440 @@
+.one {
+  text-align: center;
+    vertical-align: middle;
+    font-size: small;
+    color: beige;
+    font-weight: 600;
+}
+
+.number {
+  display: inline-block;
+  position: relative;
+  left: 358rpx;
+  top: -22rpx;
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 20rpx;
+  background-color: red;
+}
+
+.page_container {
+  background-color: #ECECEF;
+  /* display: column; */
+  height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.user_photo_box {
+  width: 160rpx;
+  height: 160rpx;
+  overflow: hidden;
+  border-radius: 50%;
+  background: #dbdbdb;
+}
+
+
+.iconfont {
+  font-size: 42rpx;
+  color: #999;
+  display: flex;
+  align-items: center;
+}
+
+.iconyoujiantou {
+  font-size: 32rpx;
+}
+
+
+.page_header {
+  padding-top: 70rpx;
+}
+
+.manage_btn {
+  margin-left: 30rpx
+}
+
+.page_title {
+  font-size: 34rpx;
+  text-align: center;
+  color: #fff;
+}
+
+.page_content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 40rpx;
+}
+
+.iconxiaoxi1 {
+  font-size: 40rpx;
+}
+.page_header_box {
+  width: 686rpx;
+  margin: 0 auto;
+}
+/* 用户头像 */
+.user_header {
+  display: flex;
+  padding-left: 30rpx;
+}
+
+.user_header_left {
+  flex-shrink: 1;
+  margin-right: 4.3%;
+}
+
+.user_phono {
+  width: 100%;
+  height: 100%;
+}
+
+.user_photo_not.show,
+.user_phono.show {
+  display: inline-block;
+}
+
+.user_photo_not {
+  background-color: #ECECEF;
+}
+
+.logout {
+  color: #165689;
+  font-size: 20rpx;
+  text-align: center;
+  margin-left: 8rpx;
+}
+
+.user_header_right {
+  flex-grow: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+
+.user_header_right_left {
+  display: flex;
+  align-items: center;
+}
+
+
+.login_not.show,
+.logined.show {
+  display: flex;
+}
+
+.memberInfo {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-left: 25rpx;
+}
+.showUserInfo{
+  display: flex;
+  width: 565rpx;
+  height: 176rpx;
+   position: relative;
+}
+.user_name {
+  position: absolute;
+  top: 20rpx;
+  left: 0;
+  font-size: 40rpx;
+  font-weight: 600;
+  color: #ffffff;
+  width: 45%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.authentication{
+  position: absolute;
+  top: 34rpx;
+  left: 290rpx;
+  font-size: 26rpx;
+}
+.authentication_right{
+  display: flex;
+  justify-content: space-between;
+}
+.yirenzheng{
+  font-size: 26rpx;
+  line-height: 60rpx;
+  color: rgb(217,144,7);
+}
+.authentication_right>image{
+  padding-left: 10rpx;
+  width: 40rpx;
+  height: 44rpx;
+}
+.weirenzheng{
+  font-size: 26rpx;
+  line-height: 60rpx;
+}
+.user_account {
+  position: absolute;
+  top: 110rpx;
+  left: 0rpx;
+  font-size: 28rpx;
+  color: #ffffff;
+}
+
+.user_none {
+  display: none;
+}
+
+.login_not {
+  height: 44rpx;
+  font-size: 32rpx;
+  color: #747476 100%;
+}
+
+
+.user_header_right_right {
+  position: absolute;
+  right: 3vh;
+  top: 3vh;
+}
+
+.page_content_top,
+.page_content_bottom {
+  background-color: #fff;
+  width: 627rpx;
+  border-radius: 16rpx;
+  padding: 10rpx 30rpx;
+  margin-bottom: 20rpx;
+}
+
+.box {
+  height: 130rpx;
+  display: flex;
+  position: relative;
+  align-items: center;
+  border-bottom: 1rpx solid #ECECEF;
+}
+
+
+
+.iconfont_box {
+  height: 56rpx;
+  width: 56rpx;
+  margin-right: 24rpx;
+}
+
+.iconfont_box_image {
+  width: 100%;
+  height: 100%;
+}
+
+.iconfont_box_s {
+  position: absolute;
+  right: 12rpx;
+}
+
+/* 行内员工页面 */
+.top {
+  /* height: 290rpx; */
+  background-color: #F5F6F7;
+  border-radius: 20rpx;
+  margin: 32rpx;
+}
+
+.part1 {
+  padding: 28rpx 50rpx;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+  padding: 28rpx 50rpx;
+  margin-top: 40rpx;
+}
+
+.part1-2 {
+  position: relative;
+}
+
+.part1-2:not(:last-child):after {
+  position: absolute;
+  content: "";
+  width: 1px;
+  height: 20px;
+  background: #D8D8D8;
+  right: -33rpx;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.part1-2 text {
+  font-size: 26rpx;
+  color: #999999;
+  float: right;
+}
+
+.part1 .part1-2 view {
+  margin-bottom: 10rpx;
+}
+
+.indicators {
+  width: 106rpx;
+  height: 50rpx;
+  font-family: PingFangSC-Semibold;
+  font-size: 16px;
+  color: #333333;
+  text-align: center;
+  text-align: center;
+  font-weight: bold;
+}
+
+/*  资讯报告运营数据 */
+.tools {
+  /* height: 270rpx; */
+  background-color: #F5F6F7;
+  display: flex;
+  flex-direction: column;
+  border-radius: 20rpx;
+  margin: 16rpx 32rpx;
+  padding: 36rpx 32rpx;
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  text-align: center;
+  align-content: center;
+}
+
+.iconLeft_1 {
+  display: flex;
+  width: 10rpx;
+  height: 40rpx;
+  background-color: #f88542;
+  border-radius: 10rpx;
+}
+
+.left_text {
+  display: flex;
+  margin-left: 20rpx;
+  font-family: PingFangSC-Semibold;
+  font-size: 14px;
+  color: #333333;
+  font-weight: 600;
+}
+
+.right_text {
+  display: flex;
+  margin-left: 60rpx;
+  font-family: PingFangSC-Regular;
+  font-size: 12px;
+  color: #999999;
+  font-weight: 400;
+}
+
+
+.title_two {
+  margin: 20rpx 0;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.left_icon {
+  display: flex;
+  width: 50%;
+  margin-left: 12rpx;
+}
+
+
+.left_icon .iconfont {
+  font-size: 50rpx;
+  color: #8B8D8F;
+}
+
+.data_ananlyse .iconfont {
+  font-size: 50rpx;
+  color: #8B8D8F;
+}
+
+.right_content {
+  padding-left: 20rpx;
+  display: flex;
+  color: #8B8D8F;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* .number {
+  font-weight: bold;
+  font-size: 16px;
+  font-family: PingFangSC-Semibold;
+  color: #333333;
+  font-weight: 600;
+} */
+
+.content {
+  font-family: PingFangSC-Regular;
+  font-size: 12px;
+  color: #999999;
+  font-weight: 400;
+}
+
+.title_three {
+  display: flex;
+  justify-content: space-around;
+}
+
+.points {
+  background-color: #F5F6F7;
+  display: flex;
+  flex-direction: column;
+  border-radius: 20rpx;
+  margin: 16rpx 32rpx;
+  padding: 36rpx 32rpx;
+}
+
+
+
+.iconLeft_2 {
+  display: flex;
+  width: 10rpx;
+  height: 40rpx;
+  background-color: #003366;
+  border-radius: 10rpx;
+}
+
+.point_content {
+  display: flex;
+  justify-content: space-around;
+}
+
+.data_ananlyse {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.data_ananlyse text {
+  font-family: PingFangSC-Regular;
+  font-size: 12px;
+  color: #999999;
+  text-align: center;
+  font-weight: 400;
+}
+
+.data_ananlyse.iconfent {
+  justify-content: center;
+
+}
+
+
+
+.nameClass {
+  font-size: 26rpx;
+}
+
+.memberLogout {
+  margin-left: 30rpx;
+  font-size: smaller;
+}

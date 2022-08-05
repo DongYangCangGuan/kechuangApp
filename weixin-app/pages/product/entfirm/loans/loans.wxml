@@ -1,0 +1,36 @@
+<view class="pageTotal">
+    <view class="banner" 
+          style="background-image: url({{myBackground4}});background-position:center;background-size: 100% 100%;background-repeat:no-repeat;"
+          bindtap="goQuestion"
+          wx:if="{{isloan == '21'}}"
+          >
+            <image style="width:330rpx;height:420rpx;transform: rotate(225deg);" src="../../../../images/product/click.gif"></image>
+    </view>
+    <view class="content">
+        <view class="con_item" wx:for="{{investigation}}" wx:key="index" wx:for-index="index" wx:for-item="item" data-investigation='{{item}}'   bindtap="goNextpage">
+            <view class="pic">
+                <!-- <image src="../../../../images/product/pic1.png"></image> -->
+                <image src="{{item.pic}}"></image>
+            </view>
+            <view class="text">{{item.name}}</view>
+        </view>
+        <!-- <view class="con_item">
+            <view class="pic">
+                <image src="../../../../images/product/pic2.png"></image>
+            </view>
+            <view class="text">股+债</view>
+        </view>
+        <view class="con_item">
+            <view class="pic">
+                <image src="../../../../images/product/pic3.png"></image>
+            </view>
+            <view class="text">上市或并购贷款</view>
+        </view>
+        <view class="con_item">
+            <view class="pic">
+                <image src="../../../../images/product/pic4.png"></image>
+            </view>
+            <view class="text">供应链金融贷款</view>
+        </view> -->
+    </view>
+</view>

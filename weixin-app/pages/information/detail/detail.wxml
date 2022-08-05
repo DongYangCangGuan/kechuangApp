@@ -1,0 +1,12 @@
+<web-view src="{{webViewSrc}}">
+  <!-- <cover-view class="fixBox" wx:if="{{showNav}}">
+    <cover-view class="details">
+      <cover-view class="nextPart">
+        <cover-view class="adjustButtons">
+          <cover-view class="viewButton" catchtap="decreaseFontSize">A-</cover-view>
+          <cover-view class="viewButton" catchtap="increaseFontSize">A+</cover-view>
+        </cover-view>
+      </cover-view>
+    </cover-view>
+  </cover-view> -->
+</web-view>

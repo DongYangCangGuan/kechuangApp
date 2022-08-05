@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.servicewechat.mapper.CollectMapper">
+    <resultMap id="collection" type="com.cloud.commonsmng.entity.appletEntity.Collect">
+        <id column="id" property="id"></id>
+        <result column="productId" property="productId"></result>
+        <result column="delFlag" property="delFlag"></result>
+        <association property="product" javaType="com.cloud.commonsmng.entity.appletEntity.Product">
+            <result column="img" property="img"></result>
+            <result column="productName" property="productName"></result>
+            <result column="introduction" property="introduction"></result>
+            <result column="modifyTime" property="modifyTime"></result>
+            <result column="loanAmount" property="loanAmount"></result>
+            <result column="timeLimit" property="timeLimit"></result>
+            <result column="interestRate" property="interestRate"></result>
+        </association>
+        <association property="productPicture" javaType="com.cloud.commonsmng.entity.appletEntity.ProductPicture">
+            <result column="pic" property="pic"></result>
+        </association>
+    </resultMap>
+
+    <!--查找全部收藏的报告-->
+    <select id="getCollectList" parameterType="com.cloud.servicewechat.common.PageVo"
+            resultMap="collection">
+        select
+        c.id,
+        c.productId,
+        c.delFlag,
+        p.productName,
+        p.introduction,
+        p.loanAmount,
+        p.timeLimit,
+        p.interestRate,
+        p.createTime,
+        pp.pic
+        from
+        collect c
+        left join product p on c.productId = p.id
+        left join product_picture pp on p.img=pp.id
+        <include refid="tmpPageInfo"></include>
+        ORDER BY c.createTime DESC
+        LIMIT ${pageVo.page.beginIndex-1}, ${pageVo.page.pageSize}
+    </select>
+
+    <select id="getCollectDetail" parameterType="com.cloud.servicewechat.common.PageVo"
+            resultMap="collection">
+        select c.productId as id,
+               c.delFlag,
+               p.productName,
+               p.introduction,
+               p.loanAmount,
+               p.timeLimit,
+               p.interestRate,
+               p.modifyTime,
+               pp.pic
+        from collect c
+                 left join product p on c.productId = p.id
+                 left join product_picture pp on p.img = pp.id
+        where c.userId = #{userId}
+          and c.productId = #{productId}
+        ORDER BY c.modifyTime DESC
+    </select>
+
+    <!--查询页面总条数-->
+    <select id="getPageTotal" parameterType="com.cloud.servicewechat.common.PageVo"
+            resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM collect as c
+                 left join product p on c.productId = p.id
+        <include refid="tmpPageInfo"></include>
+    </select>
+
+    <sql id="tmpPageInfo">
+        <trim prefix="where" prefixOverrides="AND|OR">
+            <if test="pageVo.userId != null and pageVo.userId != ''">
+                and c.userId = #{pageVo.userId}
+            </if>
+            <if test="pageVo.searchdata != null">
+                <if test="pageVo.searchdata.name != null and pageVo.searchdata.name.length > 0">
+                    and p.productName LIKE concat('%',#{pageVo.searchdata.name},'%')
+                </if>
+            </if>
+
+        </trim>
+    </sql>
+
+    <update id="updateCollect" parameterType="com.cloud.commonsmng.entity.appletEntity.Collect">
+        UPDATE
+        collect
+        SET delFlag = 1,
+        modifierId = #{collect.modifierId},
+        modifyTime = NOW()
+        WHERE reportId = #{collect.reportId}
+        <if test="collect.userId != null and collect.userId != ''">
+            and userId = #{collect.userId}
+        </if>
+        <if test="collect.enterpriseCode != null and collect.enterpriseCode != ''">
+            and enterpriseCode = #{collect.enterpriseCode}
+        </if>
+    </update>
+
+    <insert id="addCollect" parameterType="com.cloud.commonsmng.entity.appletEntity.Collect">
+        INSERT INTO collect
+        (id, userId, reportId, enterpriseCode, creatorId, createTime, modifierId, modifyTime, delFlag)
+        VALUES (#{collect.id}, #{collect.userId}, #{collect.reportId}, #{collect.enterpriseCode}, #{collect.creatorId},
+                NOW(),
+                #{collect.modifierId}, NOW(), 1);
+
+        UPDATE
+            report
+        SET favorite = favorite + 1
+        WHERE id = #{collect.reportId}
+    </insert>
+
+    <update id="delCollect" parameterType="com.cloud.commonsmng.entity.appletEntity.Collect">
+        UPDATE
+        collect
+        SET delFlag = 0,
+        modifierId = #{collect.modifierId},
+        modifyTime = NOW()
+        WHERE reportId = #{collect.reportId}
+        <if test="collect.userId != null and collect.userId != ''">
+            and userId = #{collect.userId}
+        </if>
+        <if test="collect.enterpriseCode != null and collect.enterpriseCode != ''">
+            and enterpriseCode = #{collect.enterpriseCode}
+        </if>;
+
+        UPDATE
+        report
+        SET favorite = favorite - 1
+        WHERE id = #{collect.reportId};
+    </update>
+
+    <update id="updateFavorite" parameterType="java.lang.String">
+        UPDATE
+            report
+        SET favorite = favorite + 1
+        WHERE id = #{reportId}
+    </update>
+
+
+</mapper>

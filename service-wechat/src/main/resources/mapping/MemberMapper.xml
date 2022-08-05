@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.servicewechat.mapper.MemberMapper">
+
+	<resultMap id="member" type="com.cloud.commonsmng.entity.appletEntity.Member">
+		<id column="id" property="id"></id>
+		<result column="enterpriseName" property="enterpriseName"></result>
+		<result column="contact" property="contact"></result>
+		<result column="phone" property="phone"></result>
+		<result column="address" property="address"></result>
+		<result column="email" property="email"></result>
+		<result column="comboName" property="comboName"/>
+		<result column="startTime" property="startTime"></result>
+		<result column="endTime" property="endTime"></result>
+		<result column="endTime" property="accountManager"></result>
+		<result column="endTime" property="endTime"></result>
+
+		<collection property="dictionaryList" ofType="com.cloud.commonsmng.entity.appletEntity.Dictionary"
+					javaType="java.util.List">
+			<result column="propertyName" property="name"></result>
+			<result column="code" property="code"></result>
+		</collection>
+	</resultMap>
+
+
+	<select id="getMembers" resultType="com.cloud.commonsmng.entity.appletEntity.Member">
+		select
+		    m.id,
+			m.enterpriseName,
+		    m.investmentFund,
+		    m.enterpriseCode
+		from member m
+		where
+		  m.memberType=#{memberType} and delFlag=1
+		and m.enterpriseName like  concat('%',#{enterpriseName},'%')
+		ORDER BY m.modifyTime
+	</select>
+
+
+	<select id="getInvestmentFund" resultType="com.cloud.commonsmng.entity.appletEntity.Member">
+		select
+			m.id,
+			m.enterpriseName,
+			m.investmentFund,
+			m.enterpriseCode
+		from member m
+		where
+			m.memberType=1
+		ORDER BY m.modifyTime
+	</select>
+
+<!--	检验会员账号密码-->
+	<select id="checkCodeAndPWD" resultType="com.cloud.commonsmng.entity.appletEntity.Member">
+		select
+			m.id,
+			m.enterpriseName,
+			m.contact,
+			m.phone,
+			m.email,
+			m.accountManager
+		from member m
+		where m.enterpriseCode=#{member.enterpriseCode} and m.memberType=#{member.memberType}
+	</select>
+    <!--查询会员信息-->
+    <select id="getMemberBycodeAndPWD" resultMap="member">
+		SELECT
+			m.id,
+			m.enterpriseName,
+			m.contact,
+			m.phone,
+			m.address,
+			m.email,
+			m.accountManager,
+			d.NAME AS comboName,
+			d2.name as propertyName,
+			d3.code as code
+		FROM
+			member m
+			LEFT JOIN dictionary d ON m.comboId = d.CODE AND d.kind = 'comboMessage'
+			LEFT JOIN USER u ON m.accountManager = u.id
+			LEFT JOIN member_dictionary md on m.id = md.memberId
+			left join dictionary d2 on md.reportKind = d2.code and md.propertyKind = d2.kind
+			LEFT JOIN dictionary d3 ON md.propertyKind = d3.code AND d3.kind = 'dict'
+		WHERE
+			enterpriseCode = #{enterpriseCode}
+			AND m.delFlag =1
+    </select>
+
+	<select id="selectDictionaryByCode" parameterType="java.lang.String"
+			resultType="com.cloud.commonsmng.entity.appletEntity.Dictionary">
+		SELECT d.`code`,
+			   d.`name`
+		FROM dictionary d
+		WHERE d.isused = 1
+		  AND d.kind = #{kind}
+		  AND d.`code` = #{code} LIMIT 0,1
+	</select>
+
+	<!--新增消息信息-->
+	<insert id="insertNotes" parameterType="com.cloud.commonsmng.entity.appletEntity.Notes">
+		<if test="notes.notesDetailList != null and notes.notesDetailList.size() > 0">
+			INSERT notes_detail(id, notesId, status, userId, createTime)
+			VALUES
+			<foreach collection="notes.notesDetailList" item="item" index="index" separator=",">
+				(#{item.id},#{item.notesId},#{item.status},#{item.userId},NOW())
+			</foreach>;
+		</if>
+
+		INSERT notes (id, title, content, creatorId, createTime, modifierId, modifyTime, taskType,
+		isFeedBack,delFlag,status,flag)
+		VALUES (#{notes.id},#{notes.title},#{notes.content},
+		#{notes.creatorId},NOW(),#{notes.modifierId},NOW(),#{notes.taskType},#{notes.isFeedBack},1,#{notes.status},#{notes.flag});
+	</insert>
+
+	<insert id="insertNotesDetails" parameterType="com.cloud.commonsmng.entity.appletEntity.NotesDetail">
+		<if test="notesDetails != null and notesDetails.size() > 0">
+			INSERT notes_detail(id, notesId, status, userId, createTime)
+			VALUES
+			<foreach collection="notesDetails" item="item" index="index" separator=",">
+				(#{item.id},#{item.notesId},#{item.status},#{item.userId},NOW())
+			</foreach>;
+		</if>
+
+	</insert>
+
+	<update id="addInvest">
+		update member m
+		set m.investmentFund=#{enterpriseName}
+		where m.enterpriseCode = #{enterpriseCode}
+	</update>
+
+	<select id="getInvestmentFundByUser" resultType="java.lang.String">
+		select m.id from member_user mu left join  member m on mu.memberId = m.id where mu.userId = #{userId} order by m.createTime desc LIMIT 0,1
+	</select>
+    <select id="getmemberIdByUser" resultType="java.lang.String">
+        SELECT memberId from user WHERE id=#{userId}
+    </select>
+
+	<update id="deleteWeightMemberUser">
+		UPDATE member_user m
+        SET m.delFlag = 0
+        WHERE  m.approvalstatus = 0 AND m.delFlag =1  AND m.id NOT IN (
+        SELECT id
+        FROM (SELECT max(id) AS ID FROM member_user WHERE delFlag = 1 AND approvalstatus = 0 GROUP BY userId) AS b
+        )
+	</update>
+
+	<select id="getuserIds" resultType="java.lang.String">
+		SELECT u.id
+		FROM userrolerelation  ur left join role r on ur.roleid = r.id and r.isused =1 left  join user u on u.id=ur.userId
+		WHERE  r.code = #{code} AND u.isused = 1 AND u.delFlag = 1
+	</select>
+
+	<select id="getuserIdbyfun" resultType="java.lang.String">
+
+		SELECT u.id FROM user as u   WHERE u.uRole=#{uRole} AND u.memberId in
+		(SELECT  m.id from member m where
+		m.enterpriseKey=(select m2.enterpriseKey from member as m1 left join  member as m2 on m1.investmentFund = m2.id AND m1.memberType='5'
+         WHERE m1.id = #{memberId}) and m.delFlag = 1) and u.isused = 1 and u.job=#{job}
+	</select>
+
+	<select id="getEmail" resultType="com.cloud.commonsmng.entity.appletEntity.Dictionary">
+		select code,`name`,picurl FROM dictionary WHERE `kind` = #{kind} and isused = 1 limit 0,1
+	</select>
+
+	<select id="getMemberTypelist" resultType="com.cloud.commonsmng.entity.appletEntity.Dictionary">
+		select code,`name` FROM dictionary WHERE `kind` = #{kind} and isused = 1
+	</select>
+	<select id="getsameGp" resultType="java.lang.String">
+		SELECT  m.id from member m where
+		m.enterpriseKey=(SELECT m1.enterpriseKey from member m1 WHERE m1.id = #{memberId}) and m.delFlag = 1;
+	</select>
+
+	<select id="getMemberDetailById2" resultType="com.cloud.commonsmng.entity.appletEntity.MemberUser">
+		SELECT md.id,md.modifierId,u.memberId as modifymemberId ,md.approvalstatus,md.uRole,md.memberId ,m.investmentFund
+		from member_user md LEFT JOIN user u on u.id = md.modifierId
+		LEFT JOIN member m on m.id = md.memberId
+		WHERE md.id = #{id}
+	</select>
+
+	<select id="getUserInfo" resultType="com.cloud.commonsmng.entity.appletEntity.User">
+		SELECT uRole, id, memberId FROM user where id = #{id}
+	</select>
+</mapper>

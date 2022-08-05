@@ -1,0 +1,90 @@
+<view class="voice_container">
+  
+
+  <view class="top"
+  style="background-image: url({{myBackground}});background-size: 100%;background-repeat: no-repeat;"
+  ></view>
+  <view class="content">
+    <view class="con_item">
+      <view class="item_text">您的项目公司 <text style="color: red;">*</text>  </view>
+      <view>
+        <view class="inputicon">
+          <text class="iconfont iconjianzhu" style="font-size: 50rpx;"></text>
+        </view>
+        <input class="inputbox" bindinput='getInputValue' name="companyName" placeholder=""/>
+      </view>
+    </view>
+    <view class="con_item">
+      <view class="item_text">联系人<text style="color: red;">*</text></view>
+      <view>
+        <view class="inputicon">
+          <text class="iconfont iconuser" style="font-size: 50rpx;"></text>
+        </view>
+        <input class="inputbox"  bindinput='getInputValue2' name="userName" placeholder=""/>
+      </view>
+    </view>
+    <view class="con_item">
+      <view class="item_text">联系方式<text style="color: red;">*</text></view>
+      <view>
+        <view class="inputicon">
+          <text class="iconfont iconyoujian" style="font-size: 50rpx;"></text>
+        </view>
+        <input class="inputbox"  bindinput='getInputValue3' name="emailNumber" placeholder=""/>
+      </view>
+    </view>
+    <!-- <view class="con_item">
+      <view class="item_text">是否现成产品<text style="color: red;">*</text></view>
+      <view class="checkBox">
+        <radio-group bindchange="laternext">
+          <label style="margin-right: 30%;"><radio value="1" checked/>是</label>
+          <label><radio value="2"/>否</label>
+        </radio-group>
+      </view>
+    </view> -->
+    <!-- <form action="" bindsubmit="gosubmitDetail"> -->
+    <!-- <view></view> -->
+      <view class="con_item" wx:for="{{Activityintroductionlist.acList}}" wx:key="index"  wx:for-index="index" wx:for-item="item">
+        <view class="item_text">{{item.template}}<text style="color: red;">*</text></view>
+        <view class="checkBox" wx:if="{{item.templateType === '0'}}">
+          <radio-group bindchange="laternext2" data-model="{{item.seq}}"  data-index="{{index}}" id="{{item.id}}" >
+            <label style="margin-right: 30%;"><radio value="1" name="{{index}}"/>是</label>
+            <label><radio value="2" name="{{index}}"  />否</label>
+          </radio-group>
+        </view>
+        <view class="checkBox" wx:if="{{item.templateType === '2'}}">
+          <input class="inputbox2" bindblur='laternext2' data-index="{{index}}" data-model="{{item.seq}}" name="{{index}}" placeholder=""/>
+        </view>
+      </view>
+      <!-- <button   formType="submit">提交</button> -->
+      <!-- </form> -->
+    <!-- <view class="con_item">
+      <view class="item_text">是否可定制开发<text style="color: red;">*</text></view>
+      <view class="checkBox">
+        <radio-group bindchange="laternext2">
+          <label style="margin-right: 30%;"><radio value="1" checked/>是</label>
+          <label><radio value="2"/>否</label>
+        </radio-group>
+      </view>
+    </view> -->
+    <!-- <view class="con_item">
+      <view class="item_text">产品或技术优势与特点</view>
+      <view>
+        <view class="inputicon">
+          <text class="iconfont iconhezi1"  bindinput='getInputValue4' style="font-size: 50rpx;"></text>
+        </view>
+        <textarea name="" id="" cols="30" rows="10"></textarea>
+      </view>
+    </view> -->
+  </view>
+  <!-- <button style="width: 50rpx;background-color: #42A5F5;"   bindtap="gettest">上传案例</button>
+  <view class="item_text" wx:if="this.data.tempFilePatha.name!=null">{{this.data.tempFilePatha.name}}</view> -->
+  <view class="footer">
+    <view style="margin-left: 5%;">注：请提供产品介绍材料、实施案例和演示链接等</view>
+    <view>
+      <button  style="width: 50rpx;background-color: #42A5F5;"  bindtap="gotoIndex">提交</button>
+      <!-- <button   formType="submit">提交</button>  -->
+      
+    </view>
+  </view>
+    
+</view>

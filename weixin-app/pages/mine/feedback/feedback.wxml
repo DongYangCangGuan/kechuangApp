@@ -1,0 +1,24 @@
+<!-- <view class="fb_content">
+   <view class="content">
+      <textarea class="areas"  model:value="{{ opinion}}" 
+      placeholder='写下浦智e讯的功能建议或其他问题,以使我们提供更好的帮助' 
+      bindinput="inputs">{{textval}}</textarea>
+   </view>
+
+    <view class="fb"  bindtap="submit" >
+     <view class="bn" >提交反馈</view>
+    </view>
+    
+</view> -->
+
+<view class="container-member">
+  <view class="header">
+    <view class="blue"></view>
+    <view class="questionnaire">活动</view>
+  </view>
+  <view class="content" data-a="{{item}}" bindtap="getFeedbackItems" wx:for="{{dataList}}" wx:key="index">
+   <view class="textName">{{item.act.title}}</view>
+   <view class="time">{{item.createTime}}</view>
+
+  </view>
+</view>

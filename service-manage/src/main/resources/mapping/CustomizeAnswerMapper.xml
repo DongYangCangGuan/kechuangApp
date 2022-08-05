@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.servicemanage.mapper.CustomizeAnswerMapper">
+    <!-- sql 条件判断 -->
+    <sql id="tmpPageQry">
+        <trim prefix="where" prefixOverrides="and | or">
+            and n.delFlag = 1
+            <if test="pageVo.searchdata != null">
+                <if test="pageVo.searchdata.userName != null and pageVo.searchdata.userName != ''">
+                    and u.realName like '%${pageVo.searchdata.userName}%'
+                </if>
+                <if test="pageVo.searchdata.questionDescription != null and pageVo.searchdata.questionDescription != ''">
+                    and d.questionDescription like '%${pageVo.searchdata.questionDescription}%'
+                </if>
+            </if>
+        </trim>
+    </sql>
+
+
+    <!--sql 分页-->
+    <sql id="pagination">
+        <if test="pageVo.page!=null">
+            limit ${pageVo.page.beginIndex-1}, ${pageVo.page.pageSize}
+        </if>
+    </sql>
+
+    <!-- 获取分页区间的回答 -->
+    <select id="getCustomizeAnswerPageVo" parameterType="com.cloud.servicemanage.common.PageVo"
+            resultType="com.cloud.commonsmng.entity.appletEntity.CustomizeAnswer">
+        SELECT
+        n.id,
+        n.answer,
+        n.createTime,
+        n.reply,
+        u.`realName` AS creatorName,
+        d.`questionDescription`
+        FROM
+        customize_answer n
+        LEFT JOIN `user` u ON n.creatorId = u.id AND u.delFlag = 1
+        LEFT JOIN `customize_question` d ON n.questionId = d.id AND d.delFlag = 1
+        <include refid="tmpPageQry"/>
+        order by n.createTime desc
+        <include refid="pagination"/>
+    </select>
+
+<!--    获取已回复回答的分页区间-->
+    <select id="getRepliedCustomizeAnswerPageVo" parameterType="com.cloud.servicemanage.common.PageVo"
+            resultType="com.cloud.commonsmng.entity.appletEntity.CustomizeAnswer">
+        SELECT
+        n.id,
+        n.answer,
+        n.createTime,
+        n.reply,
+        u.`realName` AS creatorName,
+        d.`questionDescription`
+        FROM
+        customize_answer n
+        LEFT JOIN `user` u ON n.creatorId = u.id AND u.delFlag = 1
+        LEFT JOIN `customize_question` d ON n.questionId = d.id AND d.delFlag = 1
+        <include refid="tmpPageQry"/>
+        AND n.reply IS NOT NULL
+        AND n.reply != ''
+        order by n.createTime desc
+        <include refid="pagination"/>
+    </select>
+
+<!--    获取未回复的回答分页-->
+    <select id="getUnRepliedCustomizeAnswerPageVo" parameterType="com.cloud.servicemanage.common.PageVo"
+            resultType="com.cloud.commonsmng.entity.appletEntity.CustomizeAnswer">
+        SELECT
+        n.id,
+        n.answer,
+        n.createTime,
+        n.reply,
+        u.`realName` AS creatorName,
+        d.`questionDescription`
+        FROM
+        customize_answer n
+        LEFT JOIN `user` u ON n.creatorId = u.id AND u.delFlag = 1
+        LEFT JOIN `customize_question` d ON n.questionId = d.id AND d.delFlag = 1
+        <include refid="tmpPageQry"/>
+        and (n.reply IS NULL OR n.reply = '')
+        order by n.createTime desc
+        <include refid="pagination"/>
+    </select>
+
+    <!-- 查询页面的数据总条数 -->
+    <select id="getPageTotal" parameterType="com.cloud.servicemanage.common.PageVo" resultType="java.lang.Integer">
+        select count(1) from `customize_answer` n
+        left join `user` u on n.creatorId = u.id
+        left join customize_question d on n.questionId = d.id
+        <include refid="tmpPageQry"/>
+    </select>
+
+<!--    获取已回复回答数据总条数-->
+    <select id="getRepliedPageTotal" parameterType="com.cloud.servicemanage.common.PageVo" resultType="java.lang.Integer">
+        select count(1) from `customize_answer` n
+        left join `user` u on n.creatorId = u.id
+        left join customize_question d on n.questionId = d.id
+        <include refid="tmpPageQry"/>
+        and n.reply IS NOT NULL
+        and n.reply != ''
+    </select>
+
+    <!--    获取未回复回答数据总条数-->
+    <select id="getUnRepliedPageTotal" parameterType="com.cloud.servicemanage.common.PageVo" resultType="java.lang.Integer">
+        select count(1) from `customize_answer` n
+        left join `user` u on n.creatorId = u.id
+        left join customize_question d on n.questionId = d.id
+        <include refid="tmpPageQry"/>
+        and (n.reply IS NULL OR n.reply = '')
+    </select>
+
+<!--    回复回答-->
+    <update id="replyCustomizeAnswer" parameterType="com.cloud.commonsmng.entity.appletEntity.CustomizeAnswer">
+        UPDATE customize_answer
+        SET reply = #{customizeAnswer.reply},
+            replyTime = NOW(),
+            replyerId = #{customizeAnswer.replyerId}
+        WHERE id = #{customizeAnswer.id}
+    </update>
+
+<!--    根据id查看回答详细信息-->
+    <select id="getCustomizeAnswerDetailById" resultType="com.cloud.commonsmng.entity.appletEntity.CustomizeAnswer">
+        SELECT
+            a.id,
+            d.questionDescription,
+            a.answer,
+            a.createTime,
+            b.realName AS creatorName,
+            a.reply,
+            a.replyTime,
+            c.realName AS replyerName
+        FROM
+            customize_answer  a
+        LEFT JOIN
+            `user` b ON a.creatorId = b.id
+        LEFT JOIN
+            `user` c ON a.replyerId = c.id
+        LEFT JOIN
+             customize_question d ON a.questionId = d.id
+        WHERE
+            a.delFlag = 1 AND
+            b.delFlag = 1 AND
+            c.delFlag = 1 AND
+            d.delFlag = 1 AND
+            a.id = #{id}
+
+    </select>
+
+
+</mapper>

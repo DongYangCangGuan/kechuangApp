@@ -1,0 +1,17 @@
+{
+  "name": "weixin-app",
+  "version": "1.0.0",
+  "description": "<!-- 代码提交 -->\r 提交代码前先查是否有冲突\r 1. 先提交到自己的分支上：git checkout XXX (第一次新创用 git checkout -b XXX)；\r 2. git add .\r 3. git commit -m '备注'\r 4. git push (第一次提交到分支： git push -u origin Qiao)；/*提交到自己的分支 */\r 5. git checkout master /* 切换到master分支*/\r 6. git merge xxx /* 合并分支*/\r 7. git push\r 8. git checkout xxx /*切换回自己的分支进行开发 */",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@vant/weapp": "^1.10.1",
+    "crypto-js": "^4.0.0"
+  },
+  "devDependencies": {},
+  "keywords": []
+}

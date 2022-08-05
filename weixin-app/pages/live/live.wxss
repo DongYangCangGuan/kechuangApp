@@ -1,0 +1,55 @@
+.live {
+  width: 100vw;
+  font-size: 30rpx;
+  color: white;
+  background-color: #0f0f1e;
+}
+
+.content {
+  width: 100%;
+  height: 100%;
+  padding: 0 3%;
+  box-sizing: border-box;
+}
+
+.live_list {
+  margin-bottom: 35rpx;
+  padding: 20rpx;
+}
+
+.live_header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.live_header>view {
+  display: flex;
+  align-items: center;
+}
+
+.live_header .tilte_name {
+  font-weight: bold;
+}
+
+.live_header image {
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 50%;
+  margin-right: 10rpx;
+}
+
+.live_content {
+  padding: 2% 0;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.live_tail_icon text {
+  border-radius: 100rpx;
+  padding: .2% 2%;
+  background-color: rgba(79, 147, 157, 0.5);
+  position: absolute;
+  font-size: small;
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: 10rpx;
+}

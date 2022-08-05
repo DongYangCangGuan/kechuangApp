@@ -1,0 +1,42 @@
+<!--pages/index/infoReport/infoReport.wxml-->
+<view class="product_container" >
+    <view style="background-image: url({{symyBackground1}});background-size: 100% 100%;background-repeat: no-repeat;">
+       <view style="height: 550rpx;"></view>
+        <view class="bodytext">
+            <view class="bodytext2">
+            <view><image class="viewbody1view1Image" src="../../../images/report/hdzjbjimage4.png"></image></view>
+            <view><image class="viewbody1view1Image2" src="../../../images/report/hdzjbjimage3.png"></image></view>
+            <view><image class="viewbody1view1Image3" src="../../../images/report/hdzjbjimage2.png"></image></view>
+            </view>
+           
+        </view>
+        <view class="bodytex3">
+                <view class="bodytex3title">
+                    {{Activityintroduction.description}}
+                    <!-- <text decode="{{true}}">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</text>
+                    上海科创基金正与嘉定国资集团、上海市嘉定区教育局合作,助力嘉定区打造更具数字化、
+                    智慧化的K12校园,探索人工智能时代更先进、更高效的教育理念和方式。
+                    <text style="word-break:break-all;">\n</text>
+                    <text decode="{{true}}">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</text>
+                    近日,教育部等六部门印发《关于推进教1育新型基础设施建设构建高质量教育支撑体系的指导意见》 , 
+                    《意见》指出教育新型基础设施是以新发展理念为引领,以信息化为主导,面向教育高质量
+                    发展需要,聚焦信息网络、平台体系、数字资源、智慧校园、创新应用、可信安全等方面的
+                    新型基础设施体系。 
+                    <text style="word-break:break-all;">\n</text>
+                    <text decode="{{true}}">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</text>
+                    为响应国家政策,同时结合《嘉定新城“十四五”规划建设行动方案》 ,嘉定区计划提升区内智慧教育的
+                    水平,建设以学生为中心,自组织学习、自适应教学为特征的"未来学校”。嘉定区拟探索“资本+技术”赋
+                    能现代教育的新模式,从“教、学、测、评”等多个维度,针对教学内容、教学行为、教学空间等方面提出
+                    了技术需求和预期目标(见附件二) ,运用大数据、云平台、图片视觉技术、、自然语言技术、人工智能
+                    、机器人、知识图谱等方面的新技术、新硬件和新应用,构建虚实结合的全覆盖学习空间，打破时空局限
+                    ，打造“一人一教案、一人一学程、一人一作业、一人一画像和一师一助手”的全新教与学的体 -->
+                </view>
+            </view>
+            <view class="bodytex4" bindtap="goDetail" data-theme2="{{Activityintroduction}}">
+                <image class="viewbody1view1Image4" src="../../../images/report/hdzjbjimage5.png"></image>
+            </view>
+            <view class="btn">
+                <button data-info='{{order}}'  open-type="share" hover-class='none'>分享</button>
+            </view>
+    </view>
+</view>

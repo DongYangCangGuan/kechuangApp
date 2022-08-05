@@ -1,0 +1,204 @@
+<view class="page_container"
+  style="background-image: url({{myBackground}});background-size: 100%;background-repeat:no-repeat;">
+ 
+  <!-- 头部 -->
+  <view class="page_header_box">
+    <!-- 导航栏 -->
+    <view class="page_header">
+      <view class="page_title">我的</view>
+    </view>
+    <view class="user_header" >
+      <view class="user_header_left">
+        <view class="user_photo_box">
+          <image class="user_phono" wx:if="{{ userInfo.headImg }}" src="{{ userInfo.headImg }}" bindtap="selectLogin">
+          </image>
+          <image class="user_phono" wx:else bindtap="selectLogin"></image>
+        </view>
+      </view>
+      <view class="user_header_right" >
+        <view class="user_header_right_left">
+          <view class="showUserInfo" wx:if="{{userInfo.headImg}}">
+            <view class="user_name" catchtap="getMessages">
+              <text>{{userInfo.nickName}}</text>
+              <!-- <text class="logout" bindtap="logout">[注销]</text> -->
+            </view>
+            <view class="authentication">
+              <view class="authentication_right" wx:if="{{authentification == '2'}}">
+                <view class="yirenzheng" >已认证</view>
+                <image src="{{yirenzhengtu}}"  mode="aspectFill"></image>
+              </view>
+              <view class="weirenzheng" wx:if="{{authentification == '0'}}" >未认证</view>
+              <view class="weirenzheng" bindtap="goAuthentification" wx:if="{{authentification == '0'}}" >请进行身份认证</view>
+              <view class="weirenzheng" wx:if="{{authentification == '1'}}" >认证中...</view>
+            </view>
+            <view>
+              <view class="user_account" wx:if="{{authentification == '2'}}">您的身份：{{userID}}</view>
+              <view class="user_none" wx:else></view>
+            </view>
+            <!-- <view class="user_header_right_right" >
+              <text class="iconfont iconyoujiantou"></text>
+            </view> -->
+          </view>
+          <view class="login_not" wx:else>未登录，请先登录！</view>
+        </view>
+
+      </view>
+    </view>
+   
+  </view>
+  
+
+
+  <!-- 用户画面 -->
+  <view class="page_content" >
+    <!-- <view class="page_content_top" wx:if="{{userInfo.member == null}}"> -->
+      <!-- <view class="user_approve box" bindtap="getApprove" data-id="">
+        <view class="iconfont_box">
+          <image class="iconfont_box_image" src="{{attestation}}"></image> -->
+          <!-- <text class="iconfont iconyonghurenzhengjianquan"></text> -->
+        <!-- </view>
+        <view class="text_box">
+          <text>用户认证</text>
+        </view>
+        <view class="iconfont_box_s">
+          <text class="iconfont iconyoujiantou"></text>
+        </view>
+      </view> -->
+      <!-- <view class="user_custom box" wx:if="{{userInfo.member == null}}" bindtap="getCustomize" data-id="">
+        <view class="iconfont_box">
+        <image class="iconfont_box_image" src="{{customization}}"></image> -->
+      <!-- <text class="iconfont iconchizi-celiang- "></text> -->
+      <!-- </view>
+        <view class="text_box">
+          <text>私人定制</text>
+        </view>
+        <view class="iconfont_box_s">
+          <text class="iconfont iconyoujiantou"></text>
+        </view>
+      </view> -->
+    <!-- </view> -->
+    <view class="page_content_bottom"> 
+     <!-- 身份认证 -->
+     <view class="box" bindtap="getApprove">
+        <view class="iconfont_box">
+          <image class="iconfont_box_image" src="{{attestation}}"></image>
+          <!-- <text class="iconfont iconbiaoqiankuozhan_dingyue-133"></text> -->
+        </view>
+        <view class="text_box">
+          <text>身份认证</text>
+        </view>
+        <view class="iconfont_box_s">
+          <text class="iconfont iconyoujiantou"></text>
+        </view>
+      </view>
+      <!-- 我的消息 -->
+      <view class="box" bindtap="getMessage">
+        <view class="iconfont_box">
+          <image class="iconfont_box_image" src="{{attestation}}"></image>
+          <!-- <text class="iconfont iconbiaoqiankuozhan_dingyue-133"></text> -->
+        </view>
+        <view class="text_box">
+          <text>我的消息</text>
+            <view class="number" wx:if="{{showNum}}">
+            <view class="one">
+              {{num}}
+            </view>
+          </view>
+        </view>
+        <view class="iconfont_box_s">
+          <text class="iconfont iconyoujiantou"></text>
+        </view>
+      </view>
+      <!-- 我的足迹 -->
+      <view class="user_history box" bindtap="getHistory" data-id="">
+        <view class="iconfont_box">
+          <image class="iconfont_box_image" src="{{footprint}}"></image>
+          <!-- <text class="iconfont iconzuji"></text> -->
+        </view>
+        <view class="text_box">
+          <text>我的足迹</text>
+        </view>
+        <view class="iconfont_box_s">
+          <text class="iconfont iconyoujiantou"></text>
+        </view>
+      </view>
+     
+      <!-- 我的问卷 -->
+      <view class="about_us box" bindtap="getUs" data-id="">
+        <view class="iconfont_box">
+          <image class="iconfont_box_image" src="{{aboutUs}}"></image>
+          <!-- <text class="iconfont icongywm "></text> -->
+        </view>
+        <view class="text_box">
+          <text>我的问卷</text>
+        </view>
+        <view class="iconfont_box_s">
+          <text class="iconfont iconyoujiantou"></text>
+        </view>
+      </view>
+      <!-- 我的收藏 -->
+      <view class="user_collect box" bindtap="getCollect" data-id="">
+        <view class="iconfont_box">
+          <image class="iconfont_box_image" src="{{collect}}"></image>
+          <!-- <text class="iconfont iconfolder-open-fill"></text> -->
+        </view>
+        <view class="text_box">
+          <text>我的收藏</text>
+        </view>
+        <view class="iconfont_box_s">
+          <text class="iconfont iconyoujiantou"></text>
+        </view>
+      </view>
+      
+        <!-- 我的审批 -->
+      <view class="user_order box" bindtap="getMember" wx:if="{{isShenpi}}">
+        <view class="iconfont_box">
+          <image class="iconfont_box_image" src="{{subscription}}"></image>
+          <!-- <text class="iconfont iconbiaoqiankuozhan_dingyue-133"></text> -->
+        </view>
+        <view class="text_box">
+          <text>我的审批</text>
+            <view class="number" wx:if="{{showItemNum}}">
+              <view class="one">
+               {{itemNum}}
+              </view>
+            </view>
+        </view>
+        <view class="iconfont_box_s">
+          <text class="iconfont iconyoujiantou"></text>
+        </view>
+      </view>
+      <!-- 我的活动 -->
+      <view class="feedback box"  bindtap="getFeedback" >
+        <view class="iconfont_box">
+          <image class="iconfont_box_image" src="{{customization}}"></image>
+          <!-- <text class="iconfont iconfankuijianyi"></text> -->
+        </view>
+        <view class="text_box">
+          <text>我的活动</text>
+        </view>
+        <view class="iconfont_box_s">
+          <text class="iconfont iconyoujiantou"></text>
+        </view>
+      </view>
+      <!-- 用户问卷 -->
+      <view class="user_order box" bindtap="getAnswer" >
+        <view class="iconfont_box">
+          <image class="iconfont_box_image" src="{{subscription}}"></image>
+          <!-- <text class="iconfont iconbiaoqiankuozhan_dingyue-133"></text> -->
+        </view>
+        <view class="text_box">
+          <text>用户问卷</text>
+            <view class="number" wx:if="{{showItemNum}}">
+              <view class="one">
+               {{itemNum}}
+              </view>
+            </view>
+        </view>
+        <view class="iconfont_box_s">
+          <text class="iconfont iconyoujiantou"></text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

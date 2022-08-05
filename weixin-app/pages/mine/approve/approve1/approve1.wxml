@@ -1,0 +1,40 @@
+<!--pages/mine/approve/approve1.wxml-->
+
+<view class="head">
+  <view class="head_top">
+    <view class="yuan left">
+      1
+    </view>
+    <view class="center"></view>
+    <view class="yuan right">
+      2
+    </view>
+  </view>
+  <view class="head_text">
+    <view>个人认证</view>
+    <view class="enterprise">企业认证</view>
+  </view>
+</view>
+<view class="content">
+  <view class="box mail">
+    <view class="content_left"><text>姓名</text>
+      <text class="sign">*</text>
+    </view>
+    <view class="content_right">请填写姓名</view>
+  </view>
+  <view class="box mail">
+    <view class="content_left"><text>手机号</text>
+      <text class="sign">*</text>
+    </view>
+    <view class="content_right">请填写手机号</view>
+  </view>
+  <view class="box mail">
+    <view class="content_left"><text>邮箱</text>
+      <text class="sign">*</text>
+    </view>
+    <view class="content_right">请填写个人邮箱</view>
+  </view>
+</view>
+<view class="foot" bindtap="getApprove2">
+  <text>下一步</text>
+</view>

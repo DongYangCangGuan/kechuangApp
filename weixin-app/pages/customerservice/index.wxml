@@ -1,0 +1,7 @@
+<movable-area>
+  <movable-view x='{{x}}' y='{{y}}' direction="all" style="pointer-events: auto;">
+    <button open-type="contact" bindcontact="handleContact" class="kefu">
+      <image src='https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=1128445237,2685272385&fm=26&gp=0.jpg' class="kefuIcon"></image>
+    </button>
+  </movable-view>
+</movable-area>

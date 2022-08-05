@@ -1,0 +1,60 @@
+<!--pages/product/entfirm/loans/question/submitdetail/submitdetail.wxml-->
+<view class="submitdetail_container">
+    <!-- <view class="feedback">
+        <view style="text-align: center;font-size: 35rpx;">
+            <text class="iconfont iconshouzhi"></text>
+            综合您的反馈结果
+        </view>
+        <view wx:for="{{feedbackList}}" wx:for-index="idx" wx:key="{{idx}}">
+            {{item}}
+        </view>
+    </view> -->
+    <view class="recommend">
+        <view class="rec_title">推荐以下贷款产品</view>
+        <view class="rec_cocntent"
+        style="background-image: url({{myBackground2}});background-position:30rpx 0;background-size: 97% 97%;background-repeat:no-repeat;"
+        >
+            <scroll-view class="rec_scroll"
+            style="background-image: url({{myBackground1}});background-size: 100% 100%;background-repeat:no-repeat;"
+            >
+                <view class="rec_item" wx:for="{{productRecommendationList}}" wx:key="index" wx:for-index="index" wx:for-item="item" data-Recommendation='{{item}}'  bindtap="goDetail">
+                    <view class="item_title">{{item.productName}}</view>
+                    <view class="item_content">
+                        <view class="item_img">
+                            <!-- <image class="img" src="../../../../../../images/product/img1.png"></image> -->
+                            <image class="img" src="{{item.pic}}"></image>
+                        </view>
+                        <view class="item_text">{{item.introduction}}</view>
+                    </view>
+                </view>
+                <!-- <view class="rec_item">
+                    <view class="item_title">小巨人信用贷</view>
+                    <view class="item_content">
+                        <view class="item_img">
+                            <image class="img" src="../../../../../../images/product/img3.png"></image>
+                        </view>
+                        <view class="item_text">浦发银行推出的业内首个科技企业纯信用贷款产品</view>
+                    </view>
+                </view>
+                <view class="rec_item">
+                    <view class="item_title">科技含权贷</view>
+                    <view class="item_content">
+                        <view class="item_img">
+                            <image class="img" src="../../../../../../images/product/img5.png"></image>
+                        </view>
+                        <view class="item_text">企业与浦发银行合作的基金签署《认股选择协议》，实现增信，获得巴拉巴拉巴拉巴拉啊</view>
+                    </view>
+                </view>
+                <view class="rec_item">
+                    <view class="item_title">在线贸融产品</view>
+                    <view class="item_content">
+                        <view class="item_img">
+                            <image class="img" src="../../../../../../images/product/img6.png"></image>
+                        </view>
+                        <view class="item_text">针对有真实贸易背景、位于产业链上下游的客户，浦发银行提供在线贸易融资巴拉巴拉巴拉巴拉巴拉巴拉</view>
+                    </view>
+                </view> -->
+            </scroll-view>
+        </view>
+    </view>
+</view>

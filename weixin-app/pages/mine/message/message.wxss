@@ -1,0 +1,84 @@
+.changeInfo_content {
+  height: 100vh;
+  background-color: #ececef;
+}
+
+.weui-input {
+  text-align: end;
+  display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.right {
+  display: flex;
+  align-items: center;
+}
+
+.emailRight{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  
+}
+
+.youjiantouImage {
+  width: 56rpx;
+  height: 56rpx;
+  margin-left: 8rpx;
+}
+
+.chooseSex {
+  display: flex;
+  padding: 30rpx 10rpx 30rpx 0rpx;
+  border-top: solid 1rpx #F3F3F3;
+  margin: 0 20rpx 0 30rpx;
+}
+
+.chooseSex text {
+  flex: 1;
+}
+
+.chooseSex view {
+  justify-content: flex-end;
+}
+
+.icongou {
+  color: #1A8CFF;
+  font-size: 30rpx;
+}
+
+.iconcircle {
+  color: #808080;
+  font-size: 30rpx;
+}
+
+.btn {
+  display: flex;
+  height: 80rpx;
+  margin-top: 20rpx;
+  background-color: #ffffff;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+}
+
+.review {
+  margin-top: 20rpx;
+  padding: 50rpx;
+  text-align: center;
+  background-color: #fff;
+}
+
+.picker {
+  background-color: #FFFFFF;
+  display: flex;
+  align-items: center;
+}
+
+.genderClass {
+  width: 80%;
+  display: flex;
+  justify-content: right;
+}

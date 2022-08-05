@@ -1,0 +1,87 @@
+/* .fb_content {
+  position: relative;
+  background: #ECECEF;
+  display: flex;
+  height: 99vh;
+  flex-direction: column;
+}
+
+.content {
+  background: #fff;
+  display: flex;
+  height: 500rpx;
+}
+
+.areas {
+  display: flex;
+  width: 100%;
+
+  font-size: 27rpx;
+  padding: 10rpx;
+}
+
+.page {
+  margin-top: 10rpx;
+}
+
+.fb {
+  position: absolute;
+  bottom: 68rpx;
+  height: 88rpx;
+  width: 100%;
+  background: #165689;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  font-size: 32rpx;
+} */
+
+
+.header{
+  width: 750rpx;
+  height: 40rpx;
+  margin:30rpx 0;
+  display: flex;
+}
+.blue{
+  align-items: center;
+  justify-content: center;
+  width: 40rpx;
+  height: 26rpx;
+  line-height: 26rpx;
+  border-left: 8rpx solid;
+  margin-left: 20rpx; 
+}
+.questionnaire{
+  width: 800rpx;
+  height: 40rpx;
+  line-height: 26rpx;
+  color: rgba(16, 16, 16, 100);
+  font-size: 16px;
+  text-align: left;
+  font-family: PingFangSC-regular;
+}
+.content{
+  width: 100%;
+  height: 100rpx;
+  line-height: 100rpx;
+  font-size: 14px;
+  border-bottom: 2rpx solid #DDDDDD;
+  display: flex;
+  justify-content: space-between;
+}
+.textName{
+  /* margin-left: 40rpx; */
+  width: 70%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space:nowrap;
+  padding-left: 20rpx;
+}
+.time{
+  /* width: 180rpx; */
+  width: 30%;
+  text-align: right;
+  padding-right: 20rpx;
+}

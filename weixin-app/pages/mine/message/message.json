@@ -1,0 +1,9 @@
+{
+  "usingComponents": {},
+ 
+  "navigationBarBackgroundColor": "#ffffff",
+  "backgroundTextStyle":"light",
+  "navigationBarTitleText": "个人资料",
+  "navigationBarTextStyle":"black"
+  
+}

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.servicemanage.mapper.NotesDetailMapper">
+    <resultMap id="NotesDetailEntity" type="com.cloud.commonsmng.entity.appletEntity.NotesDetail">
+        <id column="id" property="id"/>
+        <result column="readState" property="status"/>
+        <result column="createTime" property="createTime"/>
+        <association property="userInfo" javaType="com.cloud.commonsmng.entity.appletEntity.User">
+            <id column="userId" property="id"/>
+            <result column="openId" property="openId"/>
+            <result column="nickName" property="nickName"/>
+        </association>
+    </resultMap>
+
+    <!-- sql 条件判断 -->
+    <sql id="tmpPageQry">
+        <trim prefix="where" prefixOverrides="and | or">
+            <if test="pageVo.searchData != null">
+                <if test="pageVo.searchdata.notesId != null and pageVo.searchdata.notesId != ''">
+                    and nd.notesId = #{pageVo.searchdata.notesId}
+                </if>
+
+                <if test="pageVo.searchdata.status != null and pageVo.searchdata.status != ''">
+                    and nd.`status` = #{pageVo.searchdata.status}
+                </if>
+
+                <if test="pageVo.searchdata.userId != null and pageVo.searchdata.userId != ''">
+                    and u.id LIKE concat('%',#{pageVo.searchdata.userId},'%')
+                </if>
+
+                <if test="pageVo.searchdata.openId != null and pageVo.searchdata.openId != ''">
+                    and u.openId LIKE concat('%',#{pageVo.searchdata.openId},'%')
+                </if>
+            </if>
+        </trim>
+    </sql>
+
+    <!--sql 分页-->
+    <sql id="pagination">
+        <if test="pageVo.page!=null">
+            limit ${pageVo.page.beginIndex-1}, ${pageVo.page.pageSize}
+        </if>
+    </sql>
+
+    <!-- 查询页面的数据总条数 -->
+    <select id="getPageTotal" parameterType="com.cloud.servicemanage.common.PageVo" resultType="java.lang.Integer">
+        select count(1) from `notes_detail` nd
+        LEFT JOIN `user` u ON nd.userId = u.id
+        <include refid="tmpPageQry"/>
+    </select>
+
+    <!-- -->
+    <select id="selectNotesDetailByNotesId" parameterType="com.cloud.servicemanage.common.PageVo"
+            resultMap="NotesDetailEntity">
+        SELECT
+        nd.id,
+        nd.`status` AS readState,
+        nd.createTime,
+        u.id AS userId,
+        u.openId,
+        u.nickName,
+        u.*
+        FROM
+        `notes_detail` nd
+        INNER JOIN `notes` n ON nd.notesId = n.id
+        AND n.delFlag = 1
+        INNER JOIN `user` u ON nd.userId = u.id
+        AND u.delFlag = 1
+        <include refid="tmpPageQry"></include>
+        ORDER BY n.modifyTime DESC
+        <include refid="pagination"></include>
+    </select>
+</mapper>

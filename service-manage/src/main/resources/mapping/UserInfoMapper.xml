@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.servicemanage.mapper.UserInfoMapper">
+    <!-- sql 条件判断 -->
+    <sql id="tmpPageQry">
+        <if test="pageVo.searchData != null">
+            <if test="pageVo.searchdata.userId != null and pageVo.searchdata.userId != ''">
+                and u.id like concat('%',#{pageVo.searchdata.userId},'%')
+            </if>
+            <if test="pageVo.searchdata.userName != null and pageVo.searchdata.userName != ''">
+                and u.openId like concat('%',#{pageVo.searchdata.openId},'%')
+            </if>
+            <if test="pageVo.searchdata.nickName != null and pageVo.searchdata.nickName != ''">
+                and u.nickName like concat('%',#{pageVo.searchdata.nickName},'%')
+            </if>
+            <if test="pageVo.searchdata.userIds != null and pageVo.searchdata.userIds.size() > 0">
+                and u.id in
+                <foreach collection="pageVo.searchdata.userIds" item="item" index="index" open="(" close=")"
+                         separator=",">
+                    #{item}
+                </foreach>
+            </if>
+        </if>
+    </sql>
+
+    <!--sql 分页-->
+    <sql id="pagination">
+        <if test="pageVo.page!=null">
+            limit ${pageVo.page.beginIndex-1}, ${pageVo.page.pageSize}
+        </if>
+    </sql>
+
+    <!-- 获取分页区间的消息信息 -->
+    <select id="getUserInfoPageVo" parameterType="com.cloud.servicemanage.common.PageVo"
+            resultType="com.cloud.commonsmng.entity.appletEntity.User">
+        select
+        u.id,
+        u.userName,
+        u.nickName,
+        u.modifierId,
+        u.modifyTime
+        FROM `user` u
+        LEFT JOIN `user` u2 ON u.modifierId = u2.id
+        WHERE u.delFlag = 1
+        <include refid="tmpPageQry"/>
+        ORDER BY u.id DESC
+        <include refid="pagination"/>
+    </select>
+
+    <!-- 查询页面的数据总条数 -->
+    <select id="getPageTotal" parameterType="com.cloud.servicemanage.common.PageVo" resultType="java.lang.Integer">
+        SELECT count(1) FROM `user` u WHERE u.delFlag = 1
+        <include refid="tmpPageQry"/>
+    </select>
+
+    <sql id="tmpPageQryMember">
+        <trim prefix="where" prefixOverrides="and | or">
+            AND u.delFlag = 1
+            AND u.certificationMark = 1
+            <if test="pageVo.searchData != null">
+                <if test="pageVo.searchdata.userId != null and pageVo.searchdata.userId != ''">
+                    and u.id like concat('%',#{pageVo.searchdata.userId},'%')
+                </if>
+            </if>
+        </trim>
+    </sql>
+
+    <!--分页获取认证审核中的用户-->
+    <select id="getUserInfoByCertificationMarkPageVo" parameterType="com.cloud.servicemanage.common.PageVo"
+            resultType="com.cloud.commonsmng.entity.appletEntity.User">
+        SELECT
+        u.id,
+        u.userName,
+        u.realName,
+        u.phone,
+        u.email,
+        u.enterpriseName,
+        u.contactAddress,
+        u.certificationMark,
+        u.modifierId,
+        u.createTime
+        FROM
+        `user` u
+        <include refid="tmpPageQryMember"></include>
+        ORDER BY u.modifyTime DESC
+        <include refid="pagination"></include>
+    </select>
+
+    <!-- 获取认证审核中的用户数 -->
+    <select id="getUserInfoByCertificationMarkPageTotal" parameterType="com.cloud.servicemanage.common.PageVo"
+            resultType="java.lang.Integer">
+        SELECT count(1)
+        FROM `user` u
+        <include refid="tmpPageQryMember"></include>
+    </select>
+
+    <!--分页查询小程序端的用户信息-->
+    <select id="getUserByUroleEqOnePageVo" resultType="com.cloud.commonsmng.entity.appletEntity.User">
+        SELECT u.id,
+        u.openId,
+        u.nickName
+        FROM `user` u
+        WHERE u.delFlag = 1
+        <include refid="tmpPageQry"/>
+        ORDER BY u.modifyTime DESC
+        <include refid="pagination"/>
+    </select>
+
+    <!--查询分页时的小程序端用户数-->
+    <select id="getUserByUroleEqOnePageVoCount" parameterType="com.cloud.servicemanage.common.PageVo"
+            resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM `user` u
+        WHERE u.delFlag = 1
+        <include refid="tmpPageQry"/>
+    </select>
+
+    <select id="getuRolebyId" resultType="com.cloud.commonsmng.entity.appletEntity.User">
+        SELECT id,uRole,job from `user` where id=#{id} and  delFlag = 1 AND isused = 1
+    </select>
+
+    <select id="getUserListByuRole" resultType="java.lang.String">
+        SELECT u.id FROM `user` u  WHERE u.uRole = #{uRole} and u.delFlag = 1 AND u.isused = 1
+    </select>
+    <select id="getUseremailAll" resultType="java.lang.String">
+        SELECT email from `user` where delFlag = 1 AND isused = 1 and (email is not NULL AND email != '')
+    </select>
+
+    <select id="getUserIdList" resultType="java.lang.String">
+        SELECT u.id FROM `user` u WHERE u.delFlag = 1 AND u.isused = 1
+    </select>
+
+    <select id="getCountByUser" parameterType="String"
+            resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM userrolerelation  ur left join role r on ur.roleid = r.id
+        WHERE ur.userid = #{id} and r.code = #{code}
+    </select>
+</mapper>

@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"  >
+<mapper namespace="com.cloud.servicemanage.mapper.ReportMapper">
+
+    <resultMap id="reportEntity" type="com.cloud.commonsmng.entity.appletEntity.Report">
+        <id property="id" column="id"/>
+        <result property="code" column="code"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="pic" column="pic"/>
+        <result property="url" column="url"/>
+        <result property="thumbUpNumber" column="thumbUpNumber"/>
+        <result property="articleviews" column="articleviews"/>
+        <result property="delFlag" column="delFlag"/>
+        <association property="reportKind" javaType="com.cloud.commonsmng.entity.appletEntity.ReportKind">
+            <id column="id" property="id"/>
+            <result column="reportId" property="reportId"/>
+            <result column="kindId" property="kindId"/>
+            <result column="theme" property="theme"/>
+            <result column="area" property="area"/>
+            <result column="industry" property="industry"/>
+            <result column="economy" property="economy"/>
+            <result column="special" property="special"/>
+            <result column="label" property="label"/>
+            <result column="delFlag" property="delFlag"/>
+        </association>
+
+    </resultMap>
+    <sql id="tmpPageQry">
+        <trim prefix="WHERE" prefixOverrides="AND | OR">
+            r.delFlag = 1
+            <if test="pageVo.searchdata !=null">
+                <if test="pageVo.searchdata.title !=null and pageVo.searchdata.title !='' ">
+                    AND r.title LIKE '%${pageVo.searchdata.title}%'
+                </if>
+                <if test="pageVo.searchdata.code !=null and pageVo.searchdata.code !='' ">
+                    AND r.code LIKE '%${pageVo.searchdata.code}%'
+                </if>
+                <if test="pageVo.searchdata.reportProperty != null and pageVo.searchdata.reportProperty != '' ">
+                    AND (rk.theme LIKE concat( '%', #{pageVo.searchdata.reportProperty}, '%' )
+                    OR rk.industry LIKE concat( '%', #{pageVo.searchdata.reportProperty}, '%' )
+                    OR rk.area LIKE concat( '%', #{pageVo.searchdata.reportProperty}, '%' )
+                    OR rk.label LIKE concat('%',#{pageVo.searchdata.reportProperty},'%'))
+                </if>
+                <if test="pageVo.searchdata.startTime !=null and pageVo.searchdata.startTime !='' and pageVo.searchdata.endTime !=null and pageVo.searchdata.endTime !=''">
+                    AND date_format(r.modifyTime,'%Y-%m-%d') BETWEEN #{pageVo.searchdata.startTime} AND
+                    #{pageVo.searchdata.endTime}
+                </if>
+            </if>
+        </trim>
+    </sql>
+
+    <!--//查询总页数-->
+    <select id="getPageTotal" parameterType="com.cloud.servicemanage.common.PageVo" resultType="java.lang.Integer">
+        SELECT count(0) FROM report r
+        LEFT JOIN reportkind rk ON r.id = rk.reportId
+        <include refid="tmpPageQry"></include>
+    </select>
+
+    <!--//分页-->
+    <sql id="pagination">
+        <if test="pageVo.page!=null">
+            LIMIT ${pageVo.page.beginIndex-1}, ${pageVo.page.pageSize}
+        </if>
+    </sql>
+
+    <!--分页查询报告信息-->
+    <select id="getReportPageVo" parameterType="com.cloud.servicemanage.common.PageVo"
+            resultType="com.cloud.commonsmng.entity.appletEntity.Report">
+        SELECT
+        r.id,
+        r.pic,
+        r.code,
+        r.title,
+        r.createTime,
+        r.isused
+        FROM
+        report r
+        LEFT JOIN reportkind rk ON r.id = rk.reportId
+        <include refid="tmpPageQry"></include>
+        ORDER BY r.modifyTime DESC
+        <include refid="pagination"></include>
+    </select>
+
+    <!--//根据编号查询报告信息-->
+    <select id="getReportById" parameterType="java.lang.String"
+            resultType="com.cloud.commonsmng.entity.appletEntity.Report">
+        SELECT r.id,
+               r.code,
+               r.title,
+               r.creatorid,
+               r.createTime,
+               r.modifierId,
+               r.modifyTime,
+               r.pic,
+               r.description,
+               r.url,
+               r.thumbUpNumber,
+               r.articleviews
+        FROM report r
+        WHERE r.code = #{code}
+    </select>
+
+    <!--//根据id查询报告信息-->
+    <select id="getReportInfoById" parameterType="java.lang.String" resultMap="reportEntity">
+        select r.`code`,
+               r.title,
+               r.description,
+               r.pic,
+               r.url,
+               rk.kindId,
+               rk.area,
+               rk.theme,
+               rk.industry,
+               rk.label,
+               rk.economy,
+               rk.special
+        from report r
+                 left join reportkind rk on r.id = rk.reportId
+        where r.id = #{id}
+    </select>
+
+    <resultMap id="reportPropertEntity" type="com.cloud.commonsmng.entity.appletEntity.Report">
+        <id column="id" property="id"/>
+        <collection property="industryList" ofType="java.lang.String" javaType="java.util.List">
+            <result column="industry"/>
+        </collection>
+
+        <collection property="themeList" ofType="java.lang.String" javaType="java.util.List">
+            <result column="theme"/>
+        </collection>
+        <collection property="kindIdList" ofType="java.lang.String" javaType="java.util.List">
+            <result column="kindId"/>
+        </collection>
+        <collection property="labelList" ofType="java.lang.String" javaType="java.util.List">
+            <result column="label"/>
+        </collection>
+    </resultMap>
+
+
+    <!--    根据传进去的code拿到name-->
+    <select id="getNameFromDic" parameterType="java.util.Map" resultMap="reportPropertEntity">
+        <if test="map != null">
+            SELECT
+            d.`name` as label,i.`name` as industry,t.`name` as theme,k.`name` as kindId
+            FROM
+            dictionary d
+            LEFT JOIN dictionary i ON 1=1 and i.`code` IN
+            <foreach collection="map.industryList" item="item" index="index" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+            left join dictionary t on 1=1 and t.`code` in
+            <foreach collection="map.themeList" item="item" index="index" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+            left join dictionary k on 1=1 and k.`code` in
+            <foreach collection="map.kindIdList" item="item" index="index" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+            WHERE
+            d.`code` IN
+            <foreach collection="map.labelList" item="item" index="index" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+    </select>
+
+
+    <!--//新增-->
+    <insert id="insertReport" parameterType="com.cloud.commonsmng.entity.appletEntity.Report">
+        INSERT INTO report
+        (`id`,
+         `code`,
+         `title`,
+         `pic`,
+         `url`,
+         `description`,
+         `articleviews`,
+         `voice`,
+         `favorite`,
+         `thumbUpNumber`,
+         `delFlag`,
+         `creatorId`,
+         `createTime`,
+         `modifierId`,
+         `modifyTime`)
+        VALUES (#{report.id},
+                #{report.code},
+                #{report.title},
+                #{report.pic},
+                #{report.url},
+                #{report.description},
+                0,
+                #{report.voice},
+                0,
+                0,
+                1,
+                #{report.creatorId},
+                NOW(),
+                #{report.modifierId},
+                NOW());
+
+        insert into reportkind
+        (id, reportId, kindId, theme, area, industry, label, economy, special, delFlag, createTime)
+        values (#{report.reportKind.id}, #{report.id}, #{report.reportKind.kindId}, #{report.reportKind.theme},
+                #{report.reportKind.area},
+                #{report.reportKind.industry}, #{report.reportKind.label}, #{report.reportKind.economy},
+                #{report.reportKind.special}, 1, NOW());
+    </insert>
+
+    <!--//修改-->
+    <update id="updateReport" parameterType="com.cloud.commonsmng.entity.appletEntity.Report">
+        UPDATE report r
+        SET r.title       = #{report.title},
+            r.modifierId  = #{report.modifierId},
+            r.modifyTime  = NOW(),
+            r.pic         = #{report.pic},
+            r.description = #{report.description},
+            r.url         = #{report.url}
+        WHERE r.id = #{report.id};
+
+        update reportKind rk
+        set rk.theme      = #{report.reportKind.theme},
+            rk.kindId     = #{report.reportKind.kindId},
+            rk.industry   = #{report.reportKind.industry},
+            rk.label      = #{report.reportKind.label},
+            rk.economy    = #{report.reportKind.economy},
+            rk.special    = #{report.reportKind.special},
+            rk.area       = #{report.reportKind.area},
+            rk.modifierId = #{report.modifierId},
+            rk.modifyTime = NOW()
+        WHERE rk.reportId = #{report.id};
+    </update>
+
+    <!--//判断报告编号是否已经存在-->
+    <select id="checkReportCode" resultType="java.lang.Integer">
+        SELECT count(0)
+        FROM report r
+        WHERE r.id != #{id}
+          AND r.code = #{code}
+    </select>
+
+    <!--    删除报告-->
+    <update id="deleteReport" parameterType="java.lang.String">
+        update report
+        set delFlag = 0
+        where id = #{id};
+        update reportkind
+        set delFlag = 0
+        where reportId = #{id};
+    </update>
+</mapper>

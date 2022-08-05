@@ -1,0 +1,9 @@
+/* pages/mine/authentification/subSuccess/subSuccess.wxss */
+.all{
+  background: #F7F7F7;
+  height: 100vh;
+}
+.text{
+  color: black;
+  font-weight: bold;
+}

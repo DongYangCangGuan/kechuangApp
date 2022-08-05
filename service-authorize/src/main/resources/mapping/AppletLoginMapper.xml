@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.serviceauthorize.mapper.AppletLoginMapper">
+
+    <resultMap id="userEntity" type="com.cloud.serviceauthorize.entity.User">
+        <id property="id" column="id"/>
+        <result property="openId" column="openId"/>
+        <result property="userName" column="userName"/>
+        <result property="nickName" column="nickName"/>
+        <result property="realName" column="realName"/>
+        <result property="gender" column="gender"/>
+        <result property="birthdate" column="birthdate"/>
+        <result property="identityCard" column="identityCard"/>
+        <result property="headImg" column="headImg"/>
+        <result property="phone" column="phone"/>
+        <result property="email" column="email"/>
+        <result property="uRole" column="uRole"/>
+        <result property="delFlag" column="delFlag"/>
+        <result property="job" column="job"/>
+        <association property="member">
+            <result property="enterpriseCode" column="memberEnterpriseCode"/>
+            <result property="enterpriseName" column="memberEnterpriseName"/>
+            <result property="contact" column="memberContact"/>
+            <result property="phone" column="memberPhone"/>
+            <result property="address" column="memberAddress"/>
+            <result property="email" column="memberEmail"/>
+        </association>
+        <association property="memberUser" javaType="com.cloud.commonsmng.entity.appletEntity.MemberUser">
+            <result property="approvalstatus" column="approvalstatus"/>
+        </association>
+
+    </resultMap>
+
+    <select id="selectByAccountAndPwd" resultMap="userEntity">
+        SELECT m.enterpriseCode as memberEnterpriseCode,
+               m.enterpriseName as memberEnterpriseName,
+               m.contact as memberContact,
+               m.phone   as memberPhone,
+               m.address as memberAddress,
+               m.email   as memberEmail
+        FROM member m
+        WHERE m.delFlag = 1
+          AND m.enterpriseCode = #{account}
+          AND m.pwd = #{pwd}
+    </select>
+
+    <select id="getSelectByOpenId" parameterType="java.lang.String" resultMap="userEntity">
+        SELECT u.id,
+               u.openId,
+               u.userName,
+               u.nickName,
+               u.realName,
+               u.email,
+               u.gender,
+               u.birthdate,
+               u.identityCard,
+               u.headImg,
+               u.enterpriseName,
+               u.contactAddress,
+               u.phone,
+               u.uRole,
+               u.certificationMark,
+               u.delFlag,
+               u.job,
+               md.approvalstatus,
+               m.enterpriseCode as memberEnterpriseCode,
+               m.enterpriseName as memberEnterpriseName,
+               m.contact as memberContact,
+               m.phone   as memberPhone,
+               m.address as memberAddress,
+               m.email   as memberEmail,
+               u.unionid
+        FROM USER u
+                 LEFT JOIN member_user md ON md.userId = u.id
+                 LEFT JOIN member m ON m.id = md.memberId
+            AND m.delFlag = 1
+        WHERE u.delFlag = 1
+          AND u.openId = #{openId}
+    </select>
+
+    <insert id="insertUser" parameterType="com.cloud.serviceauthorize.entity.User">
+        INSERT INTO `user` (id, openId, userName, nickName, gender, headImg, creatorId, createTime, modifierId,
+                            modifyTime, uRole,
+                            delFlag,unionid)
+        VALUES (#{user.id}, #{user.openId}, #{user.userName}, #{user.nickName}, #{user.gender}, #{user.headImg},
+                #{user.creatorId}, NOW(),
+                #{user.modifierId}, NOW(), 0, 1,#{user.unionid});
+    </insert>
+
+    <update id="addunionid" parameterType="com.cloud.serviceauthorize.entity.User">
+        UPDATE `user` set unionid = #{user.unionid} WHERE delFlag = 1
+          AND openId = #{user.openId}
+    </update>
+</mapper>

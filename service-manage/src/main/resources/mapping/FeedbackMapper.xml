@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.servicemanage.mapper.FeedbackMapper">
+    <!--分页查询反馈建议信息-->
+    <select  id="getFeedbackListPageVo"  parameterType="com.cloud.servicemanage.common.PageVo" resultType="com.cloud.commonsmng.entity.appletEntity.Feedback">
+        SELECT
+               f.id,
+               f.opinion,
+               f.createTime,
+               u.realName AS userName
+        FROM
+             feedback AS f
+        LEFT JOIN `user` u ON f.userId = u.id AND u.delFlag = 1
+        WHERE
+            f.delFlag = 1
+        ORDER BY f.createTime DESC
+        LIMIT
+            ${pageVo.page.beginIndex-1}, ${pageVo.page.pageSize}
+    </select>
+
+    <!--查询总页数-->
+    <select id="getPageTotal" parameterType="com.cloud.servicemanage.common.PageVo" resultType="java.lang.Integer">
+        SELECT count(1)
+        FROM
+        feedback
+    </select>
+
+<!--查看详情-->
+    <select id="getFeedbackDetailById" resultType="com.cloud.commonsmng.entity.appletEntity.Feedback">
+        SELECT
+            a.id ,
+            a.opinion,
+            a.username,
+            a.createTime
+        FROM
+            feedback a
+        WHERE
+            a.delFlag = 1 AND
+            a.id = #{id};
+    </select>
+
+    <!--删除反馈的建议-->
+    <update id="deleteFeedback" parameterType="com.cloud.commonsmng.entity.appletEntity.Feedback">
+        UPDATE feedback
+        SET delFlag = 0
+        WHERE id = #{feedback.id}
+    </update>
+</mapper>

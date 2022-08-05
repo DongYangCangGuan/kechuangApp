@@ -1,0 +1,46 @@
+/* pages/mine/getMessage/getMessage.wxss */
+.box{
+  width: 100%;
+  height: 120rpx;
+  padding-top: 10rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  border-bottom: 2rpx solid #dbdbdb;
+}
+.box1{
+    width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+.box1 .title{
+    width: 65%;
+    overflow: hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    font-family: Arial;
+    /* font-weight: 600; */
+    padding-left: 40rpx;
+}
+.time{
+    width: 35%;
+    text-align: right;
+    font-size: 14px;
+    padding-right: 40rpx;
+}
+
+.box2{
+  display: flex;
+  justify-content: flex-end;
+  /* justify-content: space-between; */
+}
+
+/* .title{
+  font-size: 14px;
+  padding-left: 40rpx;
+} */
+
+.readStatus{
+  padding-right: 40rpx;
+  font-weight: 600;
+}

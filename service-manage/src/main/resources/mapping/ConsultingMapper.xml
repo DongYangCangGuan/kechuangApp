@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"  >
+<mapper namespace="com.cloud.servicemanage.mapper.ConsultingMapper">
+
+    <resultMap id="ConsultingInfo" type="com.cloud.commonsmng.entity.appletEntity.ConsultingInfo">
+        <id property="id" column="id"/>
+        <result property="userId" column="userId"/>
+        <result property="accountmanager" column="accountmanager"/>
+        <result property="telephone" column="telephone"/>
+        <result property="email" column="email"/>
+    </resultMap>
+
+
+    <sql id="tmpPageQry">
+        <trim prefix="WHERE" prefixOverrides="AND | OR">
+            AND c.delFlag = 1
+            <if test="pageVo.searchData != null">
+                <if test="pageVo.searchdata.realName != null and pageVo.searchdata.realName != ''">
+                    AND u.realName LIKE concat('%',#{pageVo.searchdata.realName},'%')
+                </if>
+                <if test="pageVo.searchdata.memberName != null and pageVo.searchdata.memberName != ''">
+                    AND m.enterpriseName LIKE concat('%',#{pageVo.searchdata.memberName},'%')
+                </if>
+
+                <if test="pageVo.searchdata.accountmanager != null and pageVo.searchdata.accountmanager != ''">
+                    AND c.accountmanager LIKE concat('%',#{pageVo.searchdata.accountmanager},'%')
+                </if>
+            </if>
+        </trim>
+    </sql>
+    <!-- 查询总条数-->
+    <select id="getConsultingPageTotal" parameterType="com.cloud.servicemanage.common.PageVo" resultType="java.lang.Integer">
+        select count(0) from consultingInfo c
+        left JOIN  user u on u.id = c.userId
+        LEFT JOIN member m on m.id = u.memberId
+        <include refid="tmpPageQry"></include>
+    </select>
+    <!--//分页-->
+    <sql id="pagination">
+        <if test="pageVo.page!=null">
+            LIMIT ${pageVo.page.beginIndex-1}, ${pageVo.page.pageSize}
+        </if>
+    </sql>
+
+
+    <select id="getConsultingPageVo" parameterType="com.cloud.servicemanage.common.PageVo" resultType="com.cloud.commonsmng.entity.appletEntity.ConsultingInfo">
+        select c.*,u.realName,u.memberId,m.enterpriseName as memberName,u.phone from consultingInfo c
+        left JOIN  user u on u.id = c.userId
+        LEFT JOIN member m on m.id = u.memberId
+
+        <include refid="tmpPageQry"></include>
+        ORDER BY c.createTime DESC
+        <include refid="pagination"></include>
+    </select>
+
+
+</mapper>

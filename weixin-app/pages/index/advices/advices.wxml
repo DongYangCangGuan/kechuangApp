@@ -1,0 +1,40 @@
+<!--pages/index/advices/advices.wxml-->
+<view class="all_advices">
+  <view class="haveNoNote" wx:if="{{!showAdvicesList.length}}">
+    <image src="../../../images/report/noData.png"></image>
+    <view class="noticeText">暂无消息</view>
+  </view>
+  <scroll-view wx:else class="showAdvices" scroll-y="true" bindscrolltolower="scrollBottm">
+    <view class="advices_item" wx:for="{{ showAdvicesList }}" wx:key="index" data-item="{{ item }}"
+      bindtap="clickAdvice">
+      <!-- 消息部分 -->
+      <view class="advices_area">
+        <!-- 头像部分 -->
+        <!-- <image class="head_img"
+          src="{{ item.headImg }}">
+        </image> -->
+        <!-- 内容部分 -->
+        <view class="advices_text">
+          <view class="addresser">
+            {{ item.title }}
+          </view>
+          <view class="advices_content">
+            {{ item.content }}
+          </view>
+        </view>
+        <view class="right">
+          <view class="time">{{ item.modifyTime }}</view>
+          <block wx:if="{{showRedNoRead}}">
+            <view wx:if="{{ item.readStatus != '1' }}" class="number">1</view>
+            <view wx:else>已读</view>
+          </block>
+        </view>
+      </view>
+      <!-- 横线 -->
+      <view class="hengxian_area">
+        <view class="hengxian"></view>
+      </view>
+    </view>
+    <view wx:if="{{showBottom}}" class="bottomHint">已经到底了！</view>
+  </scroll-view>
+</view>

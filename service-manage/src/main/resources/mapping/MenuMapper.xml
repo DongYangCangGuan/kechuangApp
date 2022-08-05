@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.servicemanage.mapper.MenuMapper">
+
+    <resultMap id="baseMenuInfo" type="com.cloud.servicemanage.entity.Menu">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="code" column="code"/>
+        <result property="url" column="url"/>
+        <result property="isused" column="isused"/>
+        <result property="parentid" column="parentid"/>
+        <result property="index" column="index"/>
+        <result property="icon" column="icon"/>
+        <result property="component" column="component"/>
+        <result property="url" column="url"/>
+        <result property="parentname" column="parentname"/>
+
+        <result property="treeabout" column="treeabout"/>
+        <result property="creatorid" column="creatorid"/>
+        <result property="createtime" column="createtime"/>
+        <result property="modifierid" column="modifierid"/>
+        <result property="modifytime" column="modifytime"/>
+        <result property="path" column="path"/>
+        <result property="noCache" column="nocache"/>
+    </resultMap>
+
+
+    <resultMap id="menusSecurityMap" type="com.cloud.servicemanage.entity.Menu">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="isUsed" column="isused"/>
+        <result property="icon" column="icon"/>
+        <result property="url" column="url"/>
+        <result property="parentid" column="parentid"/>
+        <result property="creatorId" column="creatorid"/>
+        <result property="createtime" column="createtime"/>
+        <result property="modifierId" column="modifierid"/>
+        <result property="modifytime" column="modifytime"/>
+        <result property="parentname" column="parentname"/>
+        <result property="childCount" column="childcount"/>
+        <result property="code" column="code"/>
+        <result property="noCache" column="nocache"/>
+        <result property="userId" column="userId"/>
+        <result property="treeabout" column="treeabout"/>
+        <result property="path" column="path"/>
+        <collection column="{id=id,userId=userId}" property="children"
+                    ofType="menusSecurityMap" javaType="java.util.ArrayList" select="selectSecurityMenuChildrenById"/>
+    </resultMap>
+
+    <resultMap id="menusMap" type="com.cloud.servicemanage.entity.Menu">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="icon" column="icon"/>
+
+        <result property="parentid" column="parentid"/>
+
+        <result property="parentname" column="parentname"/>
+
+        <result property="treeabout" column="treeabout"/>
+        <collection column="{id=id}" property="children"
+                    ofType="menusMap" javaType="java.util.ArrayList" select="selectMenuByParentId"/>
+    </resultMap>
+
+
+    <!-- 设置菜单树 -->
+    <select id="selectMenuByParentId" resultMap="menusMap">
+        select a.ID,
+               a.NAME,
+               a.parentid,
+               a.icon,
+               IFNULL(b.Name, '-') as parentname
+        from menu a
+                 left join menu b on a.parentId = b.id
+        where a.parentid = #{id}
+          and a.isused = 1
+        order by a.index
+    </select>
+
+
+    <!-- 根据parent_id，先查出所有一级部门 -->
+    <!-- 此方法做权限判断-->
+    <select id="querySecurityMenuTreeList" resultMap="menusSecurityMap" parameterType="java.util.Map">
+        select a.path,
+               a.icon,
+               a.code,
+               a.nocache,
+               a.id,
+               a.name,
+               a.url,
+               a.parentid,
+               #{userId} userId
+        from menu a
+                 left join rolemenurelation b on a.id = b.menuid
+                 left join role c on b.roleid = c.id
+        where c.id = #{userId}
+          and a.parentid = '0'
+          and a.isused = 1
+        GROUP BY a.path, a.id, a.name, a.url, a.parentid, a.nocache, a.code, a.icon
+        order by a.index
+    </select>
+
+    <!-- 根据parent_id，先查出所有一级部门 -->
+    <!-- 此方法做权限判断-->
+    <select id="selectSecurityMenuChildrenById" resultMap="menusSecurityMap" parameterType="java.util.Map">
+        select a.path,
+               a.icon,
+               a.code,
+               a.nocache,
+               a.id,
+               a.name,
+               a.url,
+               a.parentid,
+               #{userId} userId
+        from menu a
+                 left join rolemenurelation b on a.id = b.menuid
+                 left join role c on b.roleid = c.id
+        where c.id = #{userId}
+          and a.parentid = #{id}
+          and a.isused = '1'
+        GROUP BY a.path, a.id, a.name, a.url, a.parentid, a.nocache, a.code, a.icon
+        order by a.index
+    </select>
+
+
+    <!-- 过滤掉父级节点 -->
+    <select id="selectMenuByRoleId" resultMap="baseMenuInfo">
+        select distinct b.id,
+                        b.name
+        from rolemenurelation a
+                 left join menu b on a.menuid = b.id
+            and a.menuid not in (select distinct m2.id
+                                 from menu m1
+                                          inner join menu m2
+                                 where m1.parentid = m2.id)
+        where roleid = #{roleid}
+          and b.id is not null
+    </select>
+
+
+    <select id="getMenuList" resultMap="baseMenuInfo">
+        select *
+        from menu a
+        WHERE parentid = '0'
+        ORDER BY a.index
+    </select>
+
+    <select id="getMenuListById" resultMap="baseMenuInfo">
+        select *
+        from menu a
+        WHERE a.parentid = #{ID}
+        ORDER BY a.index
+    </select>
+
+    <select id="getMenuInfoById" resultMap="baseMenuInfo">
+        SELECT a.url,
+               a.id,
+               a.`code`,
+               a.`name`,
+               a.isused,
+               a.parentid,
+               a.icon,
+               a.createtime,
+               a.modifytime,
+               b.`name`     AS parentname,
+               a.nocache,
+               a.path,
+               a.component,
+               c.`userName` AS creator,
+               d.`userName` AS modifier
+        FROM menu a
+                 LEFT JOIN menu b ON a.parentid = b.id
+                 LEFT JOIN `user` c ON a.creatorid = c.id
+                 LEFT JOIN `user` d ON a.modifierid = d.id
+        WHERE a.id = #{ID}
+    </select>
+
+    <update id="modifyMenuInfo" parameterType="com.cloud.servicemanage.entity.Menu">
+        update menu
+        set name=#{name},
+            parentid=#{parentid},
+            path=#{path},
+            icon=#{icon},
+            url=#{url},
+            isused=#{isused},
+            nocache=#{noCache},
+            modifytime=now(),
+            modifierid=#{modifierid}
+        where id = #{id};
+        select queryParentMenu(#{id});
+    </update>
+
+    <update id="modifyMenuTree" parameterType="com.cloud.servicemanage.entity.Menu">
+        UPDATE
+            menu
+        SET parentid = #{parentid}
+        WHERE id = #{id};
+
+        SELECT queryParentMenu(#{id});
+    </update>
+
+    <insert id="insertMenu" parameterType="com.cloud.servicemanage.entity.Menu">
+
+        insert into menu (id, name, parentid, path, icon, url, isused, nocache, createtime, modifytime, code, creatorid,
+                          modifierid, component, `index`)
+        values (#{id}, #{name}, #{parentid}, #{path}, #{icon}, #{url}, #{isused}, #{noCache}, now(), now(), #{code},
+                #{creatorid}, #{modifierid}, #{component}, #{index});
+
+        select queryParentMenu(#{id});
+
+    </insert>
+
+
+    <insert id="insertMenuByRoleId" parameterType="java.util.List">
+
+        delete from rolemenurelation where roleid=#{roleid};
+        <foreach collection="list" item="item" index="index" separator=";">
+
+            insert into rolemenurelation(id,roleid,menuid,creatorid,createtime,modifierid,modifytime)
+            values(UUID(),#{roleid},#{item.id},#{item.creatorid},NOW(),#{item.creatorid},NOW())
+        </foreach>
+    </insert>
+
+    <select id="isMenuCodeExisted" resultType="boolean">
+        <![CDATA[
+        SELECT COUNT(1)
+        FROM menu
+        WHERE id != #{id}
+          AND code = #{code}
+        ]]>
+    </select>
+</mapper>

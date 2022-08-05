@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.serviceauthorize.mapper.UsersMapper">
+
+    <resultMap id="userinfo" type="com.cloud.commonsmng.entity.BaseUserInfo">
+        <id property="id" column="id"/>
+        <result property="nickName" column="nickName"/>
+        <result property="userName" column="userName"/>
+        <result property="email" column="email"/>
+        <result property="departmentId" column="departmentId"/>
+        <result property="headImg" column="headImg"/>
+        <result property="gender" column="gender"/>
+        <result property="deptName" column="deptName"/>
+        <collection property="listrole" select="getRoleByUserid" column="id">
+        </collection>
+    </resultMap>
+
+    <resultMap id="getRole" type="com.cloud.commonsmng.entity.BaseRole">
+        <id property="id" column="id"/>
+        <result property="code" column="code"/>
+        <result property="name" column="name"/>
+    </resultMap>
+
+    <select id="getUsersByLoginName" resultMap="userinfo">
+        SELECT a.*,
+               b.`name` AS deptName
+        FROM `user` a
+                 LEFT JOIN department b ON a.departmentId = b.id
+        WHERE a.delFlag = 1
+          AND a.userName = #{userName}
+          AND a.`passWord` = #{passWord}
+    </select>
+
+    <select id="getUsersByID" resultMap="userinfo">
+        SELECT a.userName
+        FROM `user` a
+        WHERE id = #{id}
+    </select>
+
+    <select id="getRoleByUserid" parameterType="String" resultMap="getRole">
+        SELECT a.id,
+               a.`code`,
+               a.`name`
+        FROM role a
+                 INNER JOIN userrolerelation b ON a.id = b.roleid
+            AND b.userid = #{id}
+    </select>
+
+    <select id="getUserInfo" resultType="com.cloud.commonsmng.entity.BaseUserInfo">
+        SELECT a.id,
+               a.nickName,
+               a.userName,
+               a.email,
+               a.phone,
+               a.headImg,
+               a.creatorid,
+               a.createtime,
+               a.delFlag,
+               a.gender,
+               a.birthdate,
+               a.uRole
+        FROM `user` a
+        WHERE a.delFlag = 1
+          AND a.userName = #{id}
+    </select>
+</mapper>

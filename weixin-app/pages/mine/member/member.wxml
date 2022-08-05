@@ -1,0 +1,33 @@
+<!--pages/mine/member/member.wxml-->
+<view class="container-member">
+  <view class="header">
+    <!-- <view class="blue"></view> -->
+    <!-- <view class="questionnaire">待审批信息</view> -->
+    <view class="questionnaire">待审批信息（{{totalNum}}）</view>
+  </view>
+
+  <scroll-view scroll-y="true" class="scrollView">
+    <radio-group>
+        <label wx:for="{{itemList}}" wx:key="index">
+        <!-- checked="{{item.checked}}" -->
+            <radio value="{{item.value}}"  bindtap="radioChange" data-a="{{item}}"></radio>
+            <text bindtap="radioChange"  data-a="{{item}}">{{item.enterpriseName}}</text>
+            <view bindtap="radioChange"  data-a="{{item}}" class="time">{{item.time}}</view>
+        </label>
+    </radio-group>
+  </scroll-view>
+
+  
+  <view class="pages_box">
+    <view bindtap="pagesFn" class="{{pagesNum == 0?'active':''}}" data-type="0">上一页</view>
+    <block wx:for="shujuDataArr" wx:key="index" wx:if="{{index + 1 < 4}}">
+        <view wx:if="{{tyindex+index <= maxPages}}" bindtap="pagesFn" class="{{pagesNum == tyindex+index?'active':''}}" data-type="{{tyindex + index}}">{{ tyindex + index}}</view>
+    </block>
+    <view bindtap="pagesFn" class="{{pagesNum == -1?'active':''}}" data-type="-1">下一页</view>
+  </view>
+  <view class="bottom">
+    <!-- <view bindtap="getAdopt">审批通过</view>
+    <view bindtap="getRefuse">拒绝</view> -->
+    <view bindtap="goMemberDetail">审批</view>
+  </view>
+</view>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.servicemanage.mapper.NewsMapper">
+
+    <sql id="tmpPageQry">
+        <trim prefix="WHERE" prefixOverrides="AND | OR">
+            <if test="pageVo.searchData != null">
+                <if test="pageVo.searchdata.title != null and pageVo.searchdata.title != '' ">
+                    AND n.title LIKE concat('%',#{pageVo.searchdata.title},'%')
+                </if>
+                <if test="pageVo.searchdata.id != null and pageVo.searchdata.id != '' ">
+                    AND n.id LIKE concat('%',#{pageVo.searchdata.id},'%')
+                </if>
+                <if test="pageVo.searchdata.startTime != null and pageVo.searchdata.startTime != ''">
+                    <if test="pageVo.searchdata.endTime != null and pageVo.searchdata.endTime != ''">
+                        AND date_format(n.newsTime,'%Y-%m-%d') BETWEEN #{pageVo.searchdata.startTime} AND
+                        #{pageVo.searchdata.endTime}
+                    </if>
+                </if>
+            </if>
+        </trim>
+    </sql>
+
+    <!--//分页-->
+    <sql id="pagination">
+        <if test="pageVo.page!=null">
+            LIMIT ${pageVo.page.beginIndex-1}, ${pageVo.page.pageSize}
+        </if>
+    </sql>
+
+    <!-- 查询总条数-->
+    <select id="getUserCount" parameterType="com.cloud.servicemanage.common.PageVo" resultType="java.lang.Integer">
+        select count(0) from news n
+        <include refid="tmpPageQry"></include>
+    </select>
+
+    <select id="getUserList" parameterType="com.cloud.servicemanage.common.PageVo" resultType="com.cloud.commonsmng.entity.appletEntity.NewsEntity">
+        select
+        id,
+        title,
+        newsPic,
+        newsLink,
+        `describe`,
+        creatorId,
+        createTime,
+        modifierId,
+        modifyTime,
+        remark,
+        newsTime
+        from  news n
+        <include refid="tmpPageQry"></include>
+        ORDER BY n.createTime DESC
+        <include refid="pagination"></include>
+    </select>
+
+    <insert id="insertUser" parameterType="com.cloud.commonsmng.entity.appletEntity.NewsEntity">
+        insert into news(
+            id,
+            title,
+            newsPic,
+            newsLink,
+            `describe`,
+            creatorId,
+            createTime,
+            modifierId,
+            modifyTime,
+            remark,
+            newsTime
+        )
+        VALUES (
+                uuid(),
+                #{title},
+                #{newsPic},
+                #{newsLink},
+                #{describe},
+                #{creatorId},
+                now(),
+                #{modifierId},
+                now(),
+                #{remark},
+                now()
+                )
+    </insert>
+
+    <!--删除角色-->
+    <delete id="deleteUser" parameterType="java.lang.String">
+        delete from news   where  id=#{id}
+    </delete>
+
+    <update id="updateUser" parameterType="com.cloud.commonsmng.entity.appletEntity.NewsEntity">
+        update news set
+           title =  #{title},
+           newsPic =  #{newsPic},
+           newsLink =  #{newsLink},
+            `describe` =  #{describe},
+           modifierId =  #{modifierId},
+           modifyTime =  now(),
+           remark = #{remark},
+           newsTime = #{newsTime}
+        where  id = #{id}
+    </update>
+</mapper>

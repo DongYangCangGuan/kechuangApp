@@ -1,0 +1,39 @@
+/* pages/mine/approve/approve.wxss */
+page{
+ background-color: rgba(238, 238, 238, 0.3);
+}
+.main_content{
+  height:528rpx;
+  background-color: #fff;
+}
+.main{
+  margin: 0 40rpx;
+  height: 107rpx;
+  border-bottom: 1rpx solid rgba(0, 0, 0, 0.2);
+  box-sizing: border-box;
+  line-height: 107rpx;
+  font-size: 14px;
+  color: #444;
+  font-weight: 400;
+  display: flex;
+  justify-content: space-between;
+}
+.main view text{
+  color: #999;
+  margin-right: 20rpx;
+}
+.main view .iconfont{
+  font-size: 32rpx;
+  font-weight: 900;
+  color:#BFBFBF;
+}
+.foot{
+  height: 88rpx;
+  background-color: #fff;
+  margin-top: 20rpx;
+  line-height: 88rpx;
+  text-align: center;
+  font-size: 14px;
+  color: #333333;
+  
+}

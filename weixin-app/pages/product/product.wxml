@@ -1,0 +1,100 @@
+<view class="product_container" wx:if="{{userisnull==1}}">
+  <view wx:if="{{productis==false}}">
+      <image style="height: 100vh;" src="https://ssic-capital.com/public-gateway/service-manage/pictureloads/chanping.png" bindtap="AuthenticationPage"></image>
+  </view>
+  <view wx:else>
+        <view class="title">
+            <text bindtap="goAuthentification">产品需身份认证后查看</text>
+        </view>
+        <view class="content_box">
+            <view class="con_circle" style=" top: 0;left: -1%;z-index: 999;"></view>
+            <view class="con_main">
+                <view class="con_pargraph">
+                    上海科创基金是根据上海市委、市政府部署要求，由上海国际集团牵头发起设立的市场化母基金，主要投资人包括国盛集团、上港集团国泰君安、上海信托、张江高科、太保集团、嘉定国资集团等。上海科创基金以服务上海科创中心建设为使命，目标规模300亿元，目前管理规模超过120亿元。
+                </view>
+                <view class="con_pargraph">
+                    截至目前，上海科创基金已投资子基金超过50支，子基金签约总规模超过1000亿元，投资组合企业超过1000家。已上市企业达到46家，其中科创板27家。未来一年有申报上市计划的企业超过100家。
+                </view>
+            </view>
+            <view class="con_circle" style="bottom: 0;right: -1%;"></view>
+        </view>
+        <view class="footer">
+            <button bindtap="gohomepage">跳转认证页面</button>
+        </view>
+        <!-- <view class="footer">
+            您的身份证正在认证中，请稍后...
+        </view> -->
+    </view>
+</view>
+<view  wx:if="{{userisnull==2}}" class="pageTotal"
+      style="background-image: url({{myBackground}});background-position:bottom;background-size: 100%;background-repeat:no-repeat;"
+>
+    <view class="content">
+        <view class="box" wx:for="{{noReadNumber1}}" wx:key="index" wx:for-index="index" wx:for-item="item"  bindtap="goSearch" data-theme="{{item}}">
+            <view class="pic">
+                <!-- <image src="../../../images/product/fundraising.png"></image> -->
+                <image src="{{item.pic}}"></image>
+            </view>
+            <view class="text">{{item.name}}</view>
+        </view>
+        <!-- <view class="box"  bindtap="goSearch" data-theme="insurance">
+            <view class="pic">
+                <image src="../../../images/product/ODIFDI.png"></image>
+            </view>
+            <view class="text">ODI/FDI</view>
+        </view>
+        <view class="box"  bindtap="goSearch" data-theme="loans">
+            <view class="pic">
+                <image src="../../../images/product/loans.png"></image>
+            </view>
+            <view class="text">贷款</view>
+        </view>
+        <view class="box"  bindtap="goSearch" data-theme="rent">
+            <view class="pic">
+                <image src="../../../images/product/cash.png"></image>
+            </view>
+            <view class="text">现金管理</view>
+        </view> -->
+    </view>
+    <view class="footer" style="position: absolute;bottom: 40rpx;">
+        <button bindtap="goEntfirm">切换到创业公司产品</button>
+    </view>
+    <!-- <view class="footerpage">
+        <button bindtap="gohomepage">返回主页</button>
+    </view> -->
+</view>
+<view wx:if="{{userisnull==3}}" class="pageTotal"
+      style="background-image: url({{myBackground}});background-position:bottom;background-size: 100%;background-repeat:no-repeat;"
+>
+    <view class="content">
+        <view class="box" wx:for="{{noReadNumber1}}" wx:key="index" wx:for-index="index" wx:for-item="item"  bindtap="goSearch2" data-theme="loans" data-theme2='{{item}}'>
+            <view class="pic">
+                <!-- <image src="../../../images/product/loans.png"></image> -->
+                <image src="{{item.pic}}"></image>
+            </view>
+            <view catchtap="socrt_change" data-ccc="{{item}}" class="text">{{item.name}}</view>
+        </view>
+        <!-- <view class="box"  bindtap="goSearch" data-theme="cash">
+            <view class="pic">
+                <image src="../../../images/product/cash.png"></image>
+            </view>
+            <view class="text">现金管理</view>
+        </view> -->
+        <!-- <view class="box"  bindtap="goSearch" data-theme="rent">
+            <view class="pic">
+                <image src="../../../images/product/rent.png"></image>
+            </view>
+            <view class="text">租赁</view>
+        </view>
+        <view class="box"  bindtap="goSearch" data-theme="insurance">
+            <view class="pic">
+                <image src="../../../images/product/insurance.png"></image>
+            </view>
+            <view class="text">保险</view>
+        </view> -->
+        
+    </view>
+    <!-- <view class="footer">
+            <button bindtap="gohomepage">返回主页</button>
+    </view> -->
+</view>

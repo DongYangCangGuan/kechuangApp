@@ -1,0 +1,481 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.servicemanage.mapper.ActivityMapper">
+
+    <resultMap id="applymap"  type="com.cloud.commonsmng.entity.appletEntity.ActivityEntity" >
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="title" property="title"/>
+        <result column="description" property="description"/>
+        <result column="artStartTime" property="artStartTime"/>
+        <result column="artEndTime" property="artEndTime"/>
+        <result column="createTime" property="createTime"/>
+        <result column="realName" property="realName"/>
+        <collection property="activityTemplate" select="getAt" column="id" >
+        </collection>
+    </resultMap>
+
+    <resultMap id="getAt" type="com.cloud.commonsmng.entity.appletEntity.ActivityTemplate" >
+        <id column="id" property="id"/>
+        <result column="activityTemId" property="activityTemId"/>
+        <result column="seq" property="seq"/>
+        <result column="template" property="template"/>
+        <result column="templateType" property="templateType"/>
+    </resultMap>
+
+    <sql id="ApplyQuery">
+        <trim prefix="WHERE" prefixOverrides="AND | OR">
+         a.isused='1' AND a.delFlag='1'
+        <if test="pageVo.searchdata !=null">
+            <if test="pageVo.searchdata.name != null and pageVo.searchdata.name != '' ">
+                AND  a.name like concat('%',#{pageVo.searchdata.name} ,'%')
+            </if>
+            <if  test=" pageVo.searchdata.startTime!=null and pageVo.searchdata.startTime!=''">
+                and  a.createTime &gt; #{pageVo.searchdata.startTime}
+            </if>
+            <if  test=" pageVo.searchdata.endTime!=null and pageVo.searchdata.endTime!=''">
+                and  a.createTime &lt; #{pageVo.searchdata.endTime}
+            </if>
+        </if>
+        </trim>
+    </sql>
+
+    <sql id="page">
+        <if test="pageVo.page!=null">
+            LIMIT ${pageVo.page.beginIndex-1}, ${pageVo.page.pageSize}
+        </if>
+    </sql>
+
+
+    <select id="getActivityList" resultMap="applymap">
+        SELECT
+        a.id,
+        a.name,
+        a.title,
+        a.description,
+        a.artStartTime,
+        a.artEndTime,
+        a.createTime,
+        u.realName
+        FROM
+        activity a
+        LEFT JOIN user u ON a.creatorId = u.id
+        <include refid="ApplyQuery"></include>
+        ORDER BY a.createTime DESC
+        <include refid="page"></include>
+    </select>
+
+    <select id="getAt" parameterType="String" resultMap="getAt">
+        SELECT
+          ai.id as activityTemId,
+          ai.activityId,
+          ai.template,
+          ai.seq,
+          ai.templateType
+        FROM activity_template ai
+            where  ai.activityId =#{id}
+    </select>
+
+
+    <select id="countActivityList" resultType="java.lang.Integer">
+        SELECT
+        count(1) as tolNum
+        FROM
+        activity a
+        LEFT JOIN user u ON a.creatorId = u.id
+            <include refid="ApplyQuery"></include>
+    </select>
+
+    <select id="countSignList" resultType="java.lang.Integer">
+        SELECT
+           count(1) as tolNum
+        FROM
+            sign s
+                LEFT JOIN USER u ON s.creatorId = u.id
+                LEFT JOIN USER us ON s.modifierId = us.id
+                LEFT JOIN signappendix si ON s.id=si.signId
+        WHERE
+            s.activityEventId=#{pageVo.searchdata.id}
+    </select>
+
+    <select id="getSignList" resultType="com.cloud.commonsmng.entity.appletEntity.SignEntity">
+    SELECT
+    distinct
+    s.id,
+    s.activityEventId,
+    s.memberId enterpriseName,
+    s.phone,
+    s.NAME name,
+    s.remark,
+    u.realName as uName,
+    s.createTime,
+    s.modifyTime,
+    s.isused,
+    s.readymade,
+    s.customization
+    FROM
+    sign s
+    LEFT JOIN USER u ON s.creatorId = u.id
+    LEFT JOIN USER us ON s.modifierId = us.id
+    WHERE
+    s.activityEventId=#{pageVo.searchdata.id}
+        ORDER BY s.createTime DESC
+        <include refid="page"></include>
+    </select>
+
+    <select id="getSignTemAs" resultType="com.cloud.commonsmng.entity.appletEntity.SignDetail" >
+        select sd.*,
+               ate.template as templateName,
+               ate.seq,
+               ate.templateType
+        from sign_detail sd
+                 left join activity_template ate on sd.templateId = ate.id
+        where signId = #{id}
+        ORDER BY ate.seq
+    </select>
+
+    <!--活动列表-->
+   <select id="selectActivityList" resultType="com.cloud.servicemanage.entity.Activity">
+       SELECT
+           a.id,
+           a.name,
+           a.title,
+           a.description,
+           a.artStartTime,
+           a.artEndTime,
+           a.createTime,
+           u.realName
+       FROM
+           activity a
+           LEFT JOIN user u ON a.creatorId = u.id
+       WHERE 1=1
+         AND a.isused='1'
+         AND a.delFlag='1'
+       <if test="name != null and name != '' ">
+           AND  a.name like concat('%',#{name} ,'%')
+       </if>
+       <if test="startTime != null and startTime != '' and endTime != null and endTime != '' ">
+           AND a.createTime between #{startTime,jdbcType=DATE} and #{endTime,jdbcType=DATE}
+       </if>
+        ORDER BY
+        a.createTime DESC
+   </select>
+
+    <!--公司的报名详细资料-->
+    <select id="selectSignList" resultType="com.cloud.servicemanage.entity.Sign">
+        SELECT
+            s.id,
+            s.activityEventId,
+            s.memberId enterpriseName,
+            s.phone,
+            s.NAME sName,
+            s.remark,
+            u.realName uName,
+            s.createTime,
+            us.realName usName,
+            s.modifyTime,
+            s.isused,
+            s.readymade,
+            s.customization,
+            si.appendix,
+            si.appendixName
+        FROM
+            sign s
+                LEFT JOIN USER u ON s.creatorId = u.id
+                LEFT JOIN USER us ON s.modifierId = us.id
+                LEFT JOIN signappendix si ON s.id=si.signId
+        WHERE
+            s.activityEventId=#{id}
+    </select>
+
+    <!--发布活动-->
+    <insert id="insertActivity">
+        INSERT INTO activity(id,name,title,description,artStartTime,artEndTime,creatorId,createTime,delFlag,isused)
+        VALUES(#{activity.id},#{activity.name},#{activity.title},#{activity.description},#{activity.artStartTime},#{activity.artEndTime},#{activity.creatorId},#{activity.createTime},#{activity.delflag},#{activity.isused});
+    </insert>
+
+    <insert id="insertActivityTemplate">
+        INSERT INTO activity_template(id,activityId,template,seq,creatorId,createTime,delFlag,isused,templateType)
+        VALUES(UUID(),#{activityTemplate.activityId},#{activityTemplate.template},#{activityTemplate.seq},#{activityTemplate.creatorId},#{activityTemplate.createTime},#{activityTemplate.delFlag},#{activityTemplate.isused},#{activityTemplate.templateType});
+    </insert>
+
+    <update id="updateActivity">
+        update activity
+        set name=#{activity.name},
+            title=#{activity.title},
+            description=#{activity.description},
+            artStartTime=#{activity.artStartTime},
+            artEndTime=#{activity.artEndTime},
+            modifierId=#{activity.modifierId},
+            modifyTime=#{activity.modifyTime}
+        where id = #{activity.id}
+    </update>
+
+    <update id="updateActivityTemplate">
+        update activity_template
+        set
+            template=#{activityTemplate.template},
+            templateType=#{activityTemplate.templateType},
+            seq=#{activityTemplate.seq},
+            modifierId=#{activityTemplate.modifierId},
+            modifyTime=#{activityTemplate.modifyTime}
+        where id = #{activityTemplate.id}
+    </update>
+
+
+    <!--问卷列表    a.createTime,-->
+    <select id="selectQuestionnaireList" resultType="com.cloud.servicemanage.entity.Questionnaire">
+        SELECT DISTINCT
+
+            a.questionBelong
+        FROM
+            question a
+        LEFT JOIN dictionary b ON a.questionnairetypes=b.`code`
+        WHERE
+            delFlag = '1'
+        <if test="questionname != null and questionname != ''">
+            AND a.questionname like concat('%',#{questionname} ,'%')
+        </if>
+        <if test="startTime != null and startTime != '' and endTime != null and endTime != '' ">
+            AND a.createTime between #{startTime,jdbcType=DATE} and #{endTime,jdbcType=DATE}
+        </if>
+
+    </select>
+
+
+    <!--问卷列表    a.createTime,-->
+    <select id="getQuestionMsg" resultType="com.cloud.servicemanage.entity.Questionnaire">
+        SELECT
+            questionname,
+            questionBelong,
+            modifyTime as modifytime,
+            createTime ,
+            releaseFlag
+        FROM
+            question
+        WHERE
+            delFlag='1'
+            and
+            questionBelong = #{questionBelong} limit 0,1
+    </select>
+    <!--根据问卷名称查询问卷问题-->
+    <select id="selectQuestionList" resultType="com.cloud.servicemanage.entity.Question">
+        SELECT
+            id,
+            questionDescription,
+            sequen,
+            questionType
+        FROM
+            question
+        WHERE
+            1 = 1
+          AND delFlag = '1'
+          AND questionBelong = #{questionname}
+        ORDER BY
+            sequen
+    </select>
+
+    <!--根据问题ID查询问题选项-->
+    <select id="selectMyQuestionList" resultType="com.cloud.servicemanage.entity.MyQuestion">
+        SELECT
+            id,
+            questionId,
+            answer,
+            content
+        FROM
+            myquestion
+        WHERE
+            questionId = #{id}
+        ORDER BY
+            answer
+    </select>
+
+    <!--新增问卷问题-->
+    <insert id="insertQuestion">
+        INSERT INTO question ( id,questionBelong, questionDescription, creatorId, createTime, delFlag, sequen, releaseFlag, questionname, questionType ,questionnairetypes,modifyTime)
+        VALUES
+        ( #{uuid}, #{questionBelong}, #{questionDescription}, #{creatorId}, #{createTime}, 1, #{sequen}, 1, #{questionname}, #{questionType} ,#{questionnairetypes},#{createTime});
+    </insert>
+
+<!--    修改问题-->
+    <update id="updateQuestion">
+        update question
+        set
+                    questionDescription=#{questionDescription},
+                    modifierId = #{question.modifierId} ,
+                    modifyTime= #{question.modifyTime} ,
+                    delFlag= #{question.delFlag} ,
+                    sequen= #{question.sequen},
+                    releaseFlag= #{question.releaseFlag},
+                    questionname= #{question.questionname},
+                    questionType = #{question.questionType},
+        where
+            Id=#{question.id}
+    </update>
+
+    <!--新增问题选项-->
+    <insert id="insertMyQuestion">
+        INSERT INTO myquestion ( id, questionId, answer, content, creatorId, createTime, delFlag )
+        VALUES
+            ( UUID(), #{uuid}, #{answer}, #{content},#{creatorId},#{createTime}, #{delFlag});
+    </insert>
+
+<!-- 修改选项-->
+    <update id="updateMyQuestion" parameterType="com.cloud.commonsmng.entity.appletEntity.QuestionOptionsEntity" >
+        update myquestion
+            set
+                content=#{myquestion.content},
+                modifierId=#{myquestion.modifierId},
+                modifyTime=#{myquestion.modifyTime},
+                delFlag= #{myquestion.delFlag}
+        where questionId=#{myquestion.questionId} and   answer=#{myquestion.questionId},
+    </update>
+
+    <!--逻辑删除问题选项-->
+    <update id="deleteMyQuestion">
+        UPDATE myquestion
+        SET delFlag = '0'
+        WHERE
+            questionId = #{id}
+    </update>
+
+    <!--逻辑删出问卷问题-->
+    <update id="deleteQuestion">
+        UPDATE question
+        SET delFlag = '0'
+        WHERE
+            questionBelong = #{questionname}
+    </update>
+
+    <!--逻辑删除活动-->
+    <update id="deleteActivityId">
+        UPDATE activity
+        SET delFlag = '0'
+        WHERE
+            id = #{id}
+    </update>
+
+
+    <!--修改活动信息-->
+    <update id="updateActivityId">
+        UPDATE activity
+        SET
+            name=#{name},
+            title=#{title},
+            description=#{description},
+            artStartTime=#{artStartTime},
+            artEndTime=#{artEndTime},
+            modifierId=#{modifierId},
+            modifyTime=#{modifyTime}
+        WHERE
+            id=#{id}
+    </update>
+
+
+    <!--逻辑删除问卷问题-->
+    <update id="deleteQuest">
+        UPDATE question set delFlag='0' WHERE id=#{id}
+    </update>
+
+    <!--逻辑删除问卷问题选项-->
+    <update id="deleteMy">
+        UPDATE myquestion set delFlag='0' WHERE questionId=#{id}
+    </update>
+
+    <!--逻辑删除问卷问题选项-->
+    <update id="deleteMyquest">
+        UPDATE myquestion set delFlag='0' WHERE id=#{id}
+    </update>
+
+    <!--修改问卷问题-->
+    <update id="updateQuest">
+        UPDATE question set
+            questionname=#{questionname},
+            questionDescription=#{questionDescription},
+            modifierId=#{createId},
+            questionBelong=#{questionBelong},
+            modifyTime=#{createTime},
+            sequen=#{sequen},
+            questionType=#{questionType},
+            releaseFlag=#{releaseFlag},
+            questionnairetypes=#{questionnairetypes}
+        WHERE id=#{id}
+    </update>
+
+    <update id="updateMyQuest">
+        UPDATE myquestion set
+              answer=#{answer},
+              content=#{content},
+              modifierId=#{createId},
+              modifyTime=#{createTime}
+        WHERE id=#{id}
+    </update>
+
+
+    <select id="SelectActivityFile" resultType="map">
+         select appendix as pic,appendixName as name from  signappendix where signId=#{id}
+    </select>
+
+
+    <!--//分页-->
+    <sql id="pagination">
+        <if test="pageVo.page!=null">
+            LIMIT ${pageVo.page.beginIndex-1}, ${pageVo.page.pageSize}
+        </if>
+    </sql>
+
+    <select id="countQesMemberList"  parameterType="com.cloud.servicemanage.common.PageVo" resultType="java.lang.Integer">
+        select count(id) from user where  id  in (
+        select  DISTINCT(userId) from answer  where  questionId in (select id  from question  where questionBelong =#{pageVo.searchdata.id}  and delFlag = 1 )
+        <if test="pageVo.searchData != null">
+            <if test="pageVo.searchdata.uRole != null and pageVo.searchdata.uRole != '' and  'pg'.toString == pageVo.searchdata.uRole ">
+                and  date_format(createTime,'%Y-%m-%d') &lt;=  date_add(date_format(now(),'%Y-%m-%d'), interval -2 day)
+            </if>
+        </if>
+        )
+
+    </select>
+
+    <select id="getQesMemberList"  parameterType="com.cloud.servicemanage.common.PageVo" resultType="com.cloud.commonsmng.entity.appletEntity.User">
+        select * from user where  id  in (
+        select  DISTINCT(userId) from answer  where  questionId in (select id  from question  where questionBelong =#{pageVo.searchdata.id}   and delFlag = 1 )
+        <if test="pageVo.searchData != null">
+            <if test="pageVo.searchdata.uRole != null and pageVo.searchdata.uRole != '' and  'pg'.toString == pageVo.searchdata.uRole ">
+                and  date_format(createTime,'%Y-%m-%d') &lt;=  date_add(date_format(now(),'%Y-%m-%d'), interval -2 day)
+            </if>
+        </if>
+        )
+         order by createTime desc
+        <include refid="pagination"></include>
+    </select>
+
+    <select id="getMemberByUserId"  parameterType="String" resultType="com.cloud.commonsmng.entity.appletEntity.Member">
+        select m.* from user u left join member m on u.memberId = m.id where u.id = #{id}
+    </select>
+
+    <select id="getUserAnswer"  parameterType="String" resultType="com.cloud.commonsmng.entity.appletEntity.QuestionEntity">
+        select q.* from question q left join answer  a on q.id = a.questionId
+        where
+              q.questionBelong = #{questionBelong}  and
+              a.userId = #{userId}
+        order by sequen
+    </select>
+
+    <select id="getUserAnswerByQuestionId"  parameterType="String" resultType="String">
+        select a.answer from question q left join answer  a on q.id = a.questionId
+        where
+              q.id = #{id} and
+              a.userId = #{userId}
+    </select>
+
+    <select id="getUserAnswerDetail"  parameterType="java.util.List" resultType="com.cloud.commonsmng.entity.appletEntity.QuestionOptionsEntity">
+        select * from myquestion
+        where
+              questionId = #{id} and
+              answer in
+              <foreach collection="ls" item="item" index="index" open="(" close=")" separator=",">
+                #{item}
+             </foreach>
+        order by answer
+    </select>
+</mapper>

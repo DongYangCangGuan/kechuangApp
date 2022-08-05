@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.servicemanage.mapper.HomeMapper">
+    <!--查询报告阅读次数-->
+    <select id="selectReportReadNum" resultType="java.lang.Integer">
+        SELECT sum(r.articleviews) AS reportReadNum
+        FROM report r
+        WHERE r.delFlag = 1
+    </select>
+
+    <!--查询用户数-->
+    <select id="selectUserNum" resultType="java.lang.Integer">
+        SELECT count(1) AS userNum
+        FROM `user` u
+        WHERE u.delFlag = 1
+          AND u.uRole = 1
+    </select>
+
+    <!--查询会员单位数-->
+    <select id="selectMemberUnit" resultType="java.lang.Integer">
+        SELECT count(1) AS memberUnit
+        FROM member m
+        WHERE m.delFlag = 1
+    </select>
+
+    <!--查询本月新增报告数-->
+    <select id="selectMonthAddReport" resultType="java.lang.Integer">
+        SELECT count(1) AS monthAddReport
+        FROM report r
+        WHERE r.delFlag = 1
+          AND DATE_FORMAT(r.createTime, '%Y%m') = DATE_FORMAT(CURDATE(), '%Y%m')
+    </select>
+
+    <!--查询报告总数-->
+    <select id="selectReportNum" resultType="java.lang.Integer">
+        SELECT count(1) AS reportNum
+        FROM report r
+        WHERE r.delFlag = 1
+    </select>
+
+    <!--根据开始时间和截止时间按年查询每月用户数-->
+    <select id="selectUserMonthNumByYear" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT CASE
+                   a.`month`
+                   WHEN 1 THEN '1月'
+                   WHEN 2 THEN '2月'
+                   WHEN 3 THEN '3月'
+                   WHEN 4 THEN '4月'
+                   WHEN 5 THEN '5月'
+                   WHEN 6 THEN '6月'
+                   WHEN 7 THEN '7月'
+                   WHEN 8 THEN '8月'
+                   WHEN 9 THEN '9月'
+                   WHEN 10 THEN '10月'
+                   WHEN 11 THEN '11月'
+                   WHEN 12 THEN '12月'
+                   ELSE '未定义'
+                   END          AS xData,
+               IFNULL(b.num, 0) AS yData
+        FROM (
+                 SELECT 1 AS `month`
+                 UNION
+                 SELECT 2
+                 UNION
+                 SELECT 3
+                 UNION
+                 SELECT 4
+                 UNION
+                 SELECT 5
+                 UNION
+                 SELECT 6
+                 UNION
+                 SELECT 7
+                 UNION
+                 SELECT 8
+                 UNION
+                 SELECT 9
+                 UNION
+                 SELECT 10
+                 UNION
+                 SELECT 11
+                 UNION
+                 SELECT 12
+             ) a
+                 LEFT JOIN (
+            SELECT count(1)                        AS num,
+                   date_format(u.createTime, '%m') AS `month`
+            FROM `user` u
+            WHERE u.delFlag = 1
+              AND u.uRole = 1
+              AND date_format(u.createTime, '%Y-%m-%d') BETWEEN #{map.startTime}
+                AND #{map.endTime}
+            GROUP BY `month`
+        ) b ON a.`month` = b.`month`
+        ORDER BY a.`month`
+    </select>
+
+    <!--根据开始时间和截止时间按年查询每月会员单位-->
+    <select id="selectMemberMonthNumByYear" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT CASE
+                   a.`month`
+                   WHEN 1 THEN '1月'
+                   WHEN 2 THEN '2月'
+                   WHEN 3 THEN '3月'
+                   WHEN 4 THEN '4月'
+                   WHEN 5 THEN '5月'
+                   WHEN 6 THEN '6月'
+                   WHEN 7 THEN '7月'
+                   WHEN 8 THEN '8月'
+                   WHEN 9 THEN '9月'
+                   WHEN 10 THEN '10月'
+                   WHEN 11 THEN '11月'
+                   WHEN 12 THEN '12月'
+                   ELSE '未定义'
+                   END          AS xData,
+               IFNULL(b.num, 0) AS yData
+        FROM (
+                 SELECT 1 AS `month`
+                 UNION
+                 SELECT 2
+                 UNION
+                 SELECT 3
+                 UNION
+                 SELECT 4
+                 UNION
+                 SELECT 5
+                 UNION
+                 SELECT 6
+                 UNION
+                 SELECT 7
+                 UNION
+                 SELECT 8
+                 UNION
+                 SELECT 9
+                 UNION
+                 SELECT 10
+                 UNION
+                 SELECT 11
+                 UNION
+                 SELECT 12
+             ) a
+                 LEFT JOIN (
+            SELECT count(1)                        AS num,
+                   date_format(m.createTime, '%m') AS `month`
+            FROM member m
+            WHERE m.delFlag = 1
+              AND date_format(m.createTime, '%Y-%m-%d') BETWEEN #{map.startTime}
+                AND #{map.endTime}
+            GROUP BY `month`
+        ) b ON a.`month` = b.`month`
+        ORDER BY a.`month`
+    </select>
+
+    <!--根据开始时间和截止时间按周查询每天用户数-->
+    <select id="selectUserDayNumByWeek" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT CASE
+                   a.`week`
+                   WHEN 1 THEN '周一'
+                   WHEN 2 THEN '周二'
+                   WHEN 3 THEN '周三'
+                   WHEN 4 THEN '周四'
+                   WHEN 5 THEN '周五'
+                   WHEN 6 THEN '周六'
+                   WHEN 0 THEN '周日'
+                   ELSE '未定义'
+                   END          AS xData,
+               IFNULL(b.num, 0) AS yData
+        FROM (SELECT 0 AS `week`
+              UNION
+              SELECT 1
+              UNION
+              SELECT 2
+              UNION
+              SELECT 3
+              UNION
+              SELECT 4
+              UNION
+              SELECT 5
+              UNION
+              SELECT 6) a
+                 LEFT JOIN (
+            SELECT count(1)                        AS num,
+                   date_format(u.createTime, '%w') AS `week`
+            FROM `user` u
+            WHERE u.delFlag = 1
+              and u.uRole = 1
+              AND date_format(u.createTime, '%Y-%m-%d') BETWEEN #{map.startTime}
+                AND #{map.endTime}
+            GROUP BY `week`
+        ) b ON a.`week` = b.`week`
+        ORDER BY CASE a.`week` WHEN 0 THEN 7 ELSE a.`week` END ASC
+    </select>
+
+    <!--根据开始时间和截止时间按周查询每天会员单位-->
+    <select id="selectMemberDayNumByWeek" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT CASE
+                   a.`week`
+                   WHEN 1 THEN '周一'
+                   WHEN 2 THEN '周二'
+                   WHEN 3 THEN '周三'
+                   WHEN 4 THEN '周四'
+                   WHEN 5 THEN '周五'
+                   WHEN 6 THEN '周六'
+                   WHEN 0 THEN '周日'
+                   ELSE '未定义'
+                   END          AS xData,
+               IFNULL(b.num, 0) AS yData
+        FROM (SELECT 0 AS `week`
+              UNION
+              SELECT 1
+              UNION
+              SELECT 2
+              UNION
+              SELECT 3
+              UNION
+              SELECT 4
+              UNION
+              SELECT 5
+              UNION
+              SELECT 6) a
+                 LEFT JOIN (
+            SELECT count(1)                        AS num,
+                   date_format(m.createTime, '%w') AS `week`
+            FROM member m
+            WHERE m.delFlag = 1
+              AND date_format(m.createTime, '%Y-%m-%d') BETWEEN #{map.startTime}
+                AND #{map.endTime}
+            GROUP BY `week`
+        ) b ON a.`week` = b.`week`
+        ORDER BY CASE a.`week` WHEN 0 THEN 7 ELSE a.`week` END ASC
+    </select>
+</mapper>

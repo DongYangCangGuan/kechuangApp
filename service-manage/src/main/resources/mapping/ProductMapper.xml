@@ -1,0 +1,394 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"  >
+<mapper namespace="com.cloud.servicemanage.mapper.ProductMapper">
+
+    <resultMap id="productEntity" type="com.cloud.commonsmng.entity.appletEntity.Product">
+        <id property="id" column="id"/>
+        <result property="img" column="img"/>
+        <result property="productName" column="productName"/>
+        <result property="introduction" column="introduction"/>
+        <result property="type" column="type"/>
+        <result property="loanAmount" column="loanAmount"/>
+        <result property="timeLimit" column="timeLimit"/>
+        <result property="interestRate" column="interestRate"/>
+        <result property="financingAmount" column="financingAmount"/>
+        <result property="repaymentRhythm" column="repaymentRhythm"/>
+        <result property="meltingObject" column="meltingObject"/>
+        <result property="overallCosts" column="overallCosts"/>
+        <result property="ces" column="ces"/>
+        <result property="useScenes1" column="useScenes1"/>
+        <result property="useScenes2" column="useScenes2"/>
+        <result property="useScenes3" column="useScenes3"/>
+        <result property="useScenes4" column="useScenes4"/>
+        <result property="useScenes5" column="useScenes5"/>
+        <result property="useScenes6" column="useScenes6"/>
+        <result property="serviceObject1" column="serviceObject1"/>
+        <result property="serviceObject2" column="serviceObject2"/>
+        <result property="serviceObject3" column="serviceObject3"/>
+        <result property="serviceObject4" column="serviceObject4"/>
+        <result property="serviceObject5" column="serviceObject5"/>
+        <result property="serviceObject6" column="serviceObject6"/>
+        <result property="productType" column="productType"/>
+        <result property="status" column="status"/>
+    </resultMap>
+
+    <!--//新增-->
+    <insert id="insertProduct" parameterType="com.cloud.commonsmng.entity.appletEntity.Product">
+        INSERT INTO product
+            (
+             id,
+             productName,
+             introduction,
+             loanAmount,
+             timeLimit,
+             interestRate,
+             financingAmount,
+             repaymentRhythm,
+             overallCosts,
+             meltingObject,
+             ces,
+             useScenes1,
+             useScenes2,
+             useScenes3,
+             useScenes4,
+             useScenes5,
+             useScenes6,
+             serviceObject1,
+             serviceObject2,
+             serviceObject3,
+             serviceObject4,
+             serviceObject5,
+             serviceObject6,
+             productType,
+             creatorId,
+             createTime,
+             modifierId,
+             modifyTime,
+             img,
+             `status`,
+             departmentId,
+              ascription,
+              proSeq,
+             productFeatures,
+            caseDescription,
+            casePath,
+            label,
+            linkMan,
+            linkPhone,
+            linkEmail,
+             access,
+            highLight,
+            example
+            )
+            VALUES (
+            #{product.id},
+            #{product.productName},
+            #{product.introduction},
+            #{product.loanAmount},
+            #{product.timeLimit},
+            #{product.interestRate},
+            #{product.financingAmount},
+            #{product.repaymentRhythm},
+            #{product.overallCosts},
+            #{product.meltingObject},
+            #{product.ces},
+            #{product.useScenes1},
+            #{product.useScenes2},
+            #{product.useScenes3},
+            #{product.useScenes4},
+            #{product.useScenes5},
+            #{product.useScenes6},
+            #{product.serviceObject1},
+            #{product.serviceObject2},
+            #{product.serviceObject3},
+            #{product.serviceObject4},
+            #{product.serviceObject5},
+            #{product.serviceObject6},
+            #{product.productType},
+            #{product.creatorId},
+            NOW(),
+            #{product.modifierId},
+            NOW(),
+            #{product.img},
+            1,
+            #{product.departmentId},
+            #{product.ascription},
+            #{product.proSeq},
+            #{product.productFeatures},
+            #{product.caseDescription},
+            #{product.casePath},
+            #{product.label},
+            #{product.linkMan},
+            #{product.linkPhone},
+            #{product.linkEmail},
+            #{product.access},
+            #{product.highLight},
+            #{product.example}
+            );
+        <if test="product.cooperationModes != null and product.cooperationModes.size > 0">
+            <foreach collection="product.cooperationModes" item="item" index="index" separator=";">
+                INSERT INTO cooperation_mode (
+                id,
+                productId,
+                `name`,
+                cmIntroduction,
+                cmPic,
+                creatorId,
+                createTime,
+                modifierId,
+                modifyTime
+                )
+                VALUES (
+                #{item.id},
+                #{product.id},
+                #{item.name},
+                #{item.cmIntroduction},
+                #{item.cmPic},
+                #{product.creatorId},
+                NOW(),
+                #{product.modifierId},
+                NOW()
+                )
+            </foreach>
+        </if>
+
+        <if test="product.productsExpandList != null and product.productsExpandList.size > 0">
+            <foreach collection="product.productsExpandList" item="item" index="index" separator=";">
+                INSERT INTO product_expand (
+                id,
+                productId,
+                `name`,
+                content,
+                status,
+                creatorId,
+                createTime,
+                modifierId,
+                modifyTime
+                )
+                VALUES (
+                #{item.id},
+                #{product.id},
+                #{item.name},
+                #{item.content},
+                1,
+                #{product.creatorId},
+                NOW(),
+                #{product.modifierId},
+                NOW()
+                )
+            </foreach>
+        </if>
+    </insert>
+
+    <sql id="tmpPageQry">
+        <trim prefix="WHERE" prefixOverrides="AND | OR">
+            <if test="pageVo.searchData != null">
+                <if test="pageVo.searchdata.status != null and pageVo.searchdata.status != '' ">
+                    AND p.status = #{pageVo.searchdata.status}
+                </if>
+                <if test=" '0'.toString()!= pageVo.searchdata.status and pageVo.searchdata.isKC != null and pageVo.searchdata.isKC != '' and '1'.toString()== pageVo.searchdata.isKC ">
+                    AND p.status in (0,1,2)
+                </if>
+                <if test=" '0'.toString()!= pageVo.searchdata.status and pageVo.searchdata.isKC != null and pageVo.searchdata.isKC != '' and '0'.toString()== pageVo.searchdata.isKC  ">
+                    AND p.status in (1,2,3)
+                </if>
+                <if test="pageVo.searchdata.productName != null and pageVo.searchdata.productName != '' ">
+                    AND p.productName LIKE concat('%',#{pageVo.searchdata.productName},'%')
+                </if>
+                <if test="pageVo.searchdata.productType != null and pageVo.searchdata.productType != '' ">
+                    AND p.productType = #{pageVo.searchdata.productType}
+                </if>
+                <if test="pageVo.searchdata.id != null and pageVo.searchdata.id != '' ">
+                    AND p.id LIKE concat('%',#{pageVo.searchdata.id},'%')
+                </if>
+                <if test="pageVo.searchdata.startTime != null and pageVo.searchdata.startTime != ''">
+                    <if test="pageVo.searchdata.endTime != null and pageVo.searchdata.endTime != ''">
+                        AND date_format(p.createTime,'%Y-%m-%d') BETWEEN #{pageVo.searchdata.startTime} AND
+                        #{pageVo.searchdata.endTime}
+                    </if>
+                </if>
+                <if test="pageVo.searchdata.departmentId != null and pageVo.searchdata.departmentId != '' ">
+                    AND dept.treeabout LIKE concat('%',#{pageVo.searchdata.departmentId},'%')
+                </if>
+            </if>
+        </trim>
+    </sql>
+    <!-- 查询总条数-->
+    <select id="getPageTotal" parameterType="com.cloud.servicemanage.common.PageVo" resultType="java.lang.Integer">
+        select count(0) from product p
+        left JOIN  department dept on dept.id = p.departmentId
+        <include refid="tmpPageQry"></include>
+    </select>
+    <!--//分页-->
+    <sql id="pagination">
+        <if test="pageVo.page!=null">
+            LIMIT ${pageVo.page.beginIndex-1}, ${pageVo.page.pageSize}
+        </if>
+    </sql>
+
+
+    <select id="getProductlistPageVo" parameterType="com.cloud.servicemanage.common.PageVo" resultType="com.cloud.commonsmng.entity.appletEntity.Product">
+        select p.id,p.productName,p.introduction,p.productType,p.createTime,
+        p.img,p.status, p.departmentId,p.ascription,p.proSeq,d.name as typeName,dept.name as departmentName, pp.pic as pic ,u.realName as modifierName,
+               p.linkMan,p.linkPhone,p.linkEmail
+        from product p
+        left join dictionary d on p.productType=d.code and d.kind='producttype' and d.isused = 1
+        left JOIN  department dept on dept.id = p.departmentId
+        left join product_picture pp on pp.id = p.img
+        left join user u on p.modifierId =  u.id
+        <include refid="tmpPageQry"></include>
+        ORDER BY p.type, p.createTime DESC
+        <include refid="pagination"></include>
+    </select>
+
+    <select id="getCooperationModes" resultType="com.cloud.commonsmng.entity.appletEntity.CooperationMode">
+        SELECT * from cooperation_mode where productId=#{productid}
+    </select>
+
+    <select id="getProductById" resultType="com.cloud.commonsmng.entity.appletEntity.Product">
+        select p.*,d.name as typeName,dept.name as departmentName, pp.pic as pic from product p
+                left join dictionary d on p.productType=d.code and d.kind='producttype' and d.isused = 1
+                left JOIN  department dept on dept.id = p.departmentId
+                left join product_picture pp on pp.id = p.img where p.id=#{id} limit 0,1
+    </select>
+
+    <select id="getProductTypes" resultType="com.cloud.commonsmng.entity.appletEntity.Dictionary">
+        select id, `code`, `name`, parentId from dictionary where `kind`=#{kind} and parentId=#{parentId} and isused = 1 order by `index` asc
+    </select>
+
+    <select id="getCooperationByProductId" resultType="com.cloud.commonsmng.entity.appletEntity.CooperationMode">
+        select * from cooperation_mode where productId = #{productId}
+    </select>
+
+    <update id="updateProductStatus" parameterType="com.cloud.commonsmng.entity.appletEntity.Product">
+        UPDATE product set status = #{p.status}, modifierId = #{p.modifierId},
+             modifyTime = NOW()  where id = #{p.id};
+
+    </update>
+
+    <update id="updateCooperationMode" parameterType="com.cloud.commonsmng.entity.appletEntity.CooperationMode">
+        UPDATE cooperation_mode set
+        `name` = #{mode.name},cmIntroduction = #{mode.cmIntroduction},cmPic = #{mode.cmPic},modifierId = #{mode.modifierId},modifyTime=NOW()
+        where id = #{mode.id}
+    </update>
+
+    <insert id="addCooperationMode" parameterType="com.cloud.commonsmng.entity.appletEntity.CooperationMode">
+       INSERT INTO cooperation_mode (
+                id,
+                productId,
+                `name`,
+                cmIntroduction,
+                cmPic,
+                creatorId,
+                createTime,
+                modifierId,
+                modifyTime
+                )
+                VALUES (
+                #{mode.id},
+                #{mode.productId},
+                #{mode.name},
+                #{mode.cmIntroduction},
+                #{mode.cmPic},
+                #{mode.creatorId},
+                NOW(),
+                #{mode.modifierId},
+                NOW()
+                )
+    </insert>
+
+   <update id="updateProduct" parameterType="com.cloud.commonsmng.entity.appletEntity.Product">
+       UPDATE product SET
+       img = #{p.img},
+       productName = #{p.productName},
+       introduction = #{p.introduction},
+       loanAmount = #{p.loanAmount},
+       timeLimit = #{p.timeLimit},
+       interestRate = #{p.interestRate},
+       financingAmount = #{p.financingAmount},
+       repaymentRhythm = #{p.repaymentRhythm},
+       overallCosts = #{p.overallCosts},
+       meltingObject = #{p.meltingObject},
+       ces = #{p.ces},
+       useScenes1 = #{p.useScenes1},
+       useScenes2 = #{p.useScenes2},
+       useScenes3 = #{p.useScenes3},
+       useScenes4 = #{p.useScenes4},
+       useScenes5 = #{p.useScenes5},
+       useScenes6 = #{p.useScenes6},
+       serviceObject1 = #{p.serviceObject1},
+       serviceObject2 = #{p.serviceObject2},
+       serviceObject3 = #{p.serviceObject3},
+       serviceObject4 = #{p.serviceObject4},
+       serviceObject5 = #{p.serviceObject5},
+       serviceObject6 = #{p.serviceObject6},
+       productType = #{p.productType},
+       status = #{p.status},
+       departmentId = #{p.departmentId},
+      ascription = #{p.ascription},
+      proSeq = #{p.proSeq},
+	  productFeatures = #{p.productFeatures},
+	   modifierId = #{p.modifierId},
+       modifyTime = NOW(),
+       caseDescription = #{p.caseDescription},
+       casePath = #{p.casePath},
+       label = #{p.label},
+       linkMan = #{p.linkMan},
+       linkPhone = #{p.linkPhone},
+       linkEmail = #{p.linkEmail},
+       access = #{p.access},
+       highLight = #{p.highLight},
+       example = #{p.example}
+      WHERE id = #{p.id}
+   </update>
+
+    <insert id="insertProductExpand" parameterType="com.cloud.commonsmng.entity.appletEntity.Product">
+        delete from product_expand where productId =  #{product.id};
+        <if test="product.productsExpandList != null and product.productsExpandList.size > 0">
+            <foreach collection="product.productsExpandList" item="item" index="index" separator=";">
+                INSERT INTO product_expand (
+                id,
+                productId,
+                `name`,
+                content,
+                status,
+                creatorId,
+                createTime,
+                modifierId,
+                modifyTime
+                )
+                VALUES (
+                #{item.id},
+                #{product.id},
+                #{item.name},
+                #{item.content},
+                1,
+                #{product.creatorId},
+                NOW(),
+                #{product.modifierId},
+                NOW()
+                )
+            </foreach>
+        </if>
+    </insert>
+
+    <select id="getProductPictures" resultType="com.cloud.commonsmng.entity.appletEntity.ProductPicture">
+        select * from product_picture where delFlag = #{delFlag}
+    </select>
+
+    <select id="getProductPermission" resultType="java.lang.Integer">
+        SELECT count(1) from dictionary where `kind`=#{kind} and `code`=#{code} and isused = 1 and `type` = #{type}
+    </select>
+
+    <select id="getUserByType" resultType="java.lang.String">
+        SELECT id from user  where uRole = '2'
+    </select>
+
+    <select id="SelectActivityFile" resultType="map">
+         select appendix as pic,appendixName as name from  signappendix where signId=#{id}
+    </select>
+
+    <select id="getProductExpandList" resultType="com.cloud.commonsmng.entity.appletEntity.ProductsExpand">
+        select * from product_expand where productId = #{id} and status = 1
+    </select>
+</mapper>

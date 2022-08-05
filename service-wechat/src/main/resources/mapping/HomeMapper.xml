@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.servicewechat.mapper.HomeMapper">
+    <select id="getBanner" resultType="com.cloud.commonsmng.entity.appletEntity.BannerEntity">
+        select
+            id,
+            pic,
+            url,
+            `index`,
+            creatorId,
+            createTime,
+            modifierId,
+            modifyTime,
+            isused,
+            title
+        from slideshow where  isused = 1  ORDER BY `index`
+    </select>
+
+    <sql id="page">
+        <if test="pageVo.page!=null">
+            LIMIT ${pageVo.page.beginIndex-1}, ${pageVo.page.pageSize}
+        </if>
+    </sql>
+
+    <select id="getNews" resultType="com.cloud.commonsmng.entity.appletEntity.NewsEntity">
+        select
+        id,
+        title,
+        `describe`,
+        newsPic,
+        newsLink,
+        newsTime,
+        creatorId,
+        createTime,
+        modifierId,
+        modifyTime,
+        remark
+        from news ORDER BY createTime desc
+        <include refid="page"></include>
+    </select>
+
+    <select id="getNewsCount" resultType="java.lang.Integer">
+        select
+            count(1)
+        from news ORDER BY createTime desc
+    </select>
+
+    <insert id="addCollect" parameterType="java.lang.String">
+        INSERT INTO collect(
+                        id,
+                        userId,
+                        productId,
+                        creatorId,
+                        createTime,
+                        modifierId,
+                        modifyTime,
+                        delFlag
+                        )
+            VALUE
+            (UUID(),#{userId},#{productId},
+            #{userId},now(),#{userId},
+            now(),1);
+    </insert>
+
+    <!--删除-->
+    <delete id="deleteCollect" parameterType="java.lang.String">
+
+        delete
+        from collect
+        where userId = #{userId} and productId = #{productId}
+
+    </delete>
+
+
+    <select id="getActivity" parameterType="com.cloud.commonsmng.entity.appletEntity.ActivityEntity" resultType="com.cloud.commonsmng.entity.appletEntity.ActivityEntity">
+        select
+            id,
+            code,
+            title,
+            name,
+            pic,
+            description,
+            url,
+            thumbUpNumber,
+            articleviews,
+            artStartTime,
+            artEndTime,
+            creatorId,
+            createTime,
+            modifierId,
+            modifyTime,
+            isused,
+            delFlag
+        from activity where  isused = 1  and delFlag = 1
+        <if test="act.id != null and act.id != ''">
+            AND id = #{act.id}
+        </if>
+        and <![CDATA[artStartTime<=now() ]]>and <![CDATA[artEndTime >=now()]]> order by createTime desc
+    </select>
+
+
+    <select id="getActivityTemplate" resultType="com.cloud.commonsmng.entity.appletEntity.ActivityTemplate">
+        select
+            id,
+            activityId,
+            template,
+            creatorId,
+            createTime,
+            modifierId,
+            modifyTime,
+            isused,
+            delFlag,
+            seq,
+            templateType
+        from activity_template where   activityId = #{id} order by seq
+    </select>
+
+    <insert id="signUp" parameterType="com.cloud.commonsmng.entity.appletEntity.SignEntity">
+        INSERT INTO sign(id,
+                        activityEventId,
+                        memberId,
+                        phone,
+                        name,
+                        userId,
+                        remark,
+                        isused,
+                        readymade,
+                        customization,
+                        creatorId,
+                        createTime,
+                        modifierId,
+                        modifyTime)
+            VALUE
+            (#{id},#{activityEventId},#{memberId},
+            #{phone},#{name},#{userId},
+            #{remark},#{isused},
+            #{readymade},#{customization},
+            #{creatorId},NOW(),#{modifierId},NOW());
+    </insert>
+
+    <insert id="signUpAppendix" parameterType="java.util.List">
+
+        <foreach collection="list" item="item" index="index" separator=";" >
+            insert into signappendix(id,signId,appendix,appendixName,creatorId,createtime,modifierid,modifytime,issued,feedback)
+            values(UUID(),#{uid},#{item.appendix},#{item.appendixName},#{item.creatorId},NOW(),#{item.creatorId},NOW(),1,1)
+        </foreach>
+    </insert>
+
+    <insert id="signDetail" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" separator=";" >
+            insert into sign_detail(id,
+            signId,
+            templateId,
+            answer,
+            creatorId,
+            createTime,
+            modifierId,
+            modifyTime,
+            isused,
+            delFlag
+            )
+            values(UUID(),#{uid},#{item.templateId},#{item.answer},#{item.creatorId},NOW(),#{item.creatorId},NOW(),1,1)
+        </foreach>
+    </insert>
+
+    <select id="getMemberName" resultType="java.lang.String">
+        select m.enterpriseName from member_user mu left join member m on mu.memberId = m.id
+        where mu.userId = #{userId}
+          and  m.delFlag = 1 and mu.delFlag=1
+    </select>
+
+    <select id="getSignUp" parameterType="com.cloud.commonsmng.entity.appletEntity.SignEntity" resultType="java.lang.String">
+        select id from sign
+        where userId = #{userId}
+          and  activityEventId  =  #{activityEventId}
+    </select>
+
+
+    <delete id="deleteSign" parameterType="java.lang.String">
+        delete
+        from sign
+        where id = #{id};
+
+        delete
+        from signappendix
+        where signId =  #{id};
+
+        delete
+        from sign_detail
+        where signId =  #{id}
+    </delete>
+
+
+    <select id="getAcTemplateBySeq" parameterType="java.lang.String" resultType="java.lang.String">
+        select id from activity_template where activityId = #{actId} and seq =#{seq} and  isused = 1 and delFlag = 1
+    </select>
+
+</mapper>

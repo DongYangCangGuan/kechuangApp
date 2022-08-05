@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.servicewechat.mapper.ApproveMapper">
+
+    <sql id="memberDetailQry">
+            AND md.delFlag = 1  AND md.approvalstatus in (0,3)
+        <if test="role != null and role == '1'.toString()">
+           AND (um.memberId != #{memberId} OR um.memberId is NULL )
+        </if>
+            <if test="pageVo.searchData != null">
+                <if test="pageVo.searchdata.ci != null and pageVo.searchdata.ci.size() > 0" >
+                    AND m.investmentFund in
+                    <foreach collection="pageVo.searchdata.ci" item="item" index="index" open="(" close=")" separator=",">
+                        #{item}
+                    </foreach>
+                </if>
+                <if test="pageVo.searchdata.uRole1 != null and pageVo.searchdata.uRole1.size() > 0">
+                    AND md.uRole in
+                    <foreach collection="pageVo.searchdata.uRole1" item="item" index="index" open="(" close=")" separator=",">
+                        #{item}
+                    </foreach>
+                </if>
+            </if>
+    </sql>
+
+    <!--分页-->
+    <sql id="page">
+        <if test="pageVo.page!=null">
+            LIMIT ${pageVo.page.beginIndex-1}, ${pageVo.page.pageSize}
+        </if>
+    </sql>
+
+
+    <select  id="countApproveList"   parameterType="com.cloud.servicewechat.common.PageVo" resultType="Integer">
+        select count(1) as tolNum
+        from member_user md
+        LEFT JOIN  user u ON u.id = md.userId
+        INNER join member m ON md.memberId = m.id AND m.delFlag = 1
+        LEFT JOIN  user um ON um.id = md.modifierId
+        LEFT JOIN dictionary d ON d.kind = 'membertype'
+        AND md.uRole = d.`code`
+        <where>
+            <include refid="memberDetailQry"></include>
+        </where>
+    </select>
+
+<!--    <select id="getApproveList" parameterType="com.cloud.servicewechat.common.PageVo"-->
+<!--            resultType="com.cloud.commonsmng.entity.appletEntity.MemberUser">-->
+<!--        SELECT md.id, md.userId, md.memberId, md.approvalstatus, u.realName as realName, d.name as typeName,-->
+<!--        m.enterpriseName ,m.contact ,m.phone, m.email, DATE_FORMAT(md.createTime,'%Y-%c-%d') as time, u.uRole as-->
+<!--        memberType-->
+<!--        FROM-->
+<!--        member_user md-->
+<!--        LEFT JOIN USER u ON u.id = md.userId-->
+<!--        INNER JOIN member m ON md.memberId = m.id-->
+<!--        AND m.delFlag = 1-->
+<!--        LEFT JOIN dictionary d ON d.kind = 'membertype'-->
+<!--        AND u.uRole = d.`code`-->
+<!--       <where>-->
+<!--           md.id = (SELECT mc.id FROM member_user mc WHERE mc.delFlag = 1 AND mc.userId = md.userId-->
+<!--           ORDER BY mc.modifyTime DESC LIMIT 0,1)-->
+<!--           <include refid="memberDetailQry"></include>-->
+<!--       </where>-->
+<!--    </select>-->
+
+ <select id="getApproveList" parameterType="com.cloud.servicewechat.common.PageVo" resultType="com.cloud.commonsmng.entity.appletEntity.MemberUser">
+    SELECT md.id, md.userId,md.userId, md.uRole,md.memberId, md.approvalstatus, u.realName as realName, d.name as typeName,
+    m.enterpriseName ,m.contact ,m.phone, m.email, DATE_FORMAT(md.createTime,'%Y-%c-%d') as time,u.uRole as memberType,um.realName as modifierName
+    FROM member_user md
+    LEFT JOIN  user u ON u.id = md.userId
+    INNER join member m ON md.memberId = m.id AND m.delFlag = 1
+    LEFT JOIN  user um ON um.id = md.modifierId
+    LEFT JOIN dictionary d ON d.kind = 'membertype'
+    AND md.uRole = d.`code`
+     <where>
+    <include refid="memberDetailQry"></include>
+     </where>
+    ORDER BY md.createTime DESC
+    <include refid="page"/>
+</select>
+
+    <select  id="getMemberDetail" resultType="com.cloud.commonsmng.entity.appletEntity.MemberUser" >
+        SELECT md.id, md.userId, md.memberId, md.approvalstatus, u.realName as realName, d.name as typeName,md.job,
+               m.enterpriseName ,m.contact ,u.phone, u.email, md.createTime,md.uRole as memberType,um.realName as modifierName
+        FROM member_user md
+                 LEFT JOIN  user u ON u.id = md.userId
+                 LEFT join member m ON md.memberId = m.id AND m.delFlag = 1
+                 LEFT JOIN  user um ON um.id = md.modifierId
+                 LEFT JOIN dictionary d ON d.kind = 'membertype'
+            AND md.uRole = d.`code`
+        where md.id = #{memberId}
+    </select>
+
+    <update id="approve" >
+        update member_user mu
+         set mu.approvalstatus=#{mu.approvalstatus}
+        where
+            mu.memberId=#{mu.memberId}
+    </update>
+
+
+    <select id="getUserRoleList" resultType="com.cloud.commonsmng.entity.BaseRole" >
+
+        select id,code,name from `role` where id in
+                                              (select roleid from userrolerelation where userid=#{userId})
+
+    </select>
+
+
+
+    <update id="updateApprovalstatus" parameterType="com.cloud.commonsmng.entity.appletEntity.MemberUser">
+        UPDATE member_user
+        set approvalstatus = #{md.approvalstatus},modifierId = #{md.modifierId},modifyTime = NOW()
+        WHERE id = #{md.id}
+    </update>
+
+    <select id="getMemberDetailById" resultType="com.cloud.commonsmng.entity.appletEntity.MemberUser">
+        SELECT md.id,
+               md.userId,
+               md.memberId,
+               md.approvalstatus,
+               u.uRole as memberType,
+               d.name  as typeName,
+               m.enterpriseName,
+               m.contact,
+               m.phone,
+               m.email,
+               u.userName,
+               u.realName,
+               md.createTime
+        FROM member_user md
+                 LEFT join member m ON md.memberId = m.id AND m.delFlag = 1
+                 LEFT JOIN `user` u ON u.id = md.userId
+                 LEFT JOIN dictionary d ON d.kind = 'membertype'
+            AND md.uRole = d.`code`
+        WHERE md.id = #{id}
+    </select>
+
+
+</mapper>

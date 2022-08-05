@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.servicemanage.mapper.LoginfoMapper">
+
+    <resultMap id="loginfo" type="com.cloud.commonsmng.entity.Loginfo">
+        <id  property="id" column="id"/>
+        <result  property="userid" column="userid"/>
+        <result  property="recivetime" column="recivetime"/>
+        <result  property="log_level" column="log_level"/>
+        <result  property="function" column="function"/>
+        <result  property="inputparam" column="inputparam"/>
+        <result  property="outputparam" column="outputparam"/>
+        <result  property="errormsg" column="errormsg"/>
+        <result  property="client_ip" column="client_ip"/>
+        <result  property="type" column="type"/>
+        <result  property="actiontype" column="actiontype"/>
+        <result  property="thread" column="thread"/>
+        <result  property="runtime" column="runtime"/>
+        <result  property="otherparam" column="otherparam"/>
+        <result  property="describ" column="describ"/>
+
+    </resultMap>
+
+    <select id="getLoginfo" resultType="java.lang.Integer" parameterType="java.lang.String">
+
+        select count(1) from loginfo where 1=1
+        <if test="actiontype=='login'">
+            and  actiontype!=1
+        </if>
+        <if test="actiontype=='action'">
+            and  actiontype!=0
+        </if>
+        <if test="log_level=='error'">
+            and  log_level='error'
+        </if>
+    </select>
+    <select id="getLoginfoByhour" resultType="java.lang.Integer" parameterType="java.lang.String">
+        SELECT HOUR(e.recivetime) as Hour,count(*) as Count
+        FROM loginfo e    where 1=1
+        <if test="actiontype=='login'">
+            and  actiontype!=1
+        </if>
+        <if test="actiontype=='action'">
+            and  actiontype!=0
+        </if>
+        <if test="log_level=='error'">
+            and  log_level='error'
+        </if>
+        GROUP BY HOUR(e.recivetime) ORDER BY Hour(e.recivetime);
+    </select>
+    <select id="getTopNumInfo" resultMap="loginfo" parameterType="java.lang.String">
+       select * from loginfo
+       where 1=1
+        <if test="actiontype=='login'">
+            and  actiontype!=1
+        </if>
+        <if test="actiontype=='action'">
+            and  actiontype!=0
+        </if>
+        <if test="log_level=='error'">
+            and  log_level='error'
+        </if>
+        limit 0,10
+    </select>
+</mapper>

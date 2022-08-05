@@ -1,0 +1,37 @@
+<view class="pageTotal"
+      style="background-image: url({{myBackground}});background-position:bottom;background-size: 100%;background-repeat:no-repeat;"
+>
+    <view class="content">
+        <view class="box" wx:for="{{noReadNumber1}}" wx:key="index" wx:for-index="index" wx:for-item="item"  bindtap="goSearch" data-theme="{{item}}">
+            <view class="pic">
+                <!-- <image src="../../../images/product/fundraising.png"></image> -->
+                <image src="{{item.pic}}"></image>
+            </view>
+            <view class="text">{{item.name}}</view>
+        </view>
+        <!-- <view class="box"  bindtap="goSearch" data-theme="insurance">
+            <view class="pic">
+                <image src="../../../images/product/ODIFDI.png"></image>
+            </view>
+            <view class="text">ODI/FDI</view>
+        </view>
+        <view class="box"  bindtap="goSearch" data-theme="loans">
+            <view class="pic">
+                <image src="../../../images/product/loans.png"></image>
+            </view>
+            <view class="text">贷款</view>
+        </view>
+        <view class="box"  bindtap="goSearch" data-theme="rent">
+            <view class="pic">
+                <image src="../../../images/product/cash.png"></image>
+            </view>
+            <view class="text">现金管理</view>
+        </view> -->
+    </view>
+    <view class="footer">
+        <button bindtap="goEntfirm">切换到创业公司产品</button>
+    </view>
+    <view class="footerpage">
+        <button bindtap="gohomepage">返回主页</button>
+    </view>
+</view>

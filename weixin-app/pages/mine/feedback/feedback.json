@@ -1,0 +1,11 @@
+{
+  "usingComponents": {
+    "mp-uploader": "weui-miniprogram/uploader/uploader"
+  },
+
+  
+  "navigationBarBackgroundColor": "#ffffff",
+  "backgroundTextStyle":"light",
+  "navigationBarTitleText": "我的活动",
+  "navigationBarTextStyle":"black"
+}

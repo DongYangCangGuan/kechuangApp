@@ -1,0 +1,13 @@
+<!--pages/mine/getMessage/getMessage.wxml-->
+<view wx:for="{{dataList}}" wx:key="index">
+  <view class="box" bindtap="updateStatus" data-a="{{item}}">
+    <view class="box1">
+      <text class="title">{{item.title}} </text>
+      <text class="time">{{item.time}}</text>
+    </view>
+    <view class="box2">
+      <!-- <text class="title">{{item.title}} </text> -->
+      <text class="readStatus" >{{item.readStatus}}</text>
+    </view>
+  </view>
+</view>

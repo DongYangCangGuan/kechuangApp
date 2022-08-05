@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.servicemanage.mapper.AboutusMapper">
+    <!--查询关于我们的信息-->
+    <select id="getAboutus" resultType="com.cloud.commonsmng.entity.appletEntity.Aboutus">
+        SELECT information
+        FROM aboutus LIMIT 0,1
+    </select>
+
+    <!--    新增一条关于我们的信息-->
+    <insert id="insertAboutus" parameterType="com.cloud.commonsmng.entity.appletEntity.Aboutus">
+        delete
+        from aboutus;
+        insert into aboutus(id, information, creatorId, createTime, modifierId, modifyTime)
+        values (#{aboutus.id}, #{aboutus.information}, #{aboutus.creatorId}, #{aboutus.createTime},
+                #{aboutus.modifierId}, NOW())
+    </insert>
+
+</mapper>

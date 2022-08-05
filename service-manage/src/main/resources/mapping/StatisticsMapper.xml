@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"  >
+<mapper namespace="com.cloud.servicemanage.mapper.StatisticsMapper">
+
+    <!-- 获取活跃用户 -->
+    <select id="getActiveUser" resultType="java.lang.Integer">
+        select count(*) from (
+            select count(userId),userId from point  where
+             <![CDATA[createTime<=#{now} ]]>and <![CDATA[createTime >=#{agoDate}]]> group by userId
+            ) a
+    </select>
+
+
+    <!-- 获取新用户 -->
+    <select id="getNewUser" resultType="java.lang.Integer">
+        select count(*) from user  where
+         <![CDATA[createTime<=#{now} ]]>and <![CDATA[createTime >=#{agoDate}]]>
+    </select>
+
+    <!-- 活跃用户趋势 -->
+    <select id="activeTrend" resultType="com.cloud.commonsmng.entity.appletEntity.PointEntity">
+        <if  test="flag!= null and ''!=flag and '1'.toString()==flag ">
+            select count(DISTINCT(userId)) as count , dateTime from  (select userId ,DATE_FORMAT( createTime, '%Y-%m-%d' ) as dateTime  from  point  WHERE DATE_FORMAT( createTime, '%Y%m' ) = DATE_FORMAT( CURDATE( ) , '%Y%m' ) ) a
+            group by dateTime
+        </if>
+        <if  test="flag!= null and ''!=flag and '2'.toString()==flag ">
+            select count(DISTINCT(userId)) as count  , dateTime from  ( select userId ,DATE_FORMAT( createTime, '%Y-%m-%d' ) as dateTime  FROM point WHERE PERIOD_DIFF( date_format( now( ) , '%Y%m' ) ,date_format(createTime, '%Y%m' ) ) =1 ) a
+            group by dateTime
+        </if>
+        <if  test="flag!= null and ''!=flag and '3'.toString()==flag ">
+            select count(DISTINCT(userId)) as count  , dateTime from  ( select userId ,DATE_FORMAT( createTime, '%Y-%m-%d' ) as dateTime  FROM point WHERE PERIOD_DIFF( date_format( now( ) , '%Y%m' ) ,date_format(createTime, '%Y%m' ) ) =12 ) a
+            group by dateTime
+        </if>
+    </select>
+
+    <!-- 平均单日使用时长 -->
+    <select id="dayAvgTime" resultType="com.cloud.commonsmng.entity.appletEntity.PointEntity">
+        <if  test="flag!= null and ''!=flag and '1'.toString()==flag ">
+            select  sum(timelong)  as count, dateTime from
+            (select timeLong, DATE_FORMAT( createTime, '%Y-%m-%d' ) as dateTime  from point  WHERE DATE_FORMAT( createTime, '%Y%m' ) = DATE_FORMAT( CURDATE( ) , '%Y%m' ) )
+            a group by dateTime
+
+        </if>
+        <if  test="flag!= null and ''!=flag and '2'.toString()==flag ">
+            select  sum(timelong)  as count, dateTime from
+            (select timeLong, DATE_FORMAT( createTime, '%Y-%m-%d' ) as dateTime  from point  WHERE PERIOD_DIFF( date_format( now( ) , '%Y%m' ) ,date_format(createTime, '%Y%m' ) ) =1 )
+            a group by dateTime
+        </if>
+        <if  test="flag!= null and ''!=flag and '3'.toString()==flag ">
+            select  sum(timelong)  as count, dateTime from
+            (select timeLong, DATE_FORMAT( createTime, '%Y-%m-%d' ) as dateTime  from point   WHERE PERIOD_DIFF( date_format( now( ) , '%Y%m' ) ,date_format(createTime, '%Y%m' ) ) =12 )
+            a group by dateTime
+        </if>
+    </select>
+
+    <!-- 启动次数 -->
+    <select id="loginTimes" resultType="com.cloud.commonsmng.entity.appletEntity.PointEntity">
+        <if  test="flag!= null and ''!=flag and '1'.toString()==flag ">
+            select count(userId) as count ,dateTime from (
+            select userId,DATE_FORMAT(createTime, '%Y-%m-%d') as dateTime from point  WHERE DATE_FORMAT( createTime, '%Y%m' ) = DATE_FORMAT( CURDATE( ) , '%Y%m' ) and type ='login'
+            ) a group by dateTime
+        </if>
+        <if  test="flag!= null and ''!=flag and '2'.toString()==flag ">
+            select count(userId) as count ,dateTime from (
+            select userId,DATE_FORMAT(createTime, '%Y-%m-%d') as dateTime from point  WHERE PERIOD_DIFF( date_format( now( ) , '%Y%m' ) ,date_format(createTime, '%Y%m' ) ) =1 and type ='login'
+            ) a group by dateTime
+        </if>
+        <if  test="flag!= null and ''!=flag and '3'.toString()==flag ">
+            select count(userId) as count ,dateTime from (
+            select userId,DATE_FORMAT(createTime, '%Y-%m-%d') as dateTime from point  WHERE PERIOD_DIFF( date_format( now( ) , '%Y%m' ) ,date_format(createTime, '%Y%m' ) ) =12 and type ='login'
+            ) a group by dateTime
+        </if>
+    </select>
+
+
+    <!-- 平均用时 -->
+    <select id="eachAvgTime" resultType="com.cloud.commonsmng.entity.appletEntity.PointEntity">
+        <if  test="flag!= null and ''!=flag and '1'.toString()==flag ">
+            select sum(timeLong)/count(userId) as count ,dateTime from
+            (select timeLong,userId,DATE_FORMAT(createTime, '%Y-%m-%d') as dateTime from point  WHERE DATE_FORMAT( createTime, '%Y%m' ) = DATE_FORMAT( CURDATE( ) , '%Y%m' )) a
+            GROUP BY dateTime
+        </if>
+        <if  test="flag!= null and ''!=flag and '2'.toString()==flag ">
+            select sum(timeLong)/count(userId) as count ,dateTime from
+            (select timeLong,userId,DATE_FORMAT(createTime, '%Y-%m-%d') as dateTime from point  WHERE PERIOD_DIFF( date_format( now( ) , '%Y%m' ) ,date_format(createTime, '%Y%m' ) ) =1) a
+            GROUP BY dateTime
+        </if>
+        <if  test="flag!= null and ''!=flag and '3'.toString()==flag ">
+            select sum(timeLong)/count(userId) as count ,dateTime from
+            (select timeLong,userId,DATE_FORMAT(createTime, '%Y-%m-%d') as dateTime from point  WHERE PERIOD_DIFF( date_format( now( ) , '%Y%m' ) ,date_format(createTime, '%Y%m' ) ) =12) a
+            GROUP BY dateTime
+        </if>
+    </select>
+
+    <!-- 获取活跃用户 -->
+    <select id="getLoginTimes" resultType="java.lang.Integer">
+        select count(*) from point where type = #{type}
+    </select>
+
+
+    <!-- 获取统计数据-产品浏览量 -->
+    <select id="getReadStatistics" resultType="java.lang.Integer">
+        select count(*) from point where type = 'pd' and DATE_FORMAT( createTime, '%Y%m' ) = DATE_FORMAT( CURDATE( ) , '%Y%m' )
+    </select>
+
+    <!-- 获取统计数据-产品收藏量 -->
+    <select id="getCollectNum" resultType="java.lang.Integer">
+        select count(*) from collect where DATE_FORMAT( createTime, '%Y%m' ) = DATE_FORMAT( CURDATE( ) , '%Y%m' )
+    </select>
+
+    <!-- 获取统计数据-产品发布 -->
+    <select id="getPublish" resultType="com.cloud.commonsmng.entity.appletEntity.PointEntity">
+        select count(id) as count ,dateTime from
+            ( select id,DATE_FORMAT(createTime, '%Y-%m') as dateTime  from product where DATE_FORMAT( createTime, '%Y' ) = DATE_FORMAT( CURDATE( ) , '%Y' )  )a
+        GROUP BY dateTime
+    </select>
+
+    <!-- 获取统计数据-人员统计-->
+    <select id="getPersonnelDistribution" resultType="com.cloud.commonsmng.entity.appletEntity.PointEntity">
+        select count(address) as count ,address from
+            (select SUBSTR(address,1,2) as address from point ) a
+        group by address
+    </select>
+
+    <!-- 获取统计数据-获取字典表子选项-->
+    <select id="getChildList" resultType="java.lang.String">
+        select getChildList(#{type})
+    </select>
+
+    <!-- 获取统计数据-获取当月各产品点击数目-->
+    <select id="getProductDistribution" parameterType="java.util.List" resultType="com.cloud.commonsmng.entity.appletEntity.PointEntity">
+        select count(name ) as count ,name from
+            ( select d.name,p.type from point p left join product t on p.pageId = t.id left join dictionary d on t.productType = d.code where t.productType in
+        <foreach collection="list" item="item" index="index" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+            ) a  group by name
+    </select>
+</mapper>

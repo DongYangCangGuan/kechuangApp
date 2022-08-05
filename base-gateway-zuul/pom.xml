@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.cloud</groupId>
+    <artifactId>base-gateway-zuul</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>base-gateway-zuul</name>
+    <description>base-gateway-zuul project for Spring Boot</description>
+
+    <!--引入自定义的共用父类-->
+    <parent>
+        <groupId>com.cloud</groupId>
+        <artifactId>springboot-topcheer-parent</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+
+    <!--properties已在父类pom中申明，此处可留空-->
+    <properties>
+    </properties>
+
+    <!--所有引入的基础和常用jar包，应在父类工程pom里申明版本或在父类pom引用，子工程pom不写版本号(一些专用和特殊的jar包除外) -->
+    <dependencies>
+        <!--gateway网关服务所需依赖-->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-zuul</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <!-- 防止JKS被maven错误解析 -->
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+            </resource>
+        </resources>
+
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+        <finalName>base-gateway-zuul</finalName>
+    </build>
+</project>

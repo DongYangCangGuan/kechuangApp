@@ -1,0 +1,20 @@
+<view class="page1">
+  <!-- 搜索框 -->
+  <view class="search">
+    <text class="iconfont iconfangdajing"></text>
+    <input class="input" disabled bindtap="goSearch" placeholder-class="placeholder" placeholder=""
+      value="{{searchValue}}" />
+  </view>
+
+    <view>
+      <view class="bj">
+        <view class="ssd" wx:for="{{itemList}}" wx:for-item="item" wx:key="index" bindtap="goDetail" data-src="{{item}}">
+          <image class="ssd_img" src='{{item.productPicture.pic}}'></image>
+          <view class="box">
+            <text class="title">{{item.product.productName}}</text>
+            <text class="content">{{item.product.introduction}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+</view>

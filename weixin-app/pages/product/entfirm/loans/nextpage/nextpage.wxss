@@ -1,0 +1,86 @@
+/* pages/product/entfirm/loans/nextpage/nextpage.wxss */
+.nextpage_container {
+    /* background-color: #2a2396; */
+    background: -webkit-linear-gradient(top,#034DCA,rgb(125 131 214));
+    min-height: 100vh;
+}
+.nav_title {
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    position: fixed;
+    z-index: 999;
+    top: 0;
+    background-color: #034DCA;
+    color: #ffffff!important;
+    padding: 20rpx 0 20rpx 0;
+}
+.selected text {
+    padding-bottom: 15rpx;
+    border-bottom: 2rpx solid rgb(39, 172, 233);
+}
+.content {
+    width: 83%;
+    margin-left: 3%;
+    /* margin: auto; */
+    /* margin-right: 3%; */
+}
+.con_scroll {
+    height: 100%;
+    margin-top: 80rpx;
+    transform: translateX(70rpx);
+}
+.con_item {
+    /* display: flex;
+    align-items: center; */
+    width: 95%;
+    margin: 30rpx 0;
+    /* height: 200rpx; */
+    padding: 30rpx 10rpx 25rpx 20rpx;
+    /* border: 1rpx solid #A8A8A8; */
+    background-color: #ffffff;
+}
+.item_title {
+    margin-bottom: 15rpx;
+    padding-left: 10rpx;
+}
+.item_content {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+}
+.con_img {
+    width: 160rpx;
+    height: 160rpx;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    overflow: hidden;
+}
+.con_img>image {
+    width: 100%;
+    height: 100%;
+}
+.con_text {
+    width: calc(97% - 180rpx);
+    /* height: 100%; */
+    margin-left: 3%;
+    letter-spacing: 3rpx;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+.text_main {
+    box-sizing: border-box;
+    width: calc(97% - 180rpx);
+    height: 122rpx;
+    font-size: 26rpx;
+    padding: 10rpx 8rpx;
+    color: #4a4a4a;
+    /* text-shadow: 1rpx 1rpx rgb(148, 210, 238); */
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+}

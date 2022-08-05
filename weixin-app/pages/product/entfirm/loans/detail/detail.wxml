@@ -1,0 +1,178 @@
+<!--pages/product/entfirm/loans/detail/detail.wxml-->
+<view class="detail_container">
+    <view class="top"
+          style="background-image: url({{myBackground}});background-position:center;background-size: 100%;background-repeat:no-repeat;"
+    >
+        <view class="top_pic">
+            <!-- <image src="../../../../../images/product/img1.png"></image> -->
+            <image src="{{latestDetail[0].pic}}"></image>
+        </view>
+        <view class="top_title">
+            <text>{{latestDetail[0].productName}}</text>
+        </view>
+    </view>
+    <view class="content">
+        <view class="con_title">
+            <view class="title_line"></view>
+            <view class="title_text">产品说明</view>
+            <view class="title_line"></view>
+        </view>
+        <view class="con_item1" style="background-image:url({{myBackground}}); border-top-left-radius: 50px;background-position-y: -20rpx;background-position-x: -44rpx;background-repeat:no-repeat;"  wx:if="{{latestDetail[0].productFeatures!=null&&latestDetail[0].productFeatures!=''}}">
+        <view class="con_item11" style="background: url(https://ssic-capital.com/public-gateway/service-manage/pictureloads/tedianditu.png) no-repeat; background-position-y: -20rpx;background-position-x: -44rpx;background-repeat:no-repeat;">
+            <view class="item_title1">产品亮点</view>
+            <view class="item_text1">{{latestDetail[0].productFeatures}}</view>
+          </view>
+        </view>
+        <!-- <view class="con_item"  wx:if="{{latestDetail[0].productFeatures!=null&&latestDetail[0].productFeatures!=''}}">
+            <view class="item_title"
+            style="background-image: url({{titleBackground}});background-position-y: -20rpx;background-position-x: -44rpx;background-size: 100%;background-repeat:no-repeat;"
+            >产品亮点</view>
+            <view class="item_text">{{latestDetail[0].productFeatures}}</view>
+        </view> -->
+        <view class="con_item">
+            <view class="item_title"
+            style="background-image: url({{titleBackground}});background-position-y: -20rpx;background-position-x: -44rpx;background-size: 100%;background-repeat:no-repeat;"
+            >简介</view>
+            <view class="item_text" wx:if="{{latestDetail[0].introduction!=null}}">{{latestDetail[0].introduction}}</view>
+            <view class="item_text" wx:else></view>
+        </view>
+
+        <view class="con_item"  wx:if="{{latestDetail[0].highLight!=null&&latestDetail[0].highLight!=''}}">
+            <view class="item_title"
+            style="background-image: url({{titleBackground}});background-position-y: -20rpx;background-position-x: -44rpx;background-size: 100%;background-repeat:no-repeat;"
+            >产品特点</view>
+            <view class="item_text">{{latestDetail[0].highLight}}</view>
+        </view>
+        
+        <view class="con_item" wx:if="{{latestDetail[0].serviceObject1!=null&&latestDetail[0].serviceObject1!=''}}">
+            <view class="item_title"
+            style="background-image: url({{titleBackground}});background-position-y: -20rpx;background-position-x: -44rpx;background-size: 100%;background-repeat:no-repeat;"
+            >服务对象</view>
+            <view class="item_text">{{latestDetail[0].serviceObject1}}</view>
+        </view>
+        <view wx:else></view>
+        <view class="con_item" wx:if="{{latestDetail[0].loanAmount!=null&&latestDetail[0].loanAmount!=''}}">
+            <view class="item_title"
+            style="background-image: url({{titleBackground}});background-position-y: -20rpx;background-position-x: -44rpx;background-size: 100%;background-repeat:no-repeat;"
+            >贷款金额</view>
+            <view class="item_text" >{{latestDetail[0].loanAmount}}</view>
+        </view>
+        <view wx:else></view>
+        <view class="con_item" wx:if="{{latestDetail[0].timeLimit!=null&&latestDetail[0].timeLimit!=''}}">
+            <view class="item_title"
+            style="background-image: url({{titleBackground}});background-position-y: -20rpx;background-position-x: -44rpx;background-size: 100%;background-repeat:no-repeat;"
+            >期限</view>
+            <view class="item_text" >{{latestDetail[0].timeLimit}}</view>
+        </view>
+        <view wx:else></view>
+        <view class="con_item" wx:if="{{latestDetail[0].interestRate!=null&&latestDetail[0].interestRate!=''}}">
+            <view class="item_title"
+            style="background-image: url({{titleBackground}});background-position-y: -20rpx;background-position-x: -44rpx;background-size: 100%;background-repeat:no-repeat;"
+            >利率</view>
+            <view class="item_text" >{{latestDetail[0].interestRate}}</view>
+        </view>
+        <view wx:else></view>
+
+        
+        <!-- <view class="con_item" wx:if="{{latestDetail[0].productsExpandList!=null&&latestDetail[0].productsExpandList!=''}}"   wx:for="{{latestDetail[0].productsExpandList}}" wx:key="index" wx:for-item="item" >
+            <view class="item_title"
+            style="background-image: url({{titleBackground}});background-position-y: -20rpx;background-position-x: -44rpx;background-size: 100%;background-repeat:no-repeat;"
+            >{{item.name}}</view>
+            <view class="item_text" >{{item.content}}</view>
+        </view>
+        <view wx:else></view> -->
+
+        <view  wx:if="{{latestDetail[0].productsExpandList!=null&&latestDetail[0].productsExpandList!=''}}">
+          <view class="con_item" wx:for="{{latestDetail[0].productsExpandList}}" wx:key="index" wx:for-item="item">
+              <view class="item_title"
+              style="background-image: url({{titleBackground}});background-position-y: -20rpx;background-position-x: -44rpx;background-size: 100%;background-repeat:no-repeat;"
+              >{{item.name}}</view>
+              <view class="item_text" >{{item.content}}</view>
+            </view>
+        </view>
+        <view wx:else></view>
+
+        <view bindtap="yulan" class="con_item" wx:if="{{latestDetail[0].casePath!=null&&latestDetail[0].casePath!=''}}">
+            <view class="item_title"
+            style="background-image: url({{titleBackground}});background-position-y: -20rpx;background-position-x: -44rpx;background-size: 100%;background-repeat:no-repeat;"
+            wx:if="{{latestDetail[0].example!=null}}">{{latestDetail[0].example}}</view>
+            <view wx:else></view>
+            <!-- <view style="src: '';" >文件预览</view> -->
+            
+            <view  style="color: #2373ef;font-size: 16px;" ><image style="padding-left:22rpx;width: 60rpx;height:55rpx;" src="https://ssic-capital.com/public-gateway/service-manage/pictureloads/yulan.png"></image>文件预览</view>
+        </view>
+        <view wx:else></view>
+        
+    </view>
+    <view class="scang">
+        <view style="margin: 0 30rpx;">浏览数：{{latestDetail[0].times}}</view>
+        <view class="{{isClick?'iconfont iconshoucang1':'iconfont iconshoucang2'}}"></view>
+        <view bindtap="haveSave" style="margin-left: 30rpx;">收藏:</view>
+        <!-- <view style="color: #2373ef;font-size: 16px;" bindtap="yulan">文件预览</view> -->
+    </view>
+    <view style="height: 40rpx;">
+    </view>
+    <view style="height: 60px;margin-bottom: 60rpx;">
+        <button class="btn" bindtap="showpop">获取联系方式</button>
+    </view>
+    
+    
+    <!-- <view class="iconfont  iconshoucang1"></view>
+    <view class="iconfont shoucang"></view>
+    <view class="iconfont shoucang2"></view> -->
+    <!-- <view class="iconfont xihuan-yixihuan"></view> -->
+    <!-- <button form-type="submit" bindtap="gosubmitDetail">提交</button> -->
+    <!-- <button class="btn" bindtap="showpop">获取联系方式</button> -->
+
+    <!-- 弹框 -->
+    <!-- <view class="pop_img"> -->
+            <!-- <image src="../../../../../images/product/person.png"></image> -->
+            <!-- <image src="{{Contactobj.headImg}}"></image> -->
+        <!-- </view> -->
+    <!-- <view class="popup" hidden='{{showDialog}}'>
+        <view class="pop_content">
+            <view class="pop_item">
+                <text class="iconfont iconyonghu" style="font-size: 40rpx;color: #2b2398;"></text>
+                <text>客户经理</text>
+                <text>{{Contactobj.userName}}</text>
+            </view>
+            <view class="pop_item">
+                <text class="iconfont icondianhua" style="font-size: 40rpx;color: #2b2398;"></text>
+                <text>联系方式</text>
+                <text>{{Contactobj.phone}}</text>
+            </view>
+            <view class="pop_item">
+                <text class="iconfont iconyoujian" style="font-size: 40rpx;color: #2b2398;"></text>
+                <text>邮箱</text>
+                <text>{{Contactobj.email}}</text>
+            </view>
+        </view>
+    </view> -->
+
+    <view aria-role="dialog" aria-modal="true" class="fadeIn" wx:if="{{showDialog}}">
+        <view class="weui-mask"></view>
+        <view class="weui-dialog">
+            <view style="padding: 8% 10%;text-align: left;">
+                <view class="pop_item">
+                    <text class="iconfont iconyonghu" style="font-size: 40rpx;color: #2b2398;"></text>
+                    <text>客户经理</text>
+                    <text>{{Contactobj.linkMan}}</text>
+                </view>
+                <view class="pop_item">
+                    <text class="iconfont icondianhua" style="font-size: 40rpx;color: #2b2398;"></text>
+                    <text>联系方式</text>
+                    <text bindtap="onL">{{Contactobj.linkPhone}}</text>
+                </view>
+                <view class="pop_item">
+                    <text class="iconfont iconyoujian" style="font-size: 40rpx;color: #2b2398;"></text>
+                    <text>邮箱</text>
+                    <text>{{Contactobj.linkEmail}}</text>
+                </view>
+            </view>
+            <view class="weui-dialog__ft">
+                <view aria-role="button" class="weui-dialog__btn weui-dialog__btn_default" bindtap="close">关闭</view>
+            </view>
+        </view>
+    </view>
+
+</view>

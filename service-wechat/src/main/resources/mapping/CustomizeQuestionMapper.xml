@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.servicewechat.mapper.CustomizeQuestionMapper">
+
+    <select id="getQuestionList" resultType="com.cloud.commonsmng.entity.appletEntity.CustomizeQuestion">
+        SELECT
+            id,
+            questionDescription
+        FROM
+            customize_question
+        WHERE
+            delFlag = 1 AND releaseFlag = 1
+        ORDER BY
+            sequen
+    </select>
+
+<!--    <select id="getQuestionList" parameterType="com.cloud.servicewechat.common.PageVo" resultType="com.cloud.servicewechat.entity.CustomizeQuestion">-->
+<!--        SELECT-->
+<!--            id,-->
+<!--            questionDescription-->
+<!--        FROM-->
+<!--            customize_question-->
+<!--        WHERE-->
+<!--            delFlag = 1-->
+<!--    </select>-->
+
+<!--    <select id="getPageTotal" parameterType="com.cloud.servicewechat.common.PageVo"-->
+<!--            resultType="java.lang.Integer">-->
+<!--        SELECT-->
+<!--            COUNT(1)-->
+<!--        FROM-->
+<!--            customize_question-->
+<!--    </select>-->
+</mapper>

@@ -1,0 +1,55 @@
+<view class="changeInfo_content">
+  
+  <mp-cells>
+    <!-- 公司名称 -->
+    <view class="chooseSex">
+      <text class="chooseSex_left">公司名称</text>
+      <picker>
+      {{memberDetailList[0]}}
+        <text>{{memberDetailList.enterpriseName}}</text>
+      </picker>
+    </view>
+  <!-- 姓名 -->
+    <view class="chooseSex">
+      <text class="chooseSex_left">姓名</text>
+      <picker>
+        <text>{{memberDetailList.realName}}</text>
+      </picker>
+    </view>
+
+    <!-- 职务 -->
+    <view class="chooseSex">
+      <text class="chooseSex_left">职务</text>
+      <picker>
+        <text>{{memberDetailList.job}}</text>
+      </picker>
+    </view>
+    
+    <!-- 手机号 -->
+    <view class="chooseSex">
+      <text class="chooseSex_left">手机号</text>
+      <picker>
+        <text>{{memberDetailList.phone}}</text>
+      </picker>
+    </view>
+
+    <!-- 邮箱 -->
+    <view class="chooseSex">
+      <text class="chooseSex_left">联系方式</text>
+      <picker>
+        <text>{{memberDetailList.email}}</text>
+      </picker>
+    </view>
+
+    
+  </mp-cells>
+
+  <view class="bottom">
+    <view class="btn" bindtap="getAdopt">
+      通过
+    </view>
+    <view class="btn" bindtap="getRefuse">
+      拒绝
+    </view>
+  </view>
+</view>

@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.servicemanage.mapper.NotesMapper">
+
+    <resultMap id="notesEntity" type="com.cloud.commonsmng.entity.appletEntity.Notes">
+        <id column="id" property="id" javaType="java.lang.String"/>
+        <result column="title" property="title"/>
+        <result column="taskType" property="taskType"/>
+        <result column="isFeedBack" property="isFeedBack"/>
+        <result column="modifyTime" property="modifyTime"/>
+        <result column="status" property="status"/>
+        <result column="modifyusername" property="modifyusername"/>
+        <result column="notesTaskTypeName" property="notesTaskTypeName"/>
+        <result column="readNum" property="readNum"/>
+        <result column="totalNum" property="totalNum"/>
+        <collection column="{notesId=id}" property="userIds" ofType="java.lang.String" javaType="java.util.List"
+                    select="getNotesDetailByNotesId">
+        </collection>
+    </resultMap>
+
+    <select id="getNotesDetailByNotesId" resultType="java.lang.String">
+        SELECT userId
+        FROM notes_detail
+        WHERE notesId = #{notesId}
+    </select>
+
+    <!-- sql 条件判断 -->
+    <sql id="tmpPageQry">
+        <trim prefix="where" prefixOverrides="and | or">
+            and n.delFlag = 1
+            <if test="pageVo.searchdata != null">
+                <if test="pageVo.searchdata.title != null and pageVo.searchdata.title != ''">
+                    and n.title like concat('%',#{pageVo.searchdata.title},'%')
+                </if>
+
+                <if test="pageVo.searchdata.taskType != null and pageVo.searchdata.taskType != ''">
+                    and n.taskType = #{pageVo.searchdata.taskType}
+                </if>
+
+                <if test="pageVo.searchdata.id != null and pageVo.searchdata.id != ''">
+                    and n.id = #{pageVo.searchdata.id}
+                </if>
+
+                <if test="pageVo.searchdata.startTime != null and pageVo.searchdata.startTime != ''">
+                    <if test="pageVo.searchdata.endTime != null and pageVo.searchdata.endTime != ''">
+                        AND date_format(n.createTime,'%Y-%m-%d') BETWEEN #{pageVo.searchdata.startTime} AND
+                        #{pageVo.searchdata.endTime}
+                    </if>
+                </if>
+            </if>
+        </trim>
+    </sql>
+
+    <!--sql 分页-->
+    <sql id="pagination">
+        <if test="pageVo.page!=null">
+            limit ${pageVo.page.beginIndex-1}, ${pageVo.page.pageSize}
+        </if>
+    </sql>
+
+    <!-- 获取分页区间的消息信息 -->
+    <select id="getNotesPageVo" parameterType="com.cloud.servicemanage.common.PageVo"
+            resultMap="notesEntity">
+        SELECT
+        n.id,
+        n.title,
+        n.taskType,
+        n.isFeedback,
+        n.modifyTime,
+        n.`status`,
+        u.`realName` AS modifyusername,
+        d.`name` AS notesTaskTypeName
+        FROM
+        `notes` n
+        LEFT JOIN `user` u ON n.modifierId = u.id
+        LEFT JOIN `dictionary` d ON n.taskType = d.`code`
+        AND d.kind = 'taskType'
+        <include refid="tmpPageQry"/>
+        order by n.modifyTime desc
+        <include refid="pagination"/>
+    </select>
+
+    <!-- 查询页面的数据总条数 -->
+    <select id="getPageTotal" parameterType="com.cloud.servicemanage.common.PageVo" resultType="java.lang.Integer">
+        select count(1) from `notes` n
+        <include refid="tmpPageQry"/>
+    </select>
+
+    <!-- 根据编号查询信息信息（包含已读数，全部次数） -->
+    <select id="getNotesById" parameterType="java.lang.String" resultMap="notesEntity">
+        SELECT n.id,
+               n.title,
+               n.content,
+               n.taskType,
+               n.isFeedBack,
+               n.flag,
+               d.`name`                                         AS notesTaskTypeName,
+               sum(CASE WHEN nd.`status` = 1 THEN 1 ELSE 0 END) AS readNum,
+               CASE
+                   WHEN taskType = 'all' THEN
+                       c.total
+                   ELSE count(1)
+                   END                                          AS totalNum
+        FROM notes n
+                 LEFT JOIN notes_detail nd ON n.id = nd.notesId
+                 LEFT JOIN (SELECT count(id) AS total FROM `user` WHERE delFlag = 1) c ON 1 = 1
+                 LEFT JOIN dictionary d ON n.taskType = d.`code`
+            AND d.kind = 'taskType'
+        WHERE n.id = #{id}
+          and n.delFlag = 1
+        GROUP BY n.id,
+                 n.title,
+                 n.content,
+                 n.taskType,
+                 n.isFeedBack,
+                 n.flag,
+                 d.`name`,
+                 c.total
+    </select>
+
+    <!--新增消息信息-->
+    <insert id="insertNotes" parameterType="com.cloud.commonsmng.entity.appletEntity.Notes">
+        <if test="notes.notesDetailList != null and notes.notesDetailList.size() > 0">
+            INSERT notes_detail(id, notesId, status, userId, createTime)
+            VALUES
+            <foreach collection="notes.notesDetailList" item="item" index="index" separator=",">
+                (#{item.id},#{item.notesId},#{item.status},#{item.userId},NOW())
+            </foreach>;
+        </if>
+
+        INSERT notes (id, title, content, creatorId, createTime, modifierId, modifyTime, taskType,
+        isFeedBack,delFlag,status,flag)
+        VALUES (#{notes.id},#{notes.title},#{notes.content},
+        #{notes.creatorId},NOW(),#{notes.modifierId},NOW(),#{notes.taskType},#{notes.isFeedBack},1,0,#{notes.flag});
+    </insert>
+
+    <update id="updateNotes" parameterType="com.cloud.commonsmng.entity.appletEntity.Notes">
+        UPDATE notes
+        SET title = #{notes.title},
+        content = #{notes.content},
+        modifierId = #{notes.modifierId},
+        modifyTime = NOW(),
+        taskType = #{notes.taskType},
+        isFeedBack = #{notes.isFeedBack}
+        WHERE
+        id = #{notes.id};
+
+        DELETE FROM notes_detail WHERE notesId = #{notes.id};
+        <if test="notes.notesDetailList != null and notes.notesDetailList.size() > 0">
+            INSERT notes_detail(id, notesId, status, userId, createTime)
+            VALUES
+            <foreach collection="notes.notesDetailList" item="item" index="index" separator=",">
+                (#{item.id},#{item.notesId},#{item.status},#{item.userId},NOW())
+            </foreach>;
+        </if>
+    </update>
+
+    <!--获取码表中的消息类型-->
+    <select id="selectDictionaryByKindEqTaskType" resultType="com.cloud.commonsmng.entity.appletEntity.Dictionary">
+        SELECT d.`code`,
+               d.`name`
+        FROM `dictionary` d
+        WHERE d.isused = 1
+          AND d.kind = 'taskType'
+        ORDER BY d.index
+    </select>
+
+    <!--获取已读用户信息-->
+    <select id="getReadUser" resultType="com.cloud.commonsmng.entity.appletEntity.User">
+        select u.* from notes n  left join notes_detail nd on n.id = nd.notesId LEFT join user u on nd.userId = u.id
+        where nd.`status` = 1  and n.id = #{id}
+    </select>
+
+    <select id="getDelNotesList" resultType="com.cloud.commonsmng.entity.appletEntity.Notes">
+        SELECT
+        n.id,
+        n.title,
+        n.taskType,
+        n.isFeedback,
+        n.modifyTime,
+        n.`status`,
+        u.`realName` AS modifyusername,
+        d.`name` AS notesTaskTypeName
+        FROM
+        `notes` n
+        LEFT JOIN `user` u ON n.modifierId = u.id
+        LEFT JOIN `dictionary` d ON n.taskType = d.`code`
+        AND d.kind = 'taskType'
+        WHERE n.`status` = #{status} and  n.delFlag = 0
+        ORDER BY n.modifyTime
+    </select>
+
+    <!-- 根据编号查询信息信息 -->
+    <select id="getnoteInfobyId" parameterType="java.lang.String" resultMap="notesEntity">
+        SELECT n.id,
+        n.title,
+        n.content,
+        n.taskType,
+        n.isFeedBack,
+        n.flag,
+        d.`name`                                         AS notesTaskTypeName
+        FROM notes n
+        LEFT JOIN dictionary d ON n.taskType = d.`code`
+        AND d.kind = 'taskType'
+        WHERE n.id = #{id}
+        and n.delFlag = 1
+
+    </select>
+
+    <select id="getNotesDetailEmails" resultType="java.lang.String">
+        select u.email from notes_detail nd LEFT JOIN `user` u ON nd.userId = u.id AND u.delFlag = 1
+        WHERE nd.notesId = #{id} AND (u.email is not NULL AND u.email != '')
+    </select>
+
+    <!--添加通知人群notes_detail-->
+    <insert id="insertNotesDetails" parameterType="com.cloud.commonsmng.entity.appletEntity.Notes">
+
+        <if test="notes.notesDetailList != null and notes.notesDetailList.size() > 0">
+            DELETE FROM notes_detail WHERE notesId = #{notes.id};
+            INSERT notes_detail(id, notesId, status, userId, createTime)
+            VALUES
+            <foreach collection="notes.notesDetailList" item="item" index="index" separator=",">
+                (#{item.id},#{item.notesId},#{item.status},#{item.userId},NOW())
+            </foreach>;
+        </if>
+    </insert>
+
+    <select id="getUserEmails" resultType="java.lang.String">
+        select u.email from `user` u
+        WHERE u.delFlag = 1 AND (u.email is not NULL AND u.email != '') AND u.id IN
+        <foreach collection="userlist" item="item" index="index" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </select>
+    <select id="getNoteById" resultType="com.cloud.commonsmng.entity.appletEntity.Notes">
+        SELECT * FROM notes WHERE id = #{id}
+    </select>
+    <insert id="insertNote" parameterType="com.cloud.commonsmng.entity.appletEntity.Notes">
+        INSERT INTO notes (id, title, content, creatorId, createTime, modifierId, modifyTime, taskType,
+        isFeedBack,delFlag,status,flag)
+        VALUES (#{notes.id},#{notes.title},#{notes.content},
+        #{notes.creatorId},NOW(),#{notes.modifierId},NOW(),#{notes.taskType},#{notes.isFeedBack},1,#{notes.status},#{notes.flag});
+    </insert>
+
+    <select id="getUserUnionId" resultType="com.cloud.commonsmng.entity.appletEntity.User">
+        select u.id,u.unionid,w.openId from user u LEFT JOIN weixin_info w ON u.unionid = w.unionid
+        WHERE u.id IN
+        <foreach collection="userIds" item="item" index="index" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </select>
+    <select id="getNewOpenId" resultType="java.lang.String">
+        select openId from weixin_info order by modifyTime DESC limit 0,1;
+    </select>
+
+    <select id="getUnionidempty" resultType="com.cloud.commonsmng.entity.appletEntity.WeixinInfo">
+        SELECT openId from weixin_info WHERE unionid is NULL OR unionid =''
+    </select>
+
+    <select id="getRealName" resultType="java.lang.String">
+        SELECT realName FROM user where id=#{userId}
+    </select>
+</mapper>

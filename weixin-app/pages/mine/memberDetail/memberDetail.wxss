@@ -1,0 +1,46 @@
+.changeInfo_content {
+  height: 100vh;
+  background-color: #ececef;
+}
+
+
+
+.chooseSex {
+  display: flex;
+  padding: 30rpx 10rpx 30rpx 0rpx;
+  border-top: solid 1rpx #F3F3F3;
+  margin: 0 20rpx 0 30rpx;
+}
+
+.chooseSex_left{
+  color: rgb(2,2,146);
+}
+.chooseSex text {
+  flex: 1;
+}
+
+.chooseSex view {
+  justify-content: flex-end;
+}
+
+
+
+.btn {
+  display: flex;
+  height: 100rpx;
+  font-size: 34rpx;
+  margin-top: 40rpx;
+  background-color: #ffffff;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+}
+
+
+
+.picker {
+  background-color: #FFFFFF;
+  display: flex;
+  align-items: center;
+}
+

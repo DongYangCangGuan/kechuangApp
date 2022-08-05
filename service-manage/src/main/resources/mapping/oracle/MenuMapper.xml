@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloud.servicemanage.mapper.MenuMapper">
+
+    <resultMap id="baseMenuInfo" type="com.cloud.servicemanage.entity.Menu">
+        <result property="id" column="id" jdbcType="VARCHAR"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="code" column="code" jdbcType="VARCHAR"/>
+        <result property="url" column="url" jdbcType="VARCHAR"/>
+        <result property="isused" column="isused" jdbcType="BIT"/>
+        <result property="parentid" column="parentid" jdbcType="VARCHAR"/>
+        <result property="index" column="index" jdbcType="VARCHAR"/>
+        <result property="icon" column="icon" jdbcType="VARCHAR"/>
+        <result property="component" column="component" jdbcType="VARCHAR"/>
+        <result property="url" column="url" jdbcType="VARCHAR"/>
+        <result property="parentname" column="parentname" jdbcType="VARCHAR"/>
+        <result property="treeabout" column="treeabout" jdbcType="VARCHAR"/>
+        <result property="creatorid" column="creatorid" jdbcType="VARCHAR"/>
+        <result property="createtime" column="createtime" jdbcType="DATE"/>
+        <result property="modifierid" column="modifierid" jdbcType="VARCHAR"/>
+        <result property="modifytime" column="modifytime" jdbcType="DATE"/>
+        <result property="path" column="path" jdbcType="VARCHAR"/>
+        <result property="noCache" column="no_cache" jdbcType="BIT"/>
+    </resultMap>
+
+
+    <resultMap id="menusSecurityMap" type="com.cloud.servicemanage.entity.Menu">
+        <result property="id" column="id" jdbcType="VARCHAR"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="isused" column="isused" jdbcType="BIT"/>
+        <result property="icon" column="icon" jdbcType="VARCHAR"/>
+        <result property="url" column="url" jdbcType="VARCHAR"/>
+        <result property="parentid" column="parentid" jdbcType="VARCHAR"/>
+        <result property="creatorid" column="creatorid" jdbcType="VARCHAR"/>
+        <result property="createtime" column="createtime" jdbcType="DATE"/>
+        <result property="modifierid" column="modifierid" jdbcType="VARCHAR"/>
+        <result property="modifytime" column="modifytime" jdbcType="DATE"/>
+        <result property="parentname" column="parentname" jdbcType="VARCHAR"/>
+        <result property="childCount" column="child_count" />
+        <result property="code" column="code" jdbcType="VARCHAR"/>
+        <result property="noCache" column="no_cache" jdbcType="BIT"/>
+        <result property="userId" column="userId" jdbcType="VARCHAR"/>
+        <result property="treeabout" column="treeabout" jdbcType="VARCHAR"/>
+        <result property="path" column="path" jdbcType="VARCHAR"/>
+
+        <collection property="children" column="{id=id,userId=userId}"
+                    ofType="com.cloud.servicemanage.entity.Menu" javaType="java.util.ArrayList" select="selectSecurityMenuChildrenById">
+        </collection>
+    </resultMap>
+
+    <resultMap id="menusMap" type="com.cloud.servicemanage.entity.Menu">
+        <result property="id" column="id" jdbcType="VARCHAR"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="icon" column="icon" jdbcType="VARCHAR"/>
+        <result property="parentid" column="parentid" jdbcType="VARCHAR"/>
+        <result property="parentname" column="parentname" jdbcType="VARCHAR"/>
+        <result property="treeabout" column="treeabout" jdbcType="VARCHAR"/>
+        <collection property="children" column="{id=id}"
+                    ofType="com.cloud.servicemanage.entity.Menu" javaType="java.util.ArrayList" select="selectMenuByParentIds"/>
+    </resultMap>
+
+
+
+    <!-- 设置菜单树 -->
+    <select id="selectMenuByParentId" resultMap="menusMap">
+      select
+			   MEU.MENU_ID            as id,
+               MEU.MENU_NAME          as name,
+               MEU.MENU_ICON          as icon,
+               MEU.PARENTID           as parentid,
+	           NVL(MEN.MENU_NAME,'-') as parentname
+        from  MENU MEU
+    left join MENU MEN on MEU.PARENTID=MEN.MENU_ID
+        where MEU.PARENTID=#{id} and MEU.ISUSED=1
+        order by MEU.MENU_INDEX
+    </select>
+
+
+    <select id="selectMenuByParentIds" resultMap="menusMap" parameterType="java.util.Map">
+      select
+			   MEUSS.MENU_ID   as id,
+               MEUSS.MENU_NAME as name,
+               MEUSS.PARENTID  as parentid,
+               MEUSS.MENU_ICON as icon,
+	           NVL(MEN.MENU_NAME,'-') as parentname
+        from  MENU MEUSS
+    left join MENU MEN on MEUSS.PARENTID=MEN.MENU_ID
+        where MEUSS.PARENTID=#{id}
+          and MEUSS.ISUSED=1
+     order by MEUSS.MENU_INDEX
+    </select>
+
+    <!-- 根据parent_id，先查出所有一级部门 -->
+    <!-- 此方法做权限判断-->
+    <select id="querySecurityMenuTreeList" resultMap="menusSecurityMap">
+        SELECT
+			   MEU.MENU_PATH      as path,
+			   MEU.MENU_ICON      as icon,
+			   MEU.MENU_CODE      as code,
+			   MEU.MENU_NOCACHE   as no_cache,
+			   MEU.MENU_ID 		  as id,
+			   MEU.MENU_NAME 	  as name,
+			   MEU.MENU_URL 	  as url,
+			   MEU.PARENTID 	  as parentid,
+			   #{userId}          as userId
+		 from  MENU MEU
+	  left join ROLEMENURELATION ROLT on MEU.MENU_ID = ROLT.MENUID
+		left join ROLE ROL on ROLT.ROLEID = ROL.ROL_ID
+		where  ROL.ROL_ID in (
+								select
+										RL.ROL_ID
+								   from USER_INFO USI
+							  left join USERROLERELATION URRL  on  USI.ID = URRL.USERID
+							  left join ROLE RL   			   on  URRL.ROLEID =  RL.ROL_ID
+							      where   USI.ID = #{userId}
+							  )
+		      and  MEU.PARENTID='0' AND MEU.ISUSED='1'
+		GROUP BY   MEU.MENU_PATH,
+							 MEU.MENU_ICON,
+							 MEU.MENU_CODE,
+							 MEU.MENU_ID,
+							 MEU.MENU_NAME,
+							 MEU.MENU_NOCACHE,
+							 MEU.MENU_URL,
+							 MEU.PARENTID,
+							 MEU.MENU_INDEX
+	 ORDER BY    MEU.MENU_INDEX
+    </select>
+
+    <!-- 根据parent_id，先查出所有一级部门 -->
+    <!-- 此方法做权限判断-->
+    <select id="selectSecurityMenuChildrenById" resultMap="menusSecurityMap" parameterType="java.util.Map">
+         SELECT
+			   MEU.MENU_PATH      as path,
+			   MEU.MENU_ICON      as icon,
+			   MEU.MENU_CODE      as code,
+			   MEU.MENU_NOCACHE   as no_cache,
+			   MEU.MENU_ID 		  as id,
+			   MEU.MENU_NAME 	  as name,
+			   MEU.MENU_URL 	  as url,
+			   MEU.PARENTID 	  as parentid,
+			   #{userId}          as userId
+		  from  MENU MEU
+	  left join ROLEMENURELATION ROLT on MEU.MENU_ID = ROLT.MENUID
+	  left join ROLE ROL on ROLT.ROLEID = ROL.ROL_ID
+		where  ROL.ROL_ID in (
+								select
+									  RL.ROL_ID
+								from  USER_INFO USI
+						   left join USERROLERELATION URRL  on  USI.ID = URRL.USERID
+						   left join ROLE RL   			    on  URRL.ROLEID =  RL.ROL_ID
+							   where   USI.ID = #{userId}
+							)
+		      and  MEU.PARENTID=#{id} AND MEU.ISUSED='1'
+		GROUP BY   MEU.MENU_PATH,
+				   MEU.MENU_ICON,
+				   MEU.MENU_CODE,
+				   MEU.MENU_ID,
+				   MEU.MENU_NAME,
+				   MEU.MENU_NOCACHE,
+				   MEU.MENU_URL,
+				   MEU.PARENTID,
+				   MEU.MENU_INDEX
+	    ORDER BY   MEU.MENU_INDEX
+    </select>
+
+
+    <select id="selectMenuByRoleId" resultMap="baseMenuInfo">
+        select distinct
+						MEU.MENU_ID    as id,
+						MEU.MENU_NAME  as name
+				  from  ROLEMENURELATION ROLT
+			 left join  MENU  MEU   on  ROLT.MENUID = MEU.MENU_ID
+			    where  ROLT.ROLEID = #{roleid} and MEU.MENU_ID is not null
+    </select>
+
+
+    <select id="getMenuList" resultMap="baseMenuInfo">
+        select
+				MEU.MENU_ID 		as id,
+				MEU.MENU_CODE 		as code,
+				MEU.MENU_NAME 		as name,
+				MEU.MENU_URL  		as url,
+				MEU.ISUSED 			as isused,
+				MEU.PARENTID 		as parentid,
+				MEU.MENU_INDEX 		as indexs,
+				MEU.MENU_ICON    	as icon,
+				MEU.CREATORID 		as creatorid,
+				MEU.CREATETIME 		as createtime,
+				MEU.MODIFIERID 		as modifierid,
+				MEU.MODIFYTIME 		as modifytime,
+				MEU.MENU_PATH       as path,
+				MEU.COMPONENT  		as component,
+				MEU.MENU_NOCACHE    as no_cache,
+				MEU.TREEABOUT  		as treeabout
+		  from MENU MEU
+		  WHERE MEU.PARENTID='0'
+		  ORDER BY  MEU.MENU_INDEX
+    </select>
+    <select id="getMenuListById" resultMap="baseMenuInfo">
+        select
+				MEU.MENU_ID 		as id,
+				MEU.MENU_CODE 		as code,
+				MEU.MENU_NAME 		as name,
+				MEU.MENU_URL  		as url,
+				MEU.ISUSED 			as isused,
+				MEU.PARENTID 		as parentid,
+				MEU.MENU_INDEX 		as indexs,
+				MEU.MENU_ICON    	as icon,
+				MEU.CREATORID 		as creatorid,
+				MEU.CREATETIME 		as createtime,
+				MEU.MODIFIERID 		as modifierid,
+				MEU.MODIFYTIME 		as modifytime,
+				MEU.MENU_PATH       as path,
+				MEU.COMPONENT  		as component,
+				MEU.MENU_NOCACHE    as no_cache,
+				MEU.TREEABOUT  		as treeabout
+		  from MENU MEU
+		  WHERE MEU.PARENTID=#{ID}
+		  ORDER BY  MEU.MENU_INDEX
+    </select>
+
+    <select id="getMenuInfoById" resultMap="baseMenuInfo">
+        select
+											MEU.MENU_URL     as url,
+											MEU.MENU_ID      as id,
+											MEU.MENU_CODE    as code,
+											MEU.MENU_NAME    as name,
+											MEU.ISUSED       as isused,
+											MEU.PARENTID     as parentid,
+											MEU.MENU_ICON    as icon,
+											MEU.CREATETIME   as createtime,
+											MEU.MODIFYTIME   as modifytime,
+											MEN.MENU_NAME    as parentname,
+											MEU.MENU_NOCACHE as no_cache,
+											MEU.MENU_PATH    as path,
+											MEU.COMPONENT    as component,
+											usi.NAME  		 as creator ,
+											usf.NAME         as modifier
+								from  MENU MEU
+					 left join  MENU       MEN on MEU.PARENTID=MEN.MENU_ID
+					 left join  USER_INFO  usi on MEU.creatorid=usi.id
+					 left join  USER_INFO  usf on MEU.MODIFIERID=usf.ID
+							 WHERE  MEU.MENU_ID =#{ID}
+    </select>
+
+    <update id="modifyMenuInfo" parameterType="com.cloud.servicemanage.entity.Menu">
+        update MENU MEU set
+                        MEU.MENU_NAME=#{name},
+                        MEU.PARENTID=#{parentid},
+                        MEU.MENU_PATH=#{path},
+                        MEU.MENU_ICON=#{icon},
+                        MEU.MENU_URL=#{url},
+                        MEU.ISUSED=#{isused},
+                        MEU.MENU_NOCACHE=#{noCache},
+                        MEU.MODIFYTIME=(SELECT sysdate FROM DUAL),
+                        MEU.MODIFIERID=#{modifierid}
+           where MEU.MENU_ID=#{id}
+    </update>
+
+    <update id="modifyMenuTree" parameterType="com.cloud.servicemanage.entity.Menu">
+        UPDATE MENU MEU SET
+                        MEU.PARENTID = #{parentid}
+                  WHERE
+                        MEU.MENU_ID = #{id}
+    </update>
+
+    <insert id="insertMenu" parameterType="com.cloud.servicemanage.entity.Menu">
+          insert into MENU (
+                              MENU_ID,
+                              MENU_NAME,
+                              PARENTID,
+                              MENU_PATH,
+                              MENU_ICON,
+                              MENU_URL,
+                              ISUSED  ,
+                              MENU_NOCACHE,
+                              CREATETIME,
+							  MODIFYTIME,
+							  MENU_CODE,
+							  CREATORID,
+							  MODIFIERID,
+							  COMPONENT,
+							  MENU_INDEX
+                            )
+                    values (
+                              #{id},
+                              #{name},
+                              #{parentid},
+                              #{path},
+                              #{icon},
+                              #{url},
+                              #{isused},
+                              #{noCache},
+                              (SELECT sysdate FROM DUAL),
+                              (SELECT sysdate FROM DUAL),
+                              #{code},
+                              #{creatorid},
+                              #{modifierid},
+                              #{component},
+                              #{index}
+                            )
+    </insert>
+
+
+    <insert id="insertMenuByRoleId" parameterType="java.util.List">
+        begin
+        delete from rolemenurelation where roleid=#{roleid};
+        <foreach collection="list" item="item" index="index" separator=";"  close=";">
+            insert into rolemenurelation(
+                                          ROLT_ID,
+                                          roleid,
+                                          menuid,
+                                          creatorid,
+                                          createtime,
+                                          modifierid,
+                                          modifytime
+                                        )
+                                  values(
+                                          sys_guid(),
+                                          #{roleid},
+                                          #{item.id},
+                                          #{item.creatorid},
+                                          (SELECT sysdate FROM DUAL),
+                                          #{item.creatorid},
+                                          (SELECT sysdate FROM DUAL)
+                                        )
+        </foreach>
+        end;
+    </insert>
+
+
+</mapper>
